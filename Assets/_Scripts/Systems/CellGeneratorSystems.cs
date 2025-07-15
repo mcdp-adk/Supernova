@@ -11,11 +11,11 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class CellMapSystem : SystemBase
     {
-        public NativeHashMap<int3, Entity> CellMap;
+        public NativeParallelHashMap<int3, Entity> CellMap;
 
         protected override void OnCreate()
         {
-            CellMap = new NativeHashMap<int3, Entity>(1024, Allocator.Persistent);
+            CellMap = new NativeParallelHashMap<int3, Entity>(1024, Allocator.Persistent);
         }
 
         protected override void OnUpdate()
@@ -33,7 +33,7 @@ namespace _Scripts.Systems
     [UpdateAfter(typeof(CellMapSystem))]
     public partial struct GenerateCellSystem : ISystem
     {
-        private NativeHashMap<int3, Entity> _cellMap;
+        private NativeParallelHashMap<int3, Entity> _cellMap;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -41,18 +41,37 @@ namespace _Scripts.Systems
             state.RequireForUpdate<ShouldInitializeCell>();
         }
 
-        // [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             // 获取 CellMapSystem 的 CellMap
-            var cellMapSystem = state.World.GetExistingSystemManaged<CellMapSystem>();
-            if (cellMapSystem == null || !cellMapSystem.CellMap.IsCreated) return;
-            _cellMap = cellMapSystem.CellMap;
+            if (!_cellMap.IsCreated)
+            {
+                var cellMapSystem = state.World.GetExistingSystemManaged<CellMapSystem>();
+                _cellMap = cellMapSystem.CellMap;
+            }
 
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
 
-            // 生成 Cell 逻辑
-            foreach (var generator in SystemAPI.Query<CellGeneratorAspect>().WithAll<ShouldInitializeCell>())
+            var job = new GenerateCellJob
+            {
+                CellMap = _cellMap,
+                ECB = ecb.AsParallelWriter()
+            };
+
+            state.Dependency = job.ScheduleParallel(state.Dependency);
+            state.Dependency.Complete();
+
+            ecb.Playback(state.EntityManager);
+        }
+
+        [BurstCompile]
+        [WithAll(typeof(ShouldInitializeCell))]
+        public partial struct GenerateCellJob : IJobEntity
+        {
+            [NativeDisableParallelForRestriction] public NativeParallelHashMap<int3, Entity> CellMap;
+            public EntityCommandBuffer.ParallelWriter ECB;
+
+            private void Execute(CellGeneratorAspect generator, [EntityIndexInQuery] int entityIndex)
             {
                 var center = generator.Position;
                 var range = generator.CoreRange;
@@ -63,11 +82,10 @@ namespace _Scripts.Systems
                 for (var z = -range; z <= range; z++)
                 {
                     var pos = center + new int3(x, y, z);
-                    // 如果 CellMap 中已经存在这个位置的 Cell，则跳过
-                    if (_cellMap.ContainsKey(pos)) continue;
+                    if (CellMap.ContainsKey(pos)) continue; // 如果 CellMap 中已经存在这个位置的 Cell，则跳过
 
-                    var cell = ecb.Instantiate(prefab);
-                    ecb.SetComponent(cell, new LocalTransform
+                    var cell = ECB.Instantiate(entityIndex, prefab);
+                    ECB.SetComponent(entityIndex, cell, new LocalTransform
                     {
                         Position = pos,
                         Rotation = quaternion.identity,
@@ -75,13 +93,11 @@ namespace _Scripts.Systems
                     });
 
                     // 把 Cell 实体添加到 CellMap 中
-                    _cellMap.TryAdd(pos, cell);
+                    CellMap.TryAdd(pos, cell);
                 }
 
-                ecb.SetComponentEnabled<ShouldInitializeCell>(generator.Self, false);
+                ECB.SetComponentEnabled<ShouldInitializeCell>(entityIndex, generator.Self, false);
             }
-
-            ecb.Playback(state.EntityManager);
         }
     }
 }
