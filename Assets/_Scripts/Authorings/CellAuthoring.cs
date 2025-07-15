@@ -1,3 +1,4 @@
+using _Scripts.Components;
 using Unity.Entities;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace _Scripts.Authorings
             public override void Bake(CellAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
+
+                AddComponent<CellTag>(entity);
             }
         }
     }

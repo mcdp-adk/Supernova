@@ -10,9 +10,13 @@ namespace _Scripts.Components
     {
     }
 
-    public struct CellGeneratorData : IComponentData
+    public struct CellGenerateRange : IComponentData
     {
-        public int CoreRange;
-        public Entity CellPrefab;
+        public int Value;
+    }
+
+    public struct CellPrefabs : IComponentData
+    {
+        public Entity Value;
     }
 }

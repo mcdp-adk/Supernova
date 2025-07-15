@@ -1,5 +1,6 @@
 using _Scripts.Components;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace _Scripts.Authorings
@@ -29,11 +30,9 @@ namespace _Scripts.Authorings
 
                 AddComponent<ShouldInitializeCell>(entity);
 
-                AddComponent(entity, new CellGeneratorData
-                {
-                    CoreRange = authoring.generateRange,
-                    CellPrefab = GetEntity(authoring.cellPrefab, TransformUsageFlags.Renderable)
-                });
+                AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
+                AddComponent(entity, new CellPrefabs
+                    { Value = GetEntity(authoring.cellPrefab, TransformUsageFlags.Dynamic) });
             }
         }
 

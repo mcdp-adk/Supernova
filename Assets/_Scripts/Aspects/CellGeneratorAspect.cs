@@ -9,7 +9,8 @@ namespace _Scripts.Aspects
     {
         public readonly Entity Self;
         private readonly RefRW<LocalTransform> _transform;
-        private readonly RefRW<CellGeneratorData> _data;
+        private readonly RefRW<CellGenerateRange> _range;
+        private readonly RefRW<CellPrefabs> _prefab;
 
         public int3 Position
         {
@@ -19,14 +20,14 @@ namespace _Scripts.Aspects
 
         public int CoreRange
         {
-            get => _data.ValueRO.CoreRange;
-            set => _data.ValueRW.CoreRange = value;
+            get => _range.ValueRO.Value;
+            set => _range.ValueRW.Value = value;
         }
 
         public Entity CellPrefab
         {
-            get => _data.ValueRO.CellPrefab;
-            set => _data.ValueRW.CellPrefab = value;
+            get => _prefab.ValueRO.Value;
+            set => _prefab.ValueRW.Value = value;
         }
     }
 }
