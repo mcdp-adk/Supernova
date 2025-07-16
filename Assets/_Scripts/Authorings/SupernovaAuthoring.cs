@@ -13,18 +13,20 @@ namespace _Scripts.Authorings
         public int weight;
     }
 
-    public class CellGeneratorAuthoring : MonoBehaviour
+    public class SupernovaAuthoring : MonoBehaviour
     {
+        [Header("超新星设置")] [SerializeField] private int mass = 100;
+
         [Header("Cell 生成设置")] [Tooltip("从中心到生成边缘的距离")] [SerializeField]
         private int generateRange;
 
-        [Range(0, 100)] [SerializeField] private int generateDensity = 50;
-        
+        [Range(0, 100)] [SerializeField] private int generateDensity = 25;
+
         [SerializeField] private List<CellPrefabConfig> cellPrefabConfigs;
 
-        private class CenterAuthoringBaker : Baker<CellGeneratorAuthoring>
+        private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
-            public override void Bake(CellGeneratorAuthoring authoring)
+            public override void Bake(SupernovaAuthoring authoring)
             {
                 // 确保位置四舍五入为最接近的整数
                 authoring.transform.position = new Vector3(
@@ -37,6 +39,8 @@ namespace _Scripts.Authorings
 
                 AddComponent<CellGeneratorTag>(entity);
                 AddComponent<ShouldInitializeCell>(entity);
+
+                AddComponent(entity, new Mass { Value = authoring.mass });
 
                 AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
                 AddComponent(entity, new CellGenerateDensity { Value = authoring.generateDensity });

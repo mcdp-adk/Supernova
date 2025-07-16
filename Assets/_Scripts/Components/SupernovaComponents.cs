@@ -10,6 +10,11 @@ namespace _Scripts.Components
     {
     }
 
+    public struct Mass : IComponentData
+    {
+        public int Value;
+    }
+
     public struct CellGenerateRange : IComponentData
     {
         public int Value;

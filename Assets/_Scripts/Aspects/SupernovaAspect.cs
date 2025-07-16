@@ -5,7 +5,7 @@ using Unity.Transforms;
 
 namespace _Scripts.Aspects
 {
-    public readonly partial struct CellGeneratorAspect : IAspect
+    public readonly partial struct SupernovaAspect : IAspect
     {
         public readonly Entity Self;
         private readonly RefRO<LocalTransform> _transform;

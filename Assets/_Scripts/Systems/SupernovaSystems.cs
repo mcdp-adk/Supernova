@@ -31,7 +31,7 @@ namespace _Scripts.Systems
 
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [UpdateAfter(typeof(CellMapSystem))]
-    public partial struct GenerateCellSystem : ISystem
+    public partial struct CellGenerationSystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;
 
@@ -52,7 +52,7 @@ namespace _Scripts.Systems
 
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
 
-            var job = new GenerateCellJob
+            var job = new BatchCellGenerationJob
             {
                 CellMap = _cellMap,
                 ECB = ecb.AsParallelWriter()
@@ -66,12 +66,12 @@ namespace _Scripts.Systems
 
         [BurstCompile]
         [WithAll(typeof(ShouldInitializeCell))]
-        public partial struct GenerateCellJob : IJobEntity
+        public partial struct BatchCellGenerationJob : IJobEntity
         {
             [NativeDisableParallelForRestriction] public NativeParallelHashMap<int3, Entity> CellMap;
             public EntityCommandBuffer.ParallelWriter ECB;
 
-            private void Execute(CellGeneratorAspect generator, [EntityIndexInQuery] int entityIndex)
+            private void Execute(SupernovaAspect generator, [EntityIndexInQuery] int entityIndex)
             {
                 var center = generator.Position;
                 var range = generator.GenerateRange;
