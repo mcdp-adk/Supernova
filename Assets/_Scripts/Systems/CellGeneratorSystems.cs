@@ -74,17 +74,45 @@ namespace _Scripts.Systems
             private void Execute(CellGeneratorAspect generator, [EntityIndexInQuery] int entityIndex)
             {
                 var center = generator.Position;
-                var range = generator.CoreRange;
-                var prefab = generator.CellPrefab;
+                var range = generator.GenerateRange;
+                var density = generator.GenerateDensity;
+                var prefabs = generator.Prefabs;
 
-                for (var x = -range; x <= range; x++)
-                for (var y = -range; y <= range; y++)
-                for (var z = -range; z <= range; z++)
+                // 计算总权重
+                var totalWeight = 0;
+                for (var i = 0; i < prefabs.Length; i++) totalWeight += prefabs[i].Weight;
+
+                // 获取随机种子，与生成中心的位置相关
+                var random = new Random(math.hash(center));
+
+                for (var x = -range; x <= range; ++x)
+                for (var y = -range; y <= range; ++y)
+                for (var z = -range; z <= range; ++z)
                 {
                     var pos = center + new int3(x, y, z);
-                    if (CellMap.ContainsKey(pos)) continue; // 如果 CellMap 中已经存在这个位置的 Cell，则跳过
 
-                    var cell = ECB.Instantiate(entityIndex, prefab);
+                    // 根据密度决定是否生成 Cell
+                    if (random.NextInt(0, 100) >= density) continue;
+                    // 如果 CellMap 中已经存在这个位置的 Cell，则跳过
+                    if (CellMap.ContainsKey(pos)) continue;
+
+                    // 根据 Cell 权重随机选择 Prefab
+                    var pick = random.NextInt(0, totalWeight);
+                    var acc = 0;
+                    var chosenPrefab = Entity.Null;
+                    for (var i = 0; i < prefabs.Length; i++)
+                    {
+                        acc += prefabs[i].Weight;
+                        if (pick >= acc) continue;
+                        chosenPrefab = prefabs[i].Prefab;
+                        break;
+                    }
+
+                    // 如果没有选择到 Prefab，则跳过
+                    if (chosenPrefab == Entity.Null) continue;
+
+                    // 实例化 Cell 实体
+                    var cell = ECB.Instantiate(entityIndex, chosenPrefab);
                     ECB.SetComponent(entityIndex, cell, new LocalTransform
                     {
                         Position = pos,

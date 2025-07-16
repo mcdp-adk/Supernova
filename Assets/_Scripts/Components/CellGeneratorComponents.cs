@@ -15,8 +15,14 @@ namespace _Scripts.Components
         public int Value;
     }
 
-    public struct CellPrefabs : IComponentData
+    public struct CellGenerateDensity : IComponentData
     {
-        public Entity Value;
+        public int Value;
+    }
+
+    public struct CellPrefabData : IBufferElementData
+    {
+        public Entity Prefab;
+        public int Weight;
     }
 }

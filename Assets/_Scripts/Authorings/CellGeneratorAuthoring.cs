@@ -1,17 +1,26 @@
+using System;
+using System.Collections.Generic;
 using _Scripts.Components;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace _Scripts.Authorings
 {
+    [Serializable]
+    public struct CellPrefabConfig
+    {
+        public GameObject prefab;
+        public int weight;
+    }
+
     public class CellGeneratorAuthoring : MonoBehaviour
     {
-        [Header("初始 Cell 生成设置")] [Tooltip("从中心到生成边缘的距离")] [SerializeField]
+        [Header("Cell 生成设置")] [Tooltip("从中心到生成边缘的距离")] [SerializeField]
         private int generateRange;
 
-        [Header("Cell Prefabs")] [SerializeField]
-        private GameObject cellPrefab;
+        [Range(0, 100)] [SerializeField] private int generateDensity = 50;
+        
+        [SerializeField] private List<CellPrefabConfig> cellPrefabConfigs;
 
         private class CenterAuthoringBaker : Baker<CellGeneratorAuthoring>
         {
@@ -27,12 +36,20 @@ namespace _Scripts.Authorings
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
                 AddComponent<CellGeneratorTag>(entity);
-
                 AddComponent<ShouldInitializeCell>(entity);
 
                 AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
-                AddComponent(entity, new CellPrefabs
-                    { Value = GetEntity(authoring.cellPrefab, TransformUsageFlags.Dynamic) });
+                AddComponent(entity, new CellGenerateDensity { Value = authoring.generateDensity });
+
+                var cellsBuffer = AddBuffer<CellPrefabData>(entity);
+                foreach (var config in authoring.cellPrefabConfigs)
+                {
+                    cellsBuffer.Add(new CellPrefabData
+                    {
+                        Prefab = GetEntity(config.prefab, TransformUsageFlags.Dynamic),
+                        Weight = config.weight
+                    });
+                }
             }
         }
 

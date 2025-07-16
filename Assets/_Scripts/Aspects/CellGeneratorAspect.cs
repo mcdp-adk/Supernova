@@ -8,26 +8,14 @@ namespace _Scripts.Aspects
     public readonly partial struct CellGeneratorAspect : IAspect
     {
         public readonly Entity Self;
-        private readonly RefRW<LocalTransform> _transform;
-        private readonly RefRW<CellGenerateRange> _range;
-        private readonly RefRW<CellPrefabs> _prefab;
+        private readonly RefRO<LocalTransform> _transform;
+        private readonly RefRO<CellGenerateRange> _range;
+        private readonly RefRO<CellGenerateDensity> _density;
+        private readonly DynamicBuffer<CellPrefabData> _prefabs;
 
-        public int3 Position
-        {
-            get => (int3)_transform.ValueRO.Position;
-            set => _transform.ValueRW.Position = value;
-        }
-
-        public int CoreRange
-        {
-            get => _range.ValueRO.Value;
-            set => _range.ValueRW.Value = value;
-        }
-
-        public Entity CellPrefab
-        {
-            get => _prefab.ValueRO.Value;
-            set => _prefab.ValueRW.Value = value;
-        }
+        public int3 Position => (int3)_transform.ValueRO.Position;
+        public int GenerateRange => _range.ValueRO.Value;
+        public int GenerateDensity => _density.ValueRO.Value;
+        public DynamicBuffer<CellPrefabData> Prefabs => _prefabs;
     }
 }

@@ -163,8 +163,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generateRange: 10
-  cellPrefab: {fileID: 6615675397449015849, guid: 581eba25c1f7f12419998fec323de1e7, type: 3}
+  generateRange: 8
+  generateDensity: 30
+  cellPrefabConfigs:
+  - prefab: {fileID: 6615675397449015849, guid: 581eba25c1f7f12419998fec323de1e7, type: 3}
+    weight: 1
+  - prefab: {fileID: 6615675397449015849, guid: d717d9a5b98987d4da1ff292bec3bced, type: 3}
+    weight: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
