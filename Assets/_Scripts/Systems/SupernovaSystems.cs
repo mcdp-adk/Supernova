@@ -9,6 +9,11 @@ using Unity.Transforms;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
+    public partial class CellularAutomataSystemGroup : ComponentSystemGroup
+    {
+    }
+
+    [UpdateInGroup(typeof(CellularAutomataSystemGroup), OrderFirst = true)]
     public partial class CellMapSystem : SystemBase
     {
         public NativeParallelHashMap<int3, Entity> CellMap;
@@ -29,8 +34,7 @@ namespace _Scripts.Systems
         }
     }
 
-    [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
-    [UpdateAfter(typeof(CellMapSystem))]
+    [UpdateInGroup(typeof(CellularAutomataSystemGroup))]
     public partial struct CellGenerationSystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;

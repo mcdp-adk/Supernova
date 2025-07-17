@@ -38,7 +38,7 @@ namespace _Scripts.Authorings
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
                 AddComponent<CellGeneratorTag>(entity);
-                AddComponent<ShouldInitializeCell>(entity);
+                AddComponent<ShouldInitializeCell>(entity); // 默认需要初始化 Cell
 
                 AddComponent(entity, new Mass { Value = authoring.mass });
 
