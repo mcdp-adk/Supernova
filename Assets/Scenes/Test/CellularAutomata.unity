@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 100
-  generateRange: 10
-  generateDensity: 30
+  generateRange: 30
+  generateDensity: 1
   cellPrefabConfigs:
   - prefab: {fileID: 6615675397449015849, guid: 581eba25c1f7f12419998fec323de1e7, type: 3}
     weight: 1
