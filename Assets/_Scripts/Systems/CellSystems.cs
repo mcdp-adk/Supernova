@@ -3,7 +3,7 @@ using Unity.Entities;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CellularAutomataSystemGroup))]
+    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
     public partial struct GravitySystem : ISystem
     {
         [BurstCompile]
