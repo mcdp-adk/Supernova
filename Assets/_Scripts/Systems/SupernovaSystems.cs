@@ -8,7 +8,7 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
     public partial class CellMapSystem : SystemBase
     {
         public NativeParallelHashMap<int3, Entity> CellMap;
@@ -29,7 +29,7 @@ namespace _Scripts.Systems
         }
     }
 
-    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
     [UpdateAfter(typeof(CellMapSystem))]
     public partial struct CellGenerationSystem : ISystem
     {
