@@ -126,7 +126,7 @@ namespace _Scripts.Systems
     }
 
     [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    public partial struct CellGenerationSystem : ISystem
+    public partial struct CellGenerationFromSupernovaSystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;
         private NativeQueue<PendingCellData> _pendingCells;
@@ -148,7 +148,7 @@ namespace _Scripts.Systems
             }
 
             // 收集需要实例化的 Cell 位置
-            var collectJob = new CollectCellPositionsJob
+            var collectJob = new CollectCellPositionsToGenerateJob
             {
                 CellMap = _cellMap,
                 PendingCells = _pendingCells.AsParallelWriter()
@@ -169,7 +169,7 @@ namespace _Scripts.Systems
 
         [BurstCompile]
         [WithAll(typeof(ShouldInitializeCell))]
-        private partial struct CollectCellPositionsJob : IJobEntity
+        private partial struct CollectCellPositionsToGenerateJob : IJobEntity
         {
             [ReadOnly] public NativeParallelHashMap<int3, Entity> CellMap;
             public NativeQueue<PendingCellData>.ParallelWriter PendingCells;
