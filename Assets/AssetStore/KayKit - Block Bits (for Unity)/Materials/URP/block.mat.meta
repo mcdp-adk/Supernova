@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d3e662bd8f367754faf51e903c29367b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 314722
+  packageName: KayKit - Block Bits (for Unity)
+  packageVersion: 1.0
+  assetPath: Assets/KayKit/Packs/Bits/KayKit - Block Bits (for Unity)/Materials/URP/block.mat
+  uploadId: 742587
