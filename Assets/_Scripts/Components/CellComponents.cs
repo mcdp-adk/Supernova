@@ -2,7 +2,7 @@ using Unity.Entities;
 
 namespace _Scripts.Components
 {
-    public enum CellTypeEnum : int
+    public enum CellTypeEnum
     {
         None = 0
     }
@@ -13,7 +13,6 @@ namespace _Scripts.Components
 
     public struct IsCellAlive : IComponentData, IEnableableComponent
     {
-        public bool Value;
     }
 
     public struct CellType : IComponentData

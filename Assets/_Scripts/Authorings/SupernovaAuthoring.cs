@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using _Scripts.Components;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace _Scripts.Authorings
@@ -28,6 +29,9 @@ namespace _Scripts.Authorings
         {
             public override void Bake(SupernovaAuthoring authoring)
             {
+                // 依赖于 Transform，当 Transform 发生变化时触发 Bake
+                DependsOn(authoring.transform);
+
                 // 确保位置四舍五入为最接近的整数
                 authoring.transform.position = new Vector3(
                     Mathf.RoundToInt(authoring.transform.position.x),
