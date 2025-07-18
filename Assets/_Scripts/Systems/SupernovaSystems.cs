@@ -11,7 +11,7 @@ namespace _Scripts.Systems
 {
     #region System Groups and Structs
 
-    public struct PendingCellData
+    public struct PendingCellInitiationData
     {
         public int3 Position;
         public Entity Prefab;
@@ -33,12 +33,12 @@ namespace _Scripts.Systems
     public partial class GlobalDataSystem : SystemBase
     {
         public NativeParallelHashMap<int3, Entity> CellMap;
-        public NativeQueue<PendingCellData> PendingCells;
+        public NativeQueue<PendingCellInitiationData> PendingCellsToInstantiate;
 
         protected override void OnCreate()
         {
-            CellMap = new NativeParallelHashMap<int3, Entity>(1024, Allocator.Persistent);
-            PendingCells = new NativeQueue<PendingCellData>(Allocator.Persistent);
+            CellMap = new NativeParallelHashMap<int3, Entity>(4096, Allocator.Persistent);
+            PendingCellsToInstantiate = new NativeQueue<PendingCellInitiationData>(Allocator.Persistent);
         }
 
         protected override void OnUpdate()
@@ -49,7 +49,7 @@ namespace _Scripts.Systems
         protected override void OnDestroy()
         {
             if (CellMap.IsCreated) CellMap.Dispose();
-            if (PendingCells.IsCreated) PendingCells.Dispose();
+            if (PendingCellsToInstantiate.IsCreated) PendingCellsToInstantiate.Dispose();
         }
     }
 
@@ -57,7 +57,7 @@ namespace _Scripts.Systems
     public partial struct CellInstantiationSystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;
-        private NativeQueue<PendingCellData> _pendingCells;
+        private NativeQueue<PendingCellInitiationData> _pendingCells;
 
         public void OnUpdate(ref SystemState state)
         {
@@ -66,7 +66,7 @@ namespace _Scripts.Systems
             {
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
                 _cellMap = globalDataSystem.CellMap;
-                _pendingCells = globalDataSystem.PendingCells;
+                _pendingCells = globalDataSystem.PendingCellsToInstantiate;
             }
 
             // 如果没有待处理的Cell，跳过
@@ -89,14 +89,14 @@ namespace _Scripts.Systems
         [BurstCompile]
         private struct ContinuousInstantiateCellsJob : IJob
         {
-            public NativeQueue<PendingCellData> PendingCells;
+            public NativeQueue<PendingCellInitiationData> PendingCells;
             [NativeDisableParallelForRestriction] public NativeParallelHashMap<int3, Entity> CellMap;
             public EntityCommandBuffer ECB;
 
             public void Execute()
             {
                 // 自定义每帧处理的 Cell 数量
-                const int maxCellsPerFrame = 1024;
+                const int maxCellsPerFrame = 512;
                 var processedCount = 0;
 
                 while (PendingCells.TryDequeue(out var cellData) && processedCount < maxCellsPerFrame)
@@ -129,7 +129,7 @@ namespace _Scripts.Systems
     public partial struct CellGenerationFromSupernovaSystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;
-        private NativeQueue<PendingCellData> _pendingCells;
+        private NativeQueue<PendingCellInitiationData> _pendingCells;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -144,7 +144,7 @@ namespace _Scripts.Systems
             {
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
                 _cellMap = globalDataSystem.CellMap;
-                _pendingCells = globalDataSystem.PendingCells;
+                _pendingCells = globalDataSystem.PendingCellsToInstantiate;
             }
 
             // 收集需要实例化的 Cell 位置
@@ -172,7 +172,7 @@ namespace _Scripts.Systems
         private partial struct CollectCellPositionsToGenerateJob : IJobEntity
         {
             [ReadOnly] public NativeParallelHashMap<int3, Entity> CellMap;
-            public NativeQueue<PendingCellData>.ParallelWriter PendingCells;
+            public NativeQueue<PendingCellInitiationData>.ParallelWriter PendingCells;
 
             private void Execute(SupernovaAspect generator)
             {
@@ -215,7 +215,7 @@ namespace _Scripts.Systems
                     if (chosenPrefab == Entity.Null) continue;
 
                     // 添加到待实例化队列
-                    PendingCells.Enqueue(new PendingCellData
+                    PendingCells.Enqueue(new PendingCellInitiationData
                     {
                         Position = pos,
                         Prefab = chosenPrefab

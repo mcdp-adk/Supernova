@@ -11,7 +11,7 @@ namespace _Scripts.Systems
     public partial struct GravitySystem : ISystem
     {
         private NativeParallelHashMap<int3, Entity> _cellMap;
-        private NativeQueue<PendingCellData> _pendingCells;
+        private NativeQueue<PendingCellInitiationData> _pendingCells;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -26,7 +26,7 @@ namespace _Scripts.Systems
             {
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
                 _cellMap = globalDataSystem.CellMap;
-                _pendingCells = globalDataSystem.PendingCells;
+                _pendingCells = globalDataSystem.PendingCellsToInstantiate;
             }
 
             // 查询所有 Supernova 的 Position
@@ -50,7 +50,7 @@ namespace _Scripts.Systems
         {
             [ReadOnly] public NativeParallelHashMap<int3, Entity> CellMap;
             [ReadOnly] public NativeArray<int3> SupernovaPositions;
-            public NativeQueue<PendingCellData>.ParallelWriter PendingCells;
+            public NativeQueue<PendingCellInitiationData>.ParallelWriter PendingCells;
 
             private void Execute(CellAspect cell)
             {
