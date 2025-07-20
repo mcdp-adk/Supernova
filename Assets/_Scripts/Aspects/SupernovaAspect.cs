@@ -20,6 +20,6 @@ namespace _Scripts.Aspects
         public int Mass => _mass.ValueRO.Value;
 
         public int GenerateRange => _range.ValueRO.Value;
-        public int GenerateDensity => _density.ValueRO.Value;
+        public float GenerateDensity => _density.ValueRO.Value;
     }
 }

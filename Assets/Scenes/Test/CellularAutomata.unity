@@ -164,13 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 100
-  generateRange: 5
-  generateDensity: 1
-  cellPrefabConfigs:
-  - prefab: {fileID: 6615675397449015849, guid: 581eba25c1f7f12419998fec323de1e7, type: 3}
-    weight: 1
-  - prefab: {fileID: 6615675397449015849, guid: d717d9a5b98987d4da1ff292bec3bced, type: 3}
-    weight: 3
+  generateRange: 20
+  generateDensity: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

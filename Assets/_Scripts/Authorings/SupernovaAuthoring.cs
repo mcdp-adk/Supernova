@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using _Scripts.Components;
 using Unity.Entities;
 using UnityEngine;
@@ -13,7 +11,7 @@ namespace _Scripts.Authorings
         [Header("Cell 生成设置")] [Tooltip("从中心到生成边缘的距离")] [SerializeField]
         private int generateRange;
 
-        [Range(0, 100)] [SerializeField] private int generateDensity = 25;
+        [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
@@ -45,8 +43,7 @@ namespace _Scripts.Authorings
         {
             // 绘制生成
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(transform.position,
-                new Vector3(generateRange * 2 + 1f, generateRange * 2 + 1f, generateRange * 2 + 1f));
+            Gizmos.DrawWireSphere(transform.position, generateRange);
         }
     }
 }

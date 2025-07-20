@@ -22,6 +22,6 @@ namespace _Scripts.Components
 
     public struct CellGenerateDensity : IComponentData
     {
-        public int Value;
+        public float Value;
     }
 }
