@@ -2,23 +2,28 @@ using Unity.Entities;
 
 namespace _Scripts.Components
 {
-    public enum CellTypeEnum : int
+    public enum CellTypeEnum
     {
-        None = 0
+        None = 0,
+        Cell1 = -1,
+        Cell2 = -2
+    }
+
+    public struct CellPrototypeTag : IComponentData
+    {
     }
 
     public struct CellTag : IComponentData
     {
     }
 
-    public struct IsCellAlive : IComponentData, IEnableableComponent
-    {
-        public bool Value;
-    }
-
     public struct CellType : IComponentData
     {
         public CellTypeEnum Value;
+    }
+
+    public struct IsCellAlive : IComponentData, IEnableableComponent
+    {
     }
 
     public struct PendingCellUpdateBuffer : IBufferElementData

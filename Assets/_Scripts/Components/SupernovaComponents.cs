@@ -22,12 +22,12 @@ namespace _Scripts.Components
 
     public struct CellGenerateDensity : IComponentData
     {
-        public int Value;
+        public float Value;
     }
 
-    public struct CellPrefabData : IBufferElementData
+    public struct CellConfigBuffer : IBufferElementData
     {
-        public Entity Prefab;
+        public CellTypeEnum CellType;
         public int Weight;
     }
 }
