@@ -24,10 +24,4 @@ namespace _Scripts.Components
     {
         public int Value;
     }
-
-    public struct CellPrefabData : IBufferElementData
-    {
-        public Entity Prefab;
-        public int Weight;
-    }
 }

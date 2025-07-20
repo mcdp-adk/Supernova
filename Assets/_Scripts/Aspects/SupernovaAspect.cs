@@ -14,7 +14,6 @@ namespace _Scripts.Aspects
 
         private readonly RefRO<CellGenerateRange> _range;
         private readonly RefRO<CellGenerateDensity> _density;
-        private readonly DynamicBuffer<CellPrefabData> _prefabs;
 
         public int3 Position => (int3)_transform.ValueRO.Position;
 
@@ -22,6 +21,5 @@ namespace _Scripts.Aspects
 
         public int GenerateRange => _range.ValueRO.Value;
         public int GenerateDensity => _density.ValueRO.Value;
-        public DynamicBuffer<CellPrefabData> Prefabs => _prefabs;
     }
 }

@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using _Scripts.Components;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace _Scripts.Authorings
 
     public class CellPrototypeCreator : MonoBehaviour
     {
+        private static CellPrototypeCreator Instance { get; set; }
+
         [Serializable]
         private struct CellPrefabConfig
         {
@@ -25,6 +28,17 @@ namespace _Scripts.Authorings
         [SerializeField] private CellPrefabConfig[] cellPrefabConfigs;
 
         private RenderMeshArray _renderMeshArray;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -43,7 +57,7 @@ namespace _Scripts.Authorings
                 MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
             );
 
-            entityManager.AddComponent<CellPrototypeTag>(prototype);
+            AddComponents(prototype, entityManager);
         }
 
         private static RenderMeshDescription GetRenderMeshDescription()
@@ -68,6 +82,20 @@ namespace _Scripts.Authorings
             }
 
             return new RenderMeshArray(cellMaterials.ToArray(), cellMeshes.ToArray());
+        }
+
+        private static void AddComponents(Entity prototype, EntityManager entityManager)
+        {
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+
+            ecb.AddComponent<CellPrototypeTag>(prototype);
+
+            ecb.AddComponent<CellTag>(prototype);
+            ecb.AddComponent<IsCellAlive>(prototype);
+            ecb.AddComponent<CellType>(prototype);
+            ecb.AddBuffer<PendingCellUpdateBuffer>(prototype);
+
+            ecb.Playback(entityManager);
         }
     }
 }

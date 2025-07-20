@@ -6,13 +6,6 @@ using UnityEngine;
 
 namespace _Scripts.Authorings
 {
-    [Serializable]
-    public struct LegacyCellPrefabConfig
-    {
-        public GameObject prefab;
-        public int weight;
-    }
-
     public class SupernovaAuthoring : MonoBehaviour
     {
         [Header("超新星设置")] [SerializeField] private int mass = 100;
@@ -21,8 +14,6 @@ namespace _Scripts.Authorings
         private int generateRange;
 
         [Range(0, 100)] [SerializeField] private int generateDensity = 25;
-
-        [SerializeField] private List<LegacyCellPrefabConfig> cellPrefabConfigs;
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
@@ -47,16 +38,6 @@ namespace _Scripts.Authorings
 
                 AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
                 AddComponent(entity, new CellGenerateDensity { Value = authoring.generateDensity });
-
-                var cellsBuffer = AddBuffer<CellPrefabData>(entity);
-                foreach (var config in authoring.cellPrefabConfigs)
-                {
-                    cellsBuffer.Add(new CellPrefabData
-                    {
-                        Prefab = GetEntity(config.prefab, TransformUsageFlags.Dynamic),
-                        Weight = config.weight
-                    });
-                }
             }
         }
 
