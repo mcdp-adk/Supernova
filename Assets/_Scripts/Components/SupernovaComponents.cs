@@ -24,4 +24,10 @@ namespace _Scripts.Components
     {
         public float Value;
     }
+
+    public struct CellConfigBuffer : IBufferElementData
+    {
+        public CellTypeEnum CellType;
+        public int Weight;
+    }
 }

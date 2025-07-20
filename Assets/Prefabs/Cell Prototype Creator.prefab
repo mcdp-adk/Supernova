@@ -45,12 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellPrefabConfigs:
-  - cellType: 0
-    cellMesh: {fileID: 7017965584881207693, guid: 72d20550a14d0ba4d90c49575b12205e, type: 3}
-    cellMaterial: {fileID: 2100000, guid: 3cd972dd761e85e41ae854dbf7319b50, type: 2}
-  - cellType: 1
+  - cellType: -1
     cellMesh: {fileID: -2155905092228123491, guid: 30101fa5bc5151643953223b1a8eaf54, type: 3}
     cellMaterial: {fileID: 2100000, guid: 3cd972dd761e85e41ae854dbf7319b50, type: 2}
-  - cellType: 2
+  - cellType: -2
     cellMesh: {fileID: 2660893119747992777, guid: c126aece0a5f4244db531b7d4bf9c594, type: 3}
     cellMaterial: {fileID: 2100000, guid: 3cd972dd761e85e41ae854dbf7319b50, type: 2}

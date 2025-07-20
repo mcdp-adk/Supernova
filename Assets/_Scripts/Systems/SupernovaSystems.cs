@@ -5,7 +5,9 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Rendering;
 using Unity.Transforms;
+using UnityEngine.Rendering;
 
 namespace _Scripts.Systems
 {
@@ -29,12 +31,12 @@ namespace _Scripts.Systems
     public partial class GlobalDataSystem : SystemBase
     {
         public NativeHashMap<int3, Entity> CellMap;
-        public NativeQueue<int3> PendingCellsToInstantiate;
+        public NativeQueue<PendingCellData> PendingCellsToInstantiate;
 
         protected override void OnCreate()
         {
             CellMap = new NativeHashMap<int3, Entity>(4096, Allocator.Persistent);
-            PendingCellsToInstantiate = new NativeQueue<int3>(Allocator.Persistent);
+            PendingCellsToInstantiate = new NativeQueue<PendingCellData>(Allocator.Persistent);
         }
 
         protected override void OnUpdate()
@@ -53,11 +55,17 @@ namespace _Scripts.Systems
 
     #region InitializationCellularAutomataSystemGroup
 
+    public struct PendingCellData
+    {
+        public int3 Position;
+        public CellTypeEnum CellType;
+    }
+
     [UpdateInGroup(typeof(InitializationCellularAutomataSystemGroup))]
     public partial struct CellInstantiationSystem : ISystem
     {
         private NativeHashMap<int3, Entity> _cellMap;
-        private NativeQueue<int3> _pendingCells;
+        private NativeQueue<PendingCellData> _pendingCells;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -78,6 +86,7 @@ namespace _Scripts.Systems
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
 
+            // 持续实例化 Cell
             var instantiateJob = new ContinuousInstantiateCellsJob
             {
                 ECB = ecb,
@@ -97,7 +106,7 @@ namespace _Scripts.Systems
         {
             public EntityCommandBuffer ECB;
             public NativeHashMap<int3, Entity> CellMap;
-            public NativeQueue<int3> PendingCells;
+            public NativeQueue<PendingCellData> PendingCells;
             [ReadOnly] public Entity Prototype;
 
             public void Execute()
@@ -105,24 +114,35 @@ namespace _Scripts.Systems
                 const int maxCellsPerFrame = 512;
                 var processedCount = 0;
 
-                while (PendingCells.TryDequeue(out var instantiatePosition) && processedCount < maxCellsPerFrame)
+                while (PendingCells.TryDequeue(out var pendingCellData) && processedCount < maxCellsPerFrame)
                 {
                     // 检查位置是否已被占用
-                    if (CellMap.ContainsKey(instantiatePosition)) continue;
+                    if (CellMap.ContainsKey(pendingCellData.Position)) continue;
 
                     // 从 Prototype 复制并实例化 Cell
                     var cell = ECB.Instantiate(Prototype);
+
+                    ECB.SetName(cell,
+                        $"Cell_{pendingCellData.Position.x}_{pendingCellData.Position.y}_{pendingCellData.Position.z}");
                     ECB.RemoveComponent<CellPrototypeTag>(cell);
                     ECB.SetComponent(cell,
                         new LocalToWorld
                         {
-                            Value = float4x4.TRS(instantiatePosition,
+                            Value = float4x4.TRS(pendingCellData.Position,
                                 quaternion.identity,
                                 new float3(0.5f, 0.5f, 0.5f))
                         });
 
+                    // 设置 Cell 类型以及显示的 Mesh 和 Material
+                    ECB.SetComponent(cell, new CellType { Value = pendingCellData.CellType });
+                    ECB.SetComponent(cell, new MaterialMeshInfo
+                    {
+                        MaterialID = new BatchMaterialID { value = (uint)pendingCellData.CellType },
+                        MeshID = new BatchMeshID { value = (uint)pendingCellData.CellType }
+                    });
+
                     // 把 Cell 实体添加到 CellMap 中
-                    CellMap.TryAdd(instantiatePosition, cell);
+                    CellMap.TryAdd(pendingCellData.Position, cell);
                     processedCount++;
                 }
             }
@@ -137,7 +157,7 @@ namespace _Scripts.Systems
     public partial struct CellGenerationFromSupernovaSystem : ISystem
     {
         private NativeHashMap<int3, Entity> _cellMap;
-        private NativeQueue<int3> _pendingCells;
+        private NativeQueue<PendingCellData> _pendingCells;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -155,7 +175,7 @@ namespace _Scripts.Systems
                 _pendingCells = globalDataSystem.PendingCellsToInstantiate;
             }
 
-            // 收集需要实例化的 Cell 位置
+            // 收集需要实例化的 Cell 位置和类型
             var collectJob = new CollectCellPositionsToGenerateJob
             {
                 PendingCells = _pendingCells.AsParallelWriter()
@@ -169,23 +189,33 @@ namespace _Scripts.Systems
         [WithAll(typeof(ShouldInitializeCell))]
         private partial struct CollectCellPositionsToGenerateJob : IJobEntity
         {
-            public NativeQueue<int3>.ParallelWriter PendingCells;
+            public NativeQueue<PendingCellData>.ParallelWriter PendingCells;
 
             private void Execute(SupernovaAspect supernova)
             {
                 var random = new Random(math.hash(supernova.Position));
 
+                // 遍历并判断是否需要生成 Cell
                 for (var x = -supernova.GenerateRange; x <= supernova.GenerateRange; ++x)
                 for (var y = -supernova.GenerateRange; y <= supernova.GenerateRange; ++y)
                 for (var z = -supernova.GenerateRange; z <= supernova.GenerateRange; ++z)
                 {
+                    // 获取 Cell 在 World 中的位置
                     var offset = new int3(x, y, z);
                     var generatePosition = supernova.Position + offset;
 
                     if (random.NextFloat(0, 100f) >= supernova.GenerateDensity) continue; // 根据密度决定是否生成 Cell
                     if (math.length(offset) >= supernova.GenerateRange) continue; // 只保留球体内的点
 
-                    PendingCells.Enqueue(generatePosition);
+                    // 根据权重随机选择 Cell 类型
+                    var cellType = supernova.GetRandomCellType(ref random);
+
+                    // 加入生成队列
+                    PendingCells.Enqueue(new PendingCellData
+                    {
+                        Position = generatePosition,
+                        CellType = cellType
+                    });
                 }
             }
         }
@@ -193,231 +223,3 @@ namespace _Scripts.Systems
 
     #endregion
 }
-
-// using _Scripts.Aspects;
-// using _Scripts.Components;
-// using Unity.Burst;
-// using Unity.Collections;
-// using Unity.Entities;
-// using Unity.Jobs;
-// using Unity.Mathematics;
-// using Unity.Transforms;
-//
-// namespace _Scripts.Systems
-// {
-//     #region System Groups and Structs
-//
-//     public struct PendingCellInitiationData
-//     {
-//         public int3 Position;
-//         public Entity Prefab;
-//     }
-//
-//     [UpdateInGroup(typeof(InitializationSystemGroup))]
-//     public partial class InitializationCellularAutomataSystemGroup : ComponentSystemGroup
-//     {
-//     }
-//
-//     [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
-//     public partial class VariableRateCellularAutomataSystemGroup : ComponentSystemGroup
-//     {
-//     }
-//
-//     #endregion
-//
-//     [UpdateInGroup(typeof(InitializationCellularAutomataSystemGroup), OrderFirst = true)]
-//     public partial class GlobalDataSystem : SystemBase
-//     {
-//         public NativeParallelHashMap<int3, Entity> CellMap;
-//         public NativeQueue<PendingCellInitiationData> PendingCellsToInstantiate;
-//
-//         protected override void OnCreate()
-//         {
-//             CellMap = new NativeParallelHashMap<int3, Entity>(4096, Allocator.Persistent);
-//             PendingCellsToInstantiate = new NativeQueue<PendingCellInitiationData>(Allocator.Persistent);
-//         }
-//
-//         protected override void OnUpdate()
-//         {
-//             Enabled = false;
-//         }
-//
-//         protected override void OnDestroy()
-//         {
-//             if (CellMap.IsCreated) CellMap.Dispose();
-//             if (PendingCellsToInstantiate.IsCreated) PendingCellsToInstantiate.Dispose();
-//         }
-//     }
-//
-//     [UpdateInGroup(typeof(InitializationCellularAutomataSystemGroup))]
-//     public partial struct CellInstantiationSystem : ISystem
-//     {
-//         private NativeParallelHashMap<int3, Entity> _cellMap;
-//         private NativeQueue<PendingCellInitiationData> _pendingCells;
-//
-//         public void OnUpdate(ref SystemState state)
-//         {
-//             // 获取全局 CellMap 和 PendingCells
-//             if (!_cellMap.IsCreated || !_pendingCells.IsCreated)
-//             {
-//                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-//                 _cellMap = globalDataSystem.CellMap;
-//                 _pendingCells = globalDataSystem.PendingCellsToInstantiate;
-//             }
-//
-//             // 如果没有待处理的Cell，跳过
-//             if (_pendingCells.Count == 0) return;
-//
-//             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
-//             var instantiateJob = new ContinuousInstantiateCellsJob
-//             {
-//                 PendingCells = _pendingCells,
-//                 CellMap = _cellMap,
-//                 ECB = ecb
-//             };
-//
-//             state.Dependency = instantiateJob.Schedule(state.Dependency);
-//             state.Dependency.Complete();
-//
-//             ecb.Playback(state.EntityManager);
-//         }
-//
-//         [BurstCompile]
-//         private struct ContinuousInstantiateCellsJob : IJob
-//         {
-//             public NativeQueue<PendingCellInitiationData> PendingCells;
-//             [NativeDisableParallelForRestriction] public NativeParallelHashMap<int3, Entity> CellMap;
-//             public EntityCommandBuffer ECB;
-//
-//             public void Execute()
-//             {
-//                 // 自定义每帧处理的 Cell 数量
-//                 const int maxCellsPerFrame = 512;
-//                 var processedCount = 0;
-//
-//                 while (PendingCells.TryDequeue(out var cellData) && processedCount < maxCellsPerFrame)
-//                 {
-//                     // 再次检查位置是否已被占用
-//                     if (CellMap.ContainsKey(cellData.Position))
-//                     {
-//                         processedCount++;
-//                         continue;
-//                     }
-//
-//                     // 实例化 Cell 实体
-//                     var cell = ECB.Instantiate(cellData.Prefab);
-//                     ECB.SetComponent(cell, new LocalTransform
-//                     {
-//                         Position = cellData.Position,
-//                         Rotation = quaternion.identity,
-//                         Scale = 1f
-//                     });
-//
-//                     // 把 Cell 实体添加到 CellMap 中
-//                     CellMap.TryAdd(cellData.Position, cell);
-//                     processedCount++;
-//                 }
-//             }
-//         }
-//     }
-//
-// [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-// public partial struct CellGenerationFromSupernovaSystem : ISystem
-// {
-//     private NativeParallelHashMap<int3, Entity> _cellMap;
-//     private NativeQueue<PendingCellInitiationData> _pendingCells;
-//
-//     [BurstCompile]
-//     public void OnCreate(ref SystemState state)
-//     {
-//         state.RequireForUpdate<ShouldInitializeCell>();
-//     }
-//
-//     public void OnUpdate(ref SystemState state)
-//     {
-//         // 获取全局 CellMap 和 PendingCells
-//         if (!_cellMap.IsCreated || !_pendingCells.IsCreated)
-//         {
-//             var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-//             _cellMap = globalDataSystem.CellMap;
-//             _pendingCells = globalDataSystem.PendingCellsToInstantiate;
-//         }
-//
-//         // 收集需要实例化的 Cell 位置
-//         var collectJob = new CollectCellPositionsToGenerateJob
-//         {
-//             CellMap = _cellMap,
-//             PendingCells = _pendingCells.AsParallelWriter()
-//         };
-//
-//         state.Dependency = collectJob.ScheduleParallel(state.Dependency);
-//         state.Dependency.Complete();
-//
-//         // 因为收集工作完成，禁用 ShouldInitializeCell 组件
-//         var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
-//         foreach (var (_, entity) in SystemAPI.Query<RefRO<ShouldInitializeCell>>().WithEntityAccess())
-//         {
-//             ecb.SetComponentEnabled<ShouldInitializeCell>(entity, false);
-//         }
-//
-//         ecb.Playback(state.EntityManager);
-//     }
-//
-//     [BurstCompile]
-//     [WithAll(typeof(ShouldInitializeCell))]
-//     private partial struct CollectCellPositionsToGenerateJob : IJobEntity
-//     {
-//         [ReadOnly] public NativeParallelHashMap<int3, Entity> CellMap;
-//         public NativeQueue<PendingCellInitiationData>.ParallelWriter PendingCells;
-//
-//         private void Execute(SupernovaAspect generator)
-//         {
-//             var center = generator.Position;
-//             var range = generator.GenerateRange;
-//             var density = generator.GenerateDensity;
-//             var prefabs = generator.Prefabs;
-//
-//             // 计算总权重
-//             var totalWeight = 0;
-//             for (var i = 0; i < prefabs.Length; i++) totalWeight += prefabs[i].Weight;
-//
-//             // 获取随机种子，与生成中心的位置相关
-//             var random = new Random(math.hash(center));
-//
-//             for (var x = -range; x <= range; ++x)
-//             for (var y = -range; y <= range; ++y)
-//             for (var z = -range; z <= range; ++z)
-//             {
-//                 var pos = center + new int3(x, y, z);
-//
-//                 // 根据密度决定是否生成 Cell
-//                 if (random.NextInt(0, 100) >= density) continue;
-//                 // 如果 CellMap 中已经存在这个位置的 Cell，则跳过
-//                 if (CellMap.ContainsKey(pos)) continue;
-//
-//                 // 根据 Cell 权重随机选择 Prefab
-//                 var pick = random.NextInt(0, totalWeight);
-//                 var acc = 0;
-//                 var chosenPrefab = Entity.Null;
-//                 for (var i = 0; i < prefabs.Length; i++)
-//                 {
-//                     acc += prefabs[i].Weight;
-//                     if (pick >= acc) continue;
-//                     chosenPrefab = prefabs[i].Prefab;
-//                     break;
-//                 }
-//
-//                 // 如果没有选择到 Prefab，则跳过
-//                 if (chosenPrefab == Entity.Null) continue;
-//
-//                 // 添加到待实例化队列
-//                 PendingCells.Enqueue(new PendingCellInitiationData
-//                 {
-//                     Position = pos,
-//                     Prefab = chosenPrefab
-//                 });
-//             }
-//         }
-//     }
-// }
-// }

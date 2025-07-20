@@ -17,13 +17,13 @@ namespace _Scripts.Components
     {
     }
 
-    public struct IsCellAlive : IComponentData, IEnableableComponent
-    {
-    }
-
     public struct CellType : IComponentData
     {
         public CellTypeEnum Value;
+    }
+
+    public struct IsCellAlive : IComponentData, IEnableableComponent
+    {
     }
 
     public struct PendingCellUpdateBuffer : IBufferElementData
