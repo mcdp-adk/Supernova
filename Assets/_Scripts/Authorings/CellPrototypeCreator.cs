@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using _Scripts.Components;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
@@ -9,10 +8,6 @@ using UnityEngine.Rendering;
 
 namespace _Scripts.Authorings
 {
-    public struct CellPrototypeTag : IComponentData
-    {
-    }
-
     public class CellPrototypeCreator : MonoBehaviour
     {
         private static CellPrototypeCreator Instance { get; set; }
@@ -57,7 +52,7 @@ namespace _Scripts.Authorings
                 MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
             );
 
-            AddComponents(prototype, entityManager);
+            AddCellComponents(prototype, entityManager);
         }
 
         private static RenderMeshDescription GetRenderMeshDescription()
@@ -84,18 +79,14 @@ namespace _Scripts.Authorings
             return new RenderMeshArray(cellMaterials.ToArray(), cellMeshes.ToArray());
         }
 
-        private static void AddComponents(Entity prototype, EntityManager entityManager)
+        private static void AddCellComponents(Entity prototype, EntityManager entityManager)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            entityManager.AddComponent<CellPrototypeTag>(prototype);
 
-            ecb.AddComponent<CellPrototypeTag>(prototype);
-
-            ecb.AddComponent<CellTag>(prototype);
-            ecb.AddComponent<IsCellAlive>(prototype);
-            ecb.AddComponent<CellType>(prototype);
-            ecb.AddBuffer<PendingCellUpdateBuffer>(prototype);
-
-            ecb.Playback(entityManager);
+            entityManager.AddComponent<CellTag>(prototype);
+            entityManager.AddComponent<IsCellAlive>(prototype);
+            entityManager.AddComponent<CellType>(prototype);
+            entityManager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
     }
 }

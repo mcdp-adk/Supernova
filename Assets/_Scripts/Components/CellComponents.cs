@@ -9,6 +9,10 @@ namespace _Scripts.Components
         Cell2 = -2
     }
 
+    public struct CellPrototypeTag : IComponentData
+    {
+    }
+
     public struct CellTag : IComponentData
     {
     }
