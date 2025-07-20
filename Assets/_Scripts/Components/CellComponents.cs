@@ -4,7 +4,9 @@ namespace _Scripts.Components
 {
     public enum CellTypeEnum
     {
-        None = 0
+        None = 0,
+        Cell1 = -1,
+        Cell2 = -2
     }
 
     public struct CellTag : IComponentData

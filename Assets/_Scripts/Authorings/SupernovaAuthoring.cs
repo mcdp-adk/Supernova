@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using _Scripts.Components;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace _Scripts.Authorings
 {
     [Serializable]
-    public struct CellPrefabConfig
+    public struct LegacyCellPrefabConfig
     {
         public GameObject prefab;
         public int weight;
@@ -23,7 +22,7 @@ namespace _Scripts.Authorings
 
         [Range(0, 100)] [SerializeField] private int generateDensity = 25;
 
-        [SerializeField] private List<CellPrefabConfig> cellPrefabConfigs;
+        [SerializeField] private List<LegacyCellPrefabConfig> cellPrefabConfigs;
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
