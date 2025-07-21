@@ -48,28 +48,42 @@ namespace _Scripts.Systems
             private void Execute(SupernovaAspect supernova, EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
             {
                 var random = new Random(math.hash(supernova.Position));
+                var generateRangeSq = supernova.GenerateRange * supernova.GenerateRange;
 
-                // 遍历并判断是否需要生成 Cell
-                for (var x = -supernova.GenerateRange; x <= supernova.GenerateRange; ++x)
-                for (var y = -supernova.GenerateRange; y <= supernova.GenerateRange; ++y)
-                for (var z = -supernova.GenerateRange; z <= supernova.GenerateRange; ++z)
+                // 按距离层遍历，从球心向外生成
+                for (var distance = 0; distance <= supernova.GenerateRange; distance++)
                 {
-                    // 获取 Cell 在 World 中的位置
-                    var offset = new int3(x, y, z);
-                    var generatePosition = supernova.Position + offset;
+                    var distanceSq = distance * distance;
+                    var nextDistanceSq = (distance + 1) * (distance + 1);
 
-                    if (random.NextFloat(0, 100f) >= supernova.GenerateDensity) continue; // 根据密度决定是否生成 Cell
-                    if (math.length(offset) >= supernova.GenerateRange) continue; // 只保留球体内的点
-
-                    // 根据权重随机选择 Cell 类型
-                    var cellType = supernova.GetRandomCellType(ref random);
-
-                    // 加入生成队列
-                    PendingCells.Enqueue(new PendingCellData
+                    // 遍历可能包含当前距离层的最小立方体
+                    for (var x = -distance; x <= distance; ++x)
+                    for (var y = -distance; y <= distance; ++y)
+                    for (var z = -distance; z <= distance; ++z)
                     {
-                        Position = generatePosition,
-                        CellType = cellType
-                    });
+                        var offset = new int3(x, y, z);
+                        var currentDistanceSq = math.lengthsq(offset);
+
+                        // 只处理距离在当前层范围内的点
+                        if (currentDistanceSq < distanceSq || currentDistanceSq >= nextDistanceSq) continue;
+
+                        // 确保在球体范围内
+                        if (currentDistanceSq >= generateRangeSq) continue;
+
+                        // 根据密度决定是否生成 Cell
+                        if (random.NextFloat(0, 100f) >= supernova.GenerateDensity) continue;
+
+                        // 获取生成位置和 Cell 类型
+                        var generatePosition = supernova.Position + offset;
+                        var cellType = supernova.GetRandomCellType(ref random);
+
+                        // 加入生成队列
+                        PendingCells.Enqueue(new PendingCellData
+                        {
+                            Coordinate = generatePosition,
+                            CellType = cellType
+                        });
+                    }
                 }
 
                 // 生成完毕后禁用 ShouldInitializeCell 组件

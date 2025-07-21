@@ -13,7 +13,7 @@ namespace _Scripts.Aspects
         private readonly RefRW<CellType> _cellType;
         private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
 
-        private readonly RefRO<CellPosition> _cellPosition;
+        private readonly RefRO<CellCoordinate> _cellCoordinate;
         private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
 
         private readonly DynamicBuffer<PendingCellUpdateBuffer> _buffer;
@@ -30,7 +30,7 @@ namespace _Scripts.Aspects
             set => SetCellAliveState(value);
         }
 
-        public int3 Position => _cellPosition.ValueRO.Value;
+        public int3 Coordinate => _cellCoordinate.ValueRO.Value;
 
         public DynamicBuffer<PendingCellUpdateBuffer> Buffer => _buffer;
 

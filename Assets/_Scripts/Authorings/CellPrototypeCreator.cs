@@ -91,7 +91,7 @@ namespace _Scripts.Authorings
             entityManager.AddComponent<IsCellAlive>(prototype);
             entityManager.SetComponentEnabled<IsCellAlive>(prototype, false);
             
-            entityManager.AddComponent<CellPosition>(prototype);
+            entityManager.AddComponent<CellCoordinate>(prototype);
             entityManager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
     }

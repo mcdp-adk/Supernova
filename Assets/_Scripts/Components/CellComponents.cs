@@ -27,7 +27,7 @@ namespace _Scripts.Components
     {
     }
 
-    public struct CellPosition : IComponentData
+    public struct CellCoordinate : IComponentData
     {
         public int3 Value;
     }

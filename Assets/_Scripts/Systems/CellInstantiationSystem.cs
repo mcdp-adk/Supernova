@@ -12,7 +12,7 @@ namespace _Scripts.Systems
 {
     public struct PendingCellData
     {
-        public int3 Position;
+        public int3 Coordinate;
         public CellTypeEnum CellType;
     }
 
@@ -72,7 +72,7 @@ namespace _Scripts.Systems
                 while (PendingCells.TryDequeue(out var pendingCellData) && processedCount < maxCellsPerFrame)
                 {
                     // 检查位置是否已被占用
-                    if (CellMap.ContainsKey(pendingCellData.Position)) continue;
+                    if (CellMap.ContainsKey(pendingCellData.Coordinate)) continue;
 
                     // 从 Prototype 复制并实例化 Cell
                     var cell = ECB.Instantiate(Prototype);
@@ -81,7 +81,7 @@ namespace _Scripts.Systems
                     SetCellComponents(cell, pendingCellData);
 
                     // 把 Cell 实体添加到 CellMap 中
-                    CellMap.TryAdd(pendingCellData.Position, cell);
+                    CellMap.TryAdd(pendingCellData.Coordinate, cell);
                     processedCount++;
                 }
             }
@@ -96,10 +96,10 @@ namespace _Scripts.Systems
                 ECB.SetComponentEnabled<IsCellAlive>(cell, true);
 
                 // 设置 Cell 的位置和 LocalToWorld 组件以渲染
-                ECB.SetComponent(cell, new CellPosition { Value = pendingCellData.Position });
+                ECB.SetComponent(cell, new CellCoordinate { Value = pendingCellData.Coordinate });
                 ECB.SetComponent(cell, new LocalToWorld
                 {
-                    Value = float4x4.TRS(pendingCellData.Position,
+                    Value = float4x4.TRS(pendingCellData.Coordinate,
                         quaternion.identity,
                         new float3(0.5f, 0.5f, 0.5f))
                 });
