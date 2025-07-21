@@ -16,7 +16,7 @@ namespace _Scripts.Authorings
     {
         [Header("超新星设置")] [SerializeField] private int mass = 100;
 
-        [Header("Cell 生成设置")] [SerializeField] private int generateRange;
+        [Header("Cell 生成设置")] [SerializeField] private int generateRange = 10;
 
         [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
 
@@ -40,7 +40,7 @@ namespace _Scripts.Authorings
 
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-                AddComponent<CellGeneratorTag>(entity);
+                AddComponent<SupernovaTag>(entity);
                 AddComponent<ShouldInitializeCell>(entity);
 
                 // 超新星设置
