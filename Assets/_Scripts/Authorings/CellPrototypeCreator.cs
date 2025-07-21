@@ -42,7 +42,7 @@ namespace _Scripts.Authorings
 
             var prototype = entityManager.CreateEntity();
 
-            entityManager.SetName(prototype, "CellPrototype");
+            entityManager.SetName(prototype, "Cell_Prototype");
 
             // 使用 RenderMeshUtility 自动添加渲染需要的 Components
             RenderMeshUtility.AddComponents(
@@ -80,14 +80,18 @@ namespace _Scripts.Authorings
 
             return new RenderMeshArray(cellMaterials.ToArray(), cellMeshes.ToArray());
         }
-        
+
         private static void AddCellComponents(Entity prototype, EntityManager entityManager)
         {
             entityManager.AddComponent<CellPrototypeTag>(prototype);
 
             entityManager.AddComponent<CellTag>(prototype);
             entityManager.AddComponent<CellType>(prototype);
+            
             entityManager.AddComponent<IsCellAlive>(prototype);
+            entityManager.SetComponentEnabled<IsCellAlive>(prototype, false);
+            
+            entityManager.AddComponent<CellPosition>(prototype);
             entityManager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
     }

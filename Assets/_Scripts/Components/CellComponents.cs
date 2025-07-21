@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace _Scripts.Components
 {
@@ -24,6 +25,11 @@ namespace _Scripts.Components
 
     public struct IsCellAlive : IComponentData, IEnableableComponent
     {
+    }
+
+    public struct CellPosition : IComponentData
+    {
+        public int3 Value;
     }
 
     public struct PendingCellUpdateBuffer : IBufferElementData

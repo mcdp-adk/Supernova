@@ -77,29 +77,40 @@ namespace _Scripts.Systems
                     // 从 Prototype 复制并实例化 Cell
                     var cell = ECB.Instantiate(Prototype);
 
-                    ECB.SetName(cell,
-                        $"Cell_{pendingCellData.Position.x}_{pendingCellData.Position.y}_{pendingCellData.Position.z}");
-                    ECB.RemoveComponent<CellPrototypeTag>(cell);
-                    ECB.SetComponent(cell,
-                        new LocalToWorld
-                        {
-                            Value = float4x4.TRS(pendingCellData.Position,
-                                quaternion.identity,
-                                new float3(0.5f, 0.5f, 0.5f))
-                        });
-
-                    // 设置 Cell 类型以及显示的 Mesh 和 Material
-                    ECB.SetComponent(cell, new CellType { Value = pendingCellData.CellType });
-                    ECB.SetComponent(cell, new MaterialMeshInfo
-                    {
-                        MaterialID = new BatchMaterialID { value = (uint)pendingCellData.CellType },
-                        MeshID = new BatchMeshID { value = (uint)pendingCellData.CellType }
-                    });
+                    // 设置 Cell 的组件
+                    SetCellComponents(cell, pendingCellData);
 
                     // 把 Cell 实体添加到 CellMap 中
                     CellMap.TryAdd(pendingCellData.Position, cell);
                     processedCount++;
                 }
+            }
+
+            private void SetCellComponents(Entity cell, PendingCellData pendingCellData)
+            {
+                // 清除从 CellPrototype 继承的名称
+                ECB.SetName(cell, "");
+                
+                // 删除 CellPrototypeTag 组件并启用 IsCellAlive
+                ECB.RemoveComponent<CellPrototypeTag>(cell);
+                ECB.SetComponentEnabled<IsCellAlive>(cell, true);
+
+                // 设置 Cell 的位置和 LocalToWorld 组件以渲染
+                ECB.SetComponent(cell, new CellPosition { Value = pendingCellData.Position });
+                ECB.SetComponent(cell, new LocalToWorld
+                {
+                    Value = float4x4.TRS(pendingCellData.Position,
+                        quaternion.identity,
+                        new float3(0.5f, 0.5f, 0.5f))
+                });
+
+                // 设置 Cell 类型以及显示的 Mesh 和 Material
+                ECB.SetComponent(cell, new CellType { Value = pendingCellData.CellType });
+                ECB.SetComponent(cell, new MaterialMeshInfo
+                {
+                    MaterialID = new BatchMaterialID { value = (uint)pendingCellData.CellType },
+                    MeshID = new BatchMeshID { value = (uint)pendingCellData.CellType }
+                });
             }
         }
     }

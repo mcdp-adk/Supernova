@@ -45,7 +45,7 @@ namespace _Scripts.Systems
         {
             public NativeQueue<PendingCellData>.ParallelWriter PendingCells;
 
-            private void Execute(SupernovaAspect supernova)
+            private void Execute(SupernovaAspect supernova, EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
             {
                 var random = new Random(math.hash(supernova.Position));
 
@@ -71,6 +71,9 @@ namespace _Scripts.Systems
                         CellType = cellType
                     });
                 }
+
+                // 生成完毕后禁用 ShouldInitializeCell 组件
+                shouldInitializeCell.ValueRW = false;
             }
         }
     }

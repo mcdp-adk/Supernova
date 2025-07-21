@@ -2,50 +2,51 @@ using _Scripts.Components;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
-using Unity.Transforms;
+using UnityEngine.Rendering;
 
 namespace _Scripts.Aspects
 {
-    // public readonly partial struct CellPrototypeAspect : IAspect
-    // {
-    //     public readonly Entity Self;
-    //     private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
-    //     private readonly RefRW<CellType> _cellType;
-    //
-    //     public CellTypeEnum CellType
-    //     {
-    //         get => _cellType.ValueRO.Value;
-    //         set => SetCellType(value);
-    //     }
-    //
-    //     private void SetCellType(CellTypeEnum targetCellType)
-    //     {
-    //     }
-    // }
-
     public readonly partial struct CellAspect : IAspect
     {
         public readonly Entity Self;
-        private readonly RefRO<LocalTransform> _transform;
 
-        private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
         private readonly RefRW<CellType> _cellType;
+        private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
+
+        private readonly RefRO<CellPosition> _cellPosition;
+        private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
+
         private readonly DynamicBuffer<PendingCellUpdateBuffer> _buffer;
-
-        public int3 Position => (int3)_transform.ValueRO.Position;
-
-        public bool IsAlive
-        {
-            get => _isCellAlive.ValueRO;
-            set => _isCellAlive.ValueRW = value;
-        }
 
         public CellTypeEnum CellType
         {
             get => _cellType.ValueRO.Value;
-            set => _cellType.ValueRW.Value = value;
+            set => SetCellType(value);
         }
 
+        public bool IsAlive
+        {
+            get => _isCellAlive.ValueRO;
+            set => SetCellAliveState(value);
+        }
+
+        public int3 Position => _cellPosition.ValueRO.Value;
+
         public DynamicBuffer<PendingCellUpdateBuffer> Buffer => _buffer;
+
+        private void SetCellType(CellTypeEnum targetCellType)
+        {
+            _cellType.ValueRW.Value = targetCellType;
+            _materialMeshInfo.ValueRW = new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                MeshID = new BatchMeshID { value = (uint)targetCellType }
+            };
+        }
+
+        private void SetCellAliveState(bool targetAliveState)
+        {
+            _isCellAlive.ValueRW = targetAliveState;
+        }
     }
 }
