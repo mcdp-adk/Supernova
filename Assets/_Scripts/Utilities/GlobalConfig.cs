@@ -8,7 +8,17 @@ namespace _Scripts.Utilities
     public static class GlobalConfig
     {
         /// <summary>
-        /// 每帧最大 Cell 实例化数量 - 避免单帧生成过多导致性能问题
+        /// Cell Map 初始容量
+        /// </summary>
+        public const int CellMapInitialCapacity = 4096;
+
+        /// <summary>
+        /// Cell 池大小
+        /// </summary>
+        public const int MaxCellPoolSize = 4096;
+
+        /// <summary>
+        /// 每帧最大 Cell 实例化数量
         /// </summary>
         public const int MaxCellsPerFrame = 512;
 
@@ -16,12 +26,7 @@ namespace _Scripts.Utilities
         /// Cell 默认缩放比例
         /// </summary>
         public static readonly float3 DefaultCellScale = new(0.5f, 0.5f, 0.5f);
-
-        /// <summary>
-        /// Cell Map 初始容量
-        /// </summary>
-        public const int CellMapInitialCapacity = 4096;
-
+        
         /// <summary>
         /// 更新频率（毫秒），用于配置细胞自动机系统组的固定更新间隔
         /// </summary>

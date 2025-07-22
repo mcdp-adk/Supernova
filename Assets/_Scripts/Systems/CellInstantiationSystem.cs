@@ -15,7 +15,8 @@ namespace _Scripts.Systems
     /// Cell 实例化系统 - 负责将待生成的 Cell 数据转换为实际的 Entity
     /// 采用分帧实例化策略避免单帧生成过多 Entity 导致性能问题
     /// </summary>
-    [UpdateInGroup(typeof(InitializationCellularAutomataSystemGroup))]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateAfter(typeof(GlobalDataSystem))]
     public partial struct CellInstantiationSystem : ISystem
     {
         // ========== 全局数据引用 ==========
@@ -33,7 +34,10 @@ namespace _Scripts.Systems
         public void OnUpdate(ref SystemState state)
         {
             // 获取全局数据容器引用
-            InitializeGlobalDataReferences(ref state);
+            if (_cellMap.IsCreated && _pendingCells.IsCreated) return;
+            var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+            _cellMap = globalDataSystem.CellMap;
+            _pendingCells = globalDataSystem.PendingCellsToInstantiate;
 
             // 获取 Cell 原型实体
             var prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
@@ -52,19 +56,6 @@ namespace _Scripts.Systems
             state.Dependency.Complete();
 
             ecb.Playback(state.EntityManager);
-        }
-
-        // ========== 私有方法 ==========
-
-        /// <summary>
-        /// 初始化全局数据容器引用
-        /// </summary>
-        private void InitializeGlobalDataReferences(ref SystemState state)
-        {
-            if (_cellMap.IsCreated && _pendingCells.IsCreated) return;
-            var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-            _cellMap = globalDataSystem.CellMap;
-            _pendingCells = globalDataSystem.PendingCellsToInstantiate;
         }
 
         // ========== 作业定义 ==========
@@ -136,16 +127,22 @@ namespace _Scripts.Systems
             /// </summary>
             private void ConfigureCellTransformAndRendering(Entity cell, PendingCellData pendingCellData)
             {
-                // 设置坐标组件
-                ECB.SetComponent(cell, new CellCoordinate { Value = pendingCellData.Coordinate });
-
                 // 设置世界变换矩阵用于渲染
-                ECB.SetComponent(cell, new LocalToWorld
+
+                // ECB.SetComponent(cell, new LocalToWorld
+                // {
+                //     Value = float4x4.TRS(
+                //         pendingCellData.Coordinate,
+                //         quaternion.identity,
+                //         GlobalConfig.DefaultCellScale)
+                // });
+
+                ECB.AddComponent<LocalTransform>(cell);
+                ECB.SetComponent(cell, new LocalTransform
                 {
-                    Value = float4x4.TRS(
-                        pendingCellData.Coordinate,
-                        quaternion.identity,
-                        GlobalConfig.DefaultCellScale)
+                    Position = pendingCellData.Coordinate,
+                    Rotation = quaternion.identity,
+                    Scale = 0.5f
                 });
             }
 

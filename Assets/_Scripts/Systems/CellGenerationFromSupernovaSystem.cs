@@ -30,7 +30,10 @@ namespace _Scripts.Systems
         public void OnUpdate(ref SystemState state)
         {
             // 获取全局数据容器引用
-            InitializeGlobalDataReferences(ref state);
+            if (_cellMap.IsCreated && _pendingCells.IsCreated) return;
+            var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+            _cellMap = globalDataSystem.CellMap;
+            _pendingCells = globalDataSystem.PendingCellsToInstantiate;
 
             // 执行 Cell 位置收集作业
             var collectJob = new CollectCellPositionsJob
@@ -40,21 +43,6 @@ namespace _Scripts.Systems
 
             state.Dependency = collectJob.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
-        }
-
-        // ========== 私有方法 ==========
-
-        /// <summary>
-        /// 初始化全局数据容器引用
-        /// </summary>
-        private void InitializeGlobalDataReferences(ref SystemState state)
-        {
-            if (!_cellMap.IsCreated || !_pendingCells.IsCreated)
-            {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-                _cellMap = globalDataSystem.CellMap;
-                _pendingCells = globalDataSystem.PendingCellsToInstantiate;
-            }
         }
 
         // ========== 作业定义 ==========

@@ -46,14 +46,6 @@ namespace _Scripts.Components
     {
     }
 
-    /// <summary>
-    /// Cell 坐标 - 存储 Cell 在 3D 空间中的坐标
-    /// </summary>
-    public struct CellCoordinate : IComponentData
-    {
-        public int3 Value;
-    }
-
     // ========== Cell 缓冲区组件 ==========
 
     /// <summary>

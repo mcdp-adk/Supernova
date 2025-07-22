@@ -2,6 +2,7 @@ using _Scripts.Components;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine.Rendering;
 
 namespace _Scripts.Aspects
@@ -17,12 +18,12 @@ namespace _Scripts.Aspects
         // ========== 组件引用 ==========
         private readonly RefRW<CellType> _cellType;
         private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
-        private readonly RefRO<CellCoordinate> _cellCoordinate;
+        private readonly RefRW<LocalTransform> _cellTransform;
         private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
         private readonly DynamicBuffer<PendingCellUpdateBuffer> _pendingUpdateBuffer;
 
         // ========== 属性接口 ==========
-        
+
         /// <summary>
         /// Cell 类型 - 获取或设置 Cell 的类型
         /// </summary>
@@ -44,7 +45,7 @@ namespace _Scripts.Aspects
         /// <summary>
         /// 坐标位置 - 获取 Cell 在 3D 空间中的坐标
         /// </summary>
-        public int3 Coordinate => _cellCoordinate.ValueRO.Value;
+        public int3 Coordinate => (int3)_cellTransform.ValueRO.Position;
 
         /// <summary>
         /// 待更新缓冲区 - 获取待处理的状态更新队列
@@ -52,7 +53,7 @@ namespace _Scripts.Aspects
         public DynamicBuffer<PendingCellUpdateBuffer> PendingUpdateBuffer => _pendingUpdateBuffer;
 
         // ========== 私有方法 ==========
-        
+
         /// <summary>
         /// 设置 Cell 类型并更新渲染材质
         /// </summary>
@@ -60,7 +61,7 @@ namespace _Scripts.Aspects
         private void SetCellType(CellTypeEnum targetCellType)
         {
             _cellType.ValueRW.Value = targetCellType;
-            
+
             // 同步更新渲染材质和网格
             _materialMeshInfo.ValueRW = new MaterialMeshInfo
             {
