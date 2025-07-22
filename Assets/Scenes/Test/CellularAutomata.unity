@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 100
-  generateRange: 50
+  generateRange: 10
   generateDensity: 10
   cellConfigs:
   - cellType: -1

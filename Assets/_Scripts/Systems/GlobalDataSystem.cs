@@ -14,19 +14,16 @@ namespace _Scripts.Systems
     {
         // ========== 全局数据容器 ==========
         
-        public NativeHashMap<int3, Entity> FrontCellMap { get; private set; }
-        public NativeHashMap<int3, Entity> BackCellMap { get; private set; }
+        public NativeHashMap<int3, Entity> CellMap { get; private set; }
         public NativeQueue<Entity> CellPoolQueue { get; private set; }
-
+        
         private BeginVariableRateSimulationEntityCommandBufferSystem _ecbSystem;
 
         // ========== 系统生命周期 ==========
 
         protected override void OnCreate()
         {
-            // 初始化全局数据容器
-            FrontCellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
-            BackCellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
+            CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
             CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
 
             // 获取 EndInitializationEntityCommandBufferSystem 以供 OnUpdate 中获取自动执行的 Command Buffer
@@ -51,8 +48,7 @@ namespace _Scripts.Systems
         protected override void OnDestroy()
         {
             // 清理原生容器以避免内存泄漏
-            if (FrontCellMap.IsCreated) FrontCellMap.Dispose();
-            if (BackCellMap.IsCreated) BackCellMap.Dispose();
+            if (CellMap.IsCreated) CellMap.Dispose();
             if (CellPoolQueue.IsCreated) CellPoolQueue.Dispose();
         }
 

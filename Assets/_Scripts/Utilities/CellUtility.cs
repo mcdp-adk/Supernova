@@ -1,6 +1,10 @@
 using _Scripts.Components;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Rendering;
+using Unity.Transforms;
+using UnityEngine.Rendering;
 
 namespace _Scripts.Utilities
 {
@@ -23,9 +27,9 @@ namespace _Scripts.Utilities
 
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
-            manager.AddComponent<CellType>(prototype);
             manager.AddComponent<IsCellAlive>(prototype);
             manager.SetComponentEnabled<IsCellAlive>(prototype, false);
+            manager.AddComponent<CellType>(prototype);
             manager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
 
@@ -40,13 +44,28 @@ namespace _Scripts.Utilities
             return cell;
         }
 
-        public static void AddCellToWorldFromQueue(Entity cell, EntityCommandBuffer ecb)
+        public static void TryAddCellToWorldFromCellPoolQueue(Entity cell, EntityCommandBuffer ecb,
+            NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate, CellTypeEnum cellType)
         {
+            if (!cellMap.TryAdd(targetCoordinate, cell)) return;
+            ecb.SetComponentEnabled<IsCellAlive>(cell, true);
+            ecb.SetComponent(cell, new CellType { Value = cellType });
+            ecb.AddComponent<LocalTransform>(cell);
+            ecb.SetComponent(cell, new LocalTransform
+            {
+                Position = targetCoordinate,
+                Rotation = quaternion.identity,
+                Scale = GlobalConfig.DefaultCellScale
+            });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)cellType },
+                MeshID = new BatchMeshID { value = (uint)cellType }
+            });
         }
-        
+
         public static void SetCellType(Entity cell, CellTypeEnum targetCellType, EntityManager manager)
         {
-            
         }
     }
 }

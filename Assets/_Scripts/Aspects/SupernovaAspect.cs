@@ -51,7 +51,7 @@ namespace _Scripts.Aspects
         /// </summary>
         /// <param name="random">随机数生成器引用</param>
         /// <returns>随机选择的 Cell 类型</returns>
-        public CellTypeEnum GetRandomCellType(ref Random random)
+        public CellTypeEnum GetRandomCellType(Random random)
         {
             // 计算总权重
             var totalWeight = CalculateTotalWeight();

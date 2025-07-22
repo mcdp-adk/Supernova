@@ -1,5 +1,3 @@
-using Unity.Mathematics;
-
 namespace _Scripts.Utilities
 {
     /// <summary>
@@ -21,7 +19,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell 默认缩放比例
         /// </summary>
-        public static readonly float3 DefaultCellScale = new(0.5f, 0.5f, 0.5f);
+        public const float DefaultCellScale = 0.5f;
 
         /// <summary>
         /// 更新频率（毫秒），用于配置细胞自动机系统组的固定更新间隔

@@ -17,8 +17,8 @@ namespace _Scripts.Aspects
         public readonly Entity Self;
 
         // ========== 组件引用 ==========
-        private readonly RefRW<CellType> _cellType;
         private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
+        private readonly RefRW<CellType> _cellType;
         private readonly RefRW<LocalTransform> _cellTransform;
         private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
         private readonly DynamicBuffer<PendingCellUpdateBuffer> _pendingUpdateBuffer;
