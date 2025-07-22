@@ -9,44 +9,28 @@ using UnityEngine;
 
 namespace _Scripts.Systems
 {
-    /// <summary>
-    /// 全局数据管理系统
-    /// 负责管理整个应用生命周期内的共享数据结构
-    /// 包括 Cell 位置映射和待实例化队列
-    /// </summary>
-    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class GlobalDataSystem : SystemBase
     {
         // ========== 全局数据容器 ==========
-
-        /// <summary>
-        /// Cell 坐标到实体的映射表 - 用于快速查找指定位置的 Cell
-        /// </summary>
-        public NativeHashMap<int3, Entity> CellMap { get; private set; }
-
-        /// <summary>
-        /// Cell 池队列 - 用于存储可复用的 Cell 实体
-        /// </summary>
+        
+        public NativeHashMap<int3, Entity> FrontCellMap { get; private set; }
+        public NativeHashMap<int3, Entity> BackCellMap { get; private set; }
         public NativeQueue<Entity> CellPoolQueue { get; private set; }
 
-        /// <summary>
-        /// 待实例化 Cell 队列 - 存储等待创建的 Cell 数据
-        /// </summary>
-        public NativeQueue<PendingCellData> PendingCellsToInstantiate { get; private set; }
-
-        private EndInitializationEntityCommandBufferSystem _ecbSystem;
+        private BeginVariableRateSimulationEntityCommandBufferSystem _ecbSystem;
 
         // ========== 系统生命周期 ==========
 
         protected override void OnCreate()
         {
             // 初始化全局数据容器
-            CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
+            FrontCellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
+            BackCellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
             CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
-            PendingCellsToInstantiate = new NativeQueue<PendingCellData>(Allocator.Persistent);
 
             // 获取 EndInitializationEntityCommandBufferSystem 以供 OnUpdate 中获取自动执行的 Command Buffer
-            _ecbSystem = World.GetOrCreateSystemManaged<EndInitializationEntityCommandBufferSystem>();
+            _ecbSystem = World.GetOrCreateSystemManaged<BeginVariableRateSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
@@ -54,20 +38,27 @@ namespace _Scripts.Systems
             // 获取一个在 InitializationSystemGroup 结束时自动 Playback 的 Command Buffer
             var ecb = _ecbSystem.CreateCommandBuffer();
 
-            FillCellPoolQueue(ecb);
+            var isPreparationComplete = FillCellPoolQueue(ecb);
+            if (!isPreparationComplete) return;
+            
+            var cellularAutomataSystemGroup = World.GetExistingSystemManaged<VariableRateCellularAutomataSystemGroup>();
+            if (cellularAutomataSystemGroup == null) return;
+            Enabled = false;
+            cellularAutomataSystemGroup.Enabled = true;
+            Debug.Log("[GlobalDataSystem] VariableRateCellularAutomataSystemGroup 已启用");
         }
 
         protected override void OnDestroy()
         {
             // 清理原生容器以避免内存泄漏
-            if (CellMap.IsCreated) CellMap.Dispose();
+            if (FrontCellMap.IsCreated) FrontCellMap.Dispose();
+            if (BackCellMap.IsCreated) BackCellMap.Dispose();
             if (CellPoolQueue.IsCreated) CellPoolQueue.Dispose();
-            if (PendingCellsToInstantiate.IsCreated) PendingCellsToInstantiate.Dispose();
         }
 
         // ========== 私有方法 ==========
 
-        private void FillCellPoolQueue(EntityCommandBuffer ecb)
+        private bool FillCellPoolQueue(EntityCommandBuffer ecb)
         {
             Entity prototype;
 
@@ -79,7 +70,7 @@ namespace _Scripts.Systems
             catch (System.Exception ex)
             {
                 Debug.LogError($"[GlobalDataSystem] 获取 CellPrototypeTag 失败: {ex.Message}");
-                return; // 没有原型实体，跳过本帧更新
+                return false; // 没有原型实体，跳过本帧更新
             }
 
             var instantiateJob = new InstantiateCellJob
@@ -90,6 +81,8 @@ namespace _Scripts.Systems
             };
 
             instantiateJob.Schedule().Complete();
+
+            return true;
         }
 
         // ========== 作业定义 ==========
@@ -103,13 +96,7 @@ namespace _Scripts.Systems
 
             public void Execute()
             {
-                var currentCount = CellPoolQueue.Count;
-                var maxToCreate = math.min(
-                    GlobalConfig.MaxCellsPerFrame,
-                    GlobalConfig.MaxCellPoolSize - currentCount
-                );
-
-                for (var i = 0; i < maxToCreate; i++)
+                for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
                     CellPoolQueue.Enqueue(CellUtility.InitiateFromPrototype(Prototype, ECB));
             }
         }

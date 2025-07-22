@@ -15,18 +15,14 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell 池大小
         /// </summary>
-        public const int MaxCellPoolSize = 4096;
+        public const int MaxCellPoolSize = 65536;
 
-        /// <summary>
-        /// 每帧最大 Cell 实例化数量
-        /// </summary>
-        public const int MaxCellsPerFrame = 512;
 
         /// <summary>
         /// Cell 默认缩放比例
         /// </summary>
         public static readonly float3 DefaultCellScale = new(0.5f, 0.5f, 0.5f);
-        
+
         /// <summary>
         /// 更新频率（毫秒），用于配置细胞自动机系统组的固定更新间隔
         /// </summary>

@@ -1,3 +1,4 @@
+using _Scripts.Utilities;
 using Unity.Entities;
 
 namespace _Scripts.Components

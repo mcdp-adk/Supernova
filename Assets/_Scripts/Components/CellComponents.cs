@@ -1,47 +1,36 @@
+using _Scripts.Utilities;
 using Unity.Entities;
-using Unity.Mathematics;
 
 namespace _Scripts.Components
 {
-    /// <summary>
-    /// Cell 类型枚举定义
-    /// </summary>
-    public enum CellTypeEnum
-    {
-        Dead = 0,
-        Cell1 = -1,
-        Cell2 = -2
-    }
-
     // ========== Cell 标识组件 ==========
-
-    /// <summary>
-    /// Cell 原型标记 - 用于标识 Cell 预制体
-    /// </summary>
+    
     public struct CellPrototypeTag : IComponentData
     {
     }
-
-    /// <summary>
-    /// Cell 实例标记 - 用于标识实例化的 Cell
-    /// </summary>
+    
     public struct CellTag : IComponentData
     {
     }
-
-    // ========== Cell 状态组件 ==========
+    
+    // ========== Cell 数据组件 ==========
 
     /// <summary>
-    /// Cell 类型 - 定义 Cell 的种类
+    /// Cell 双缓冲数据存储组件 - 用于存储和切换 Cell 数据
     /// </summary>
+    public struct CellDataBuffer : IComponentData
+    {
+        public CellData Front;
+        public CellData Back;
+    }
+
+    // ========== Cell 状态组件 ==========
+    
     public struct CellType : IComponentData
     {
         public CellTypeEnum Value;
     }
-
-    /// <summary>
-    /// Cell 存活状态 - 控制 Cell 是否激活
-    /// </summary>
+    
     public struct IsCellAlive : IComponentData, IEnableableComponent
     {
     }

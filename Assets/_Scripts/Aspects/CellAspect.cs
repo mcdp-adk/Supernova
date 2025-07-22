@@ -1,4 +1,5 @@
 using _Scripts.Components;
+using _Scripts.Utilities;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
@@ -51,6 +52,12 @@ namespace _Scripts.Aspects
         /// 待更新缓冲区 - 获取待处理的状态更新队列
         /// </summary>
         public DynamicBuffer<PendingCellUpdateBuffer> PendingUpdateBuffer => _pendingUpdateBuffer;
+
+        // ========== 公共方法 ==========
+
+        public void SetCellData()
+        {
+        }
 
         // ========== 私有方法 ==========
 
