@@ -1,6 +1,6 @@
 using _Scripts.Aspects;
 using _Scripts.Components;
-using _Scripts.Data;
+using _Scripts.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;

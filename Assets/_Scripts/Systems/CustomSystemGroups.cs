@@ -1,3 +1,4 @@
+using _Scripts.Utilities;
 using Unity.Entities;
 
 namespace _Scripts.Systems
@@ -13,12 +14,17 @@ namespace _Scripts.Systems
     }
 
     /// <summary>
-    /// 可变频率细胞自动机系统组
-    /// 负责管理 Cell 的生成、更新等变频执行的系统
-    /// 在 Unity 的 VariableRateSimulationSystemGroup 中执行
+    /// 固定频率细胞自动机系统组
+    /// 负责管理 Cell 的生成、更新等系统，以固定频率执行
+    /// 使用 VariableRateSimulationSystemGroup 和 VariableRateManager
     /// </summary>
     [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
     public partial class VariableRateCellularAutomataSystemGroup : ComponentSystemGroup
     {
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            RateManager = new RateUtils.VariableRateManager(GlobalConfig.UpdateRateInMS);
+        }
     }
 }

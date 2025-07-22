@@ -1,4 +1,4 @@
-using _Scripts.Data;
+using _Scripts.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;

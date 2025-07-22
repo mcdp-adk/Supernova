@@ -1,0 +1,30 @@
+using Unity.Mathematics;
+
+namespace _Scripts.Utilities
+{
+    /// <summary>
+    /// 全局配置常量
+    /// </summary>
+    public static class GlobalConfig
+    {
+        /// <summary>
+        /// 每帧最大 Cell 实例化数量 - 避免单帧生成过多导致性能问题
+        /// </summary>
+        public const int MaxCellsPerFrame = 512;
+
+        /// <summary>
+        /// Cell 默认缩放比例
+        /// </summary>
+        public static readonly float3 DefaultCellScale = new(0.5f, 0.5f, 0.5f);
+
+        /// <summary>
+        /// Cell Map 初始容量
+        /// </summary>
+        public const int CellMapInitialCapacity = 4096;
+
+        /// <summary>
+        /// 更新频率（毫秒），用于配置细胞自动机系统组的固定更新间隔
+        /// </summary>
+        public const uint UpdateRateInMS = 500u;
+    }
+}
