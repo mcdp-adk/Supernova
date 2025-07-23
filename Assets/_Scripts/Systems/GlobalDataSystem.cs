@@ -26,12 +26,15 @@ namespace _Scripts.Systems
         }
 
         protected override void OnUpdate()
-        {
+        { 
+            // 生成 Cell
             var isInstantiateComplete = InstantiateCell();
             if (!isInstantiateComplete) return;
 
+            // 添加 Cell 到队列
             AddCellToQueue();
 
+            // 获取 VariableRateCellularAutomataSystemGroup 系统并启用更新
             var cellularAutomataSystemGroup = World.GetExistingSystemManaged<VariableRateCellularAutomataSystemGroup>();
             if (cellularAutomataSystemGroup == null) return;
             Enabled = false;

@@ -10,6 +10,8 @@ namespace _Scripts.Utilities
 {
     public static class CellUtility
     {
+        #region Initialize Preperations
+
         public static void CreatePrototype(string prototypeName, EntityManager manager,
             RenderMeshDescription description, RenderMeshArray renderMeshArray)
         {
@@ -50,13 +52,13 @@ namespace _Scripts.Utilities
             ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
         }
 
+        #endregion
+
         public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
-            ecb.SetComponentEnabled<IsCellAlive>(cell, true);
-            ecb.SetComponent(cell, new CellType { Value = cellType });
             ecb.AddComponent<LocalTransform>(cell);
             ecb.SetComponent(cell, new LocalTransform
             {
@@ -64,11 +66,8 @@ namespace _Scripts.Utilities
                 Rotation = quaternion.identity,
                 Scale = GlobalConfig.DefaultCellScale
             });
-            ecb.SetComponent(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)cellType },
-                MeshID = new BatchMeshID { value = (uint)cellType }
-            });
+
+            SetCellType(cell, ecb, cellType);
 
             return true;
         }
@@ -89,8 +88,31 @@ namespace _Scripts.Utilities
             return true;
         }
 
-        public static void SetCellType(Entity cell, CellTypeEnum targetCellType, EntityManager manager)
+        #region SetCellType
+
+        public static void SetCellType(Entity cell, EntityManager manager, CellTypeEnum targetCellType)
         {
+            manager.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
+
+            manager.SetComponentData(cell, new CellType { Value = targetCellType });
+            manager.SetComponentData(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                MeshID = new BatchMeshID { value = (uint)targetCellType }
+            });
         }
+
+        public static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
+        {
+            ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
+            ecb.SetComponent(cell, new CellType { Value = targetCellType });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                MeshID = new BatchMeshID { value = (uint)targetCellType }
+            });
+        }
+
+        #endregion
     }
 }

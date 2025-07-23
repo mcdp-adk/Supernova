@@ -18,12 +18,21 @@ namespace _Scripts.Systems
         // ========== 系统生命周期 ==========
         public void OnUpdate(ref SystemState state)
         {
-            // 获取全局数据容器引用
-            if (_cellMap.IsCreated && _cellPoolQueue.IsCreated) return;
-            var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-            _cellMap = globalDataSystem.CellMap;
-            _cellPoolQueue = globalDataSystem.CellPoolQueue;
+            // 初始化 CellMap
+            if (!_cellMap.IsCreated)
+            {
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+                _cellMap = globalDataSystem.CellMap;
+            }
 
+            // 初始化 CellPoolQueue
+            if (!_cellPoolQueue.IsCreated)
+            {
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+                _cellPoolQueue = globalDataSystem.CellPoolQueue;
+            }
+
+            // 开启 Cell 实例化 Job
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var instantiateCellJob = new InstantiateCellJob
             {
@@ -32,6 +41,7 @@ namespace _Scripts.Systems
                 CellPoolQueue = _cellPoolQueue
             };
 
+            // 等待 Job 完成后回放 Entity 修改
             state.Dependency = instantiateCellJob.Schedule(state.Dependency);
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
@@ -47,7 +57,8 @@ namespace _Scripts.Systems
             public NativeHashMap<int3, Entity> CellMap;
             public NativeQueue<Entity> CellPoolQueue;
 
-            private void Execute(SupernovaAspect supernova, EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
+            private void Execute(SupernovaAspect supernova,
+                EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
             {
                 var center = supernova.Coordinate;
                 var range = supernova.GenerateRange;
