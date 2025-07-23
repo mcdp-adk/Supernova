@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using _Scripts.Components;
+using _Scripts.Utilities;
 using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
@@ -37,24 +37,8 @@ namespace _Scripts.Authorings
 
         private void Start()
         {
-            var world = World.DefaultGameObjectInjectionWorld;
-            var entityManager = world.EntityManager;
-
-            var prototype = entityManager.CreateEntity();
-
-            entityManager.SetName(prototype, "Cell_Prototype");
-
-            // 使用 RenderMeshUtility 自动添加渲染需要的 Components
-            RenderMeshUtility.AddComponents(
-                prototype,
-                entityManager,
-                GetRenderMeshDescription(),
-                GetRenderMeshArray(),
-                MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
-            );
-
-            // 添加其他 Components
-            AddCellComponents(prototype, entityManager);
+            CellUtility.CreatePrototype("Cell_Prototype", World.DefaultGameObjectInjectionWorld.EntityManager,
+                GetRenderMeshDescription(), GetRenderMeshArray());
         }
 
         private static RenderMeshDescription GetRenderMeshDescription()
@@ -79,20 +63,6 @@ namespace _Scripts.Authorings
             }
 
             return new RenderMeshArray(cellMaterials.ToArray(), cellMeshes.ToArray());
-        }
-
-        private static void AddCellComponents(Entity prototype, EntityManager entityManager)
-        {
-            entityManager.AddComponent<CellPrototypeTag>(prototype);
-
-            entityManager.AddComponent<CellTag>(prototype);
-            entityManager.AddComponent<CellType>(prototype);
-            
-            entityManager.AddComponent<IsCellAlive>(prototype);
-            entityManager.SetComponentEnabled<IsCellAlive>(prototype, false);
-            
-            entityManager.AddComponent<CellCoordinate>(prototype);
-            entityManager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
     }
 }

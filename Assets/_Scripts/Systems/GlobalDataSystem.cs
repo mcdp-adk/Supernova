@@ -1,56 +1,88 @@
-using _Scripts.Data;
+using _Scripts.Components;
+using _Scripts.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace _Scripts.Systems
 {
-    /// <summary>
-    /// 全局数据管理系统
-    /// 负责管理整个应用生命周期内的共享数据结构
-    /// 包括 Cell 位置映射和待实例化队列
-    /// </summary>
-    [UpdateInGroup(typeof(InitializationCellularAutomataSystemGroup), OrderFirst = true)]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class GlobalDataSystem : SystemBase
     {
-        // ========== 全局数据容器 ==========
-        
-        /// <summary>
-        /// Cell 坐标到实体的映射表 - 用于快速查找指定位置的 Cell
-        /// </summary>
+        // ========== 数据容器 ==========
+
         public NativeHashMap<int3, Entity> CellMap { get; private set; }
-
-        /// <summary>
-        /// 待实例化 Cell 队列 - 存储等待创建的 Cell 数据
-        /// </summary>
-        public NativeQueue<PendingCellData> PendingCellsToInstantiate { get; private set; }
-
-        // ========== 系统生命周期 ==========
+        public NativeQueue<Entity> CellPoolQueue { get; private set; }
         
+        private EntityCommandBuffer _ecb;
+
+        // ========== 生命周期 ==========
+
         protected override void OnCreate()
         {
-            // 初始化全局数据容器
-            CellMap = new NativeHashMap<int3, Entity>(
-                GlobalConfig.CellMapInitialCapacity, 
-                Allocator.Persistent);
-            
-            PendingCellsToInstantiate = new NativeQueue<PendingCellData>(Allocator.Persistent);
+            CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
+            CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
         }
 
         protected override void OnUpdate()
-        {
-            // 禁用系统更新 - 此系统仅用于数据管理
+        { 
+            // 生成 Cell
+            var isInstantiateComplete = InstantiateCell();
+            if (!isInstantiateComplete) return;
+
+            // 添加 Cell 到队列
+            AddCellToQueue();
+
+            // 获取 VariableRateCellularAutomataSystemGroup 系统并启用更新
+            var cellularAutomataSystemGroup = World.GetExistingSystemManaged<VariableRateCellularAutomataSystemGroup>();
+            if (cellularAutomataSystemGroup == null) return;
             Enabled = false;
+            cellularAutomataSystemGroup.Enabled = true;
+            Debug.Log("初始化成功！已启用更新：[GlobalDataSystem] VariableRateCellularAutomataSystemGroup");
         }
 
         protected override void OnDestroy()
         {
             // 清理原生容器以避免内存泄漏
-            if (CellMap.IsCreated) 
-                CellMap.Dispose();
+            if (CellMap.IsCreated) CellMap.Dispose();
+            if (CellPoolQueue.IsCreated) CellPoolQueue.Dispose();
+        }
+
+        // ========== 私有方法 ==========
+
+        private bool InstantiateCell()
+        {
+            Entity prototype;
+
+            // 获取 Cell 原型实体（如果报错则跳过更新）
+            try
+            {
+                prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[GlobalDataSystem] 获取 CellPrototypeTag 失败: {ex.Message}");
+                return false; // 没有原型实体，跳过本帧更新
+            }
+
+            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
+                CellUtility.InstantiateFromPrototype(prototype, _ecb);
+            _ecb.Playback(EntityManager);
             
-            if (PendingCellsToInstantiate.IsCreated) 
-                PendingCellsToInstantiate.Dispose();
+            return true;
+        }
+
+        private void AddCellToQueue()
+        {
+            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<CellPendingDequeue>().WithEntityAccess())
+            {
+                CellUtility.EnqueueCellIntoPool(cell, _ecb, CellPoolQueue);
+            }
+
+            _ecb.Playback(EntityManager);
         }
     }
 }
