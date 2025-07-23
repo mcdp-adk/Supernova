@@ -27,21 +27,27 @@ namespace _Scripts.Utilities
 
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
+            manager.AddComponent<CellPendingDequeue>(prototype);
+            manager.SetComponentEnabled<CellPendingDequeue>(prototype, false);
             manager.AddComponent<IsCellAlive>(prototype);
             manager.SetComponentEnabled<IsCellAlive>(prototype, false);
             manager.AddComponent<CellType>(prototype);
             manager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
 
-        public static Entity InitiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
+        public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
         {
             var cell = ecb.Instantiate(prototype);
 
             ecb.SetName(cell, "");
             ecb.RemoveComponent<CellPrototypeTag>(cell);
-            ecb.SetComponentEnabled<IsCellAlive>(cell, false);
+            ecb.SetComponentEnabled<CellPendingDequeue>(cell, true);
+        }
 
-            return cell;
+        public static void EnqueueCellIntoPool(Entity cell, EntityCommandBuffer ecb, NativeQueue<Entity> queue)
+        {
+            queue.Enqueue(cell);
+            ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
         }
 
         public static void TryAddCellToWorldFromCellPoolQueue(Entity cell, EntityCommandBuffer ecb,

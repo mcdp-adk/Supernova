@@ -13,6 +13,10 @@ namespace _Scripts.Components
     {
     }
 
+    public struct CellPendingDequeue : IComponentData, IEnableableComponent
+    {
+    }
+
     public struct IsCellAlive : IComponentData, IEnableableComponent
     {
     }

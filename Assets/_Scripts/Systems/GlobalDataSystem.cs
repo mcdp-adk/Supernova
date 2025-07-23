@@ -1,9 +1,7 @@
 using _Scripts.Components;
 using _Scripts.Utilities;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,37 +10,33 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class GlobalDataSystem : SystemBase
     {
-        // ========== 全局数据容器 ==========
-        
+        // ========== 数据容器 ==========
+
         public NativeHashMap<int3, Entity> CellMap { get; private set; }
         public NativeQueue<Entity> CellPoolQueue { get; private set; }
         
-        private BeginVariableRateSimulationEntityCommandBufferSystem _ecbSystem;
+        private EntityCommandBuffer _ecb;
 
-        // ========== 系统生命周期 ==========
+        // ========== 生命周期 ==========
 
         protected override void OnCreate()
         {
             CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
             CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
-
-            // 获取 EndInitializationEntityCommandBufferSystem 以供 OnUpdate 中获取自动执行的 Command Buffer
-            _ecbSystem = World.GetOrCreateSystemManaged<BeginVariableRateSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
         {
-            // 获取一个在 InitializationSystemGroup 结束时自动 Playback 的 Command Buffer
-            var ecb = _ecbSystem.CreateCommandBuffer();
+            var isInstantiateComplete = InstantiateCell();
+            if (!isInstantiateComplete) return;
 
-            var isPreparationComplete = FillCellPoolQueue(ecb);
-            if (!isPreparationComplete) return;
-            
+            AddCellToQueue();
+
             var cellularAutomataSystemGroup = World.GetExistingSystemManaged<VariableRateCellularAutomataSystemGroup>();
             if (cellularAutomataSystemGroup == null) return;
             Enabled = false;
             cellularAutomataSystemGroup.Enabled = true;
-            Debug.Log("[GlobalDataSystem] VariableRateCellularAutomataSystemGroup 已启用");
+            Debug.Log("初始化成功！已启用更新：[GlobalDataSystem] VariableRateCellularAutomataSystemGroup");
         }
 
         protected override void OnDestroy()
@@ -54,7 +48,7 @@ namespace _Scripts.Systems
 
         // ========== 私有方法 ==========
 
-        private bool FillCellPoolQueue(EntityCommandBuffer ecb)
+        private bool InstantiateCell()
         {
             Entity prototype;
 
@@ -69,32 +63,23 @@ namespace _Scripts.Systems
                 return false; // 没有原型实体，跳过本帧更新
             }
 
-            var instantiateJob = new InstantiateCellJob
-            {
-                ECB = ecb,
-                CellPoolQueue = CellPoolQueue,
-                Prototype = prototype
-            };
-
-            instantiateJob.Schedule().Complete();
-
+            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
+                CellUtility.InstantiateFromPrototype(prototype, _ecb);
+            _ecb.Playback(EntityManager);
+            
             return true;
         }
 
-        // ========== 作业定义 ==========
-
-        [BurstCompile]
-        private struct InstantiateCellJob : IJob
+        private void AddCellToQueue()
         {
-            public EntityCommandBuffer ECB;
-            public NativeQueue<Entity> CellPoolQueue;
-            [ReadOnly] public Entity Prototype;
-
-            public void Execute()
+            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<CellPendingDequeue>().WithEntityAccess())
             {
-                for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
-                    CellPoolQueue.Enqueue(CellUtility.InitiateFromPrototype(Prototype, ECB));
+                CellUtility.EnqueueCellIntoPool(cell, _ecb, CellPoolQueue);
             }
+
+            _ecb.Playback(EntityManager);
         }
     }
 }

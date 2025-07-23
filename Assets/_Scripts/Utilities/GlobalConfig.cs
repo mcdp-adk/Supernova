@@ -14,6 +14,8 @@ namespace _Scripts.Utilities
         /// Cell 池大小
         /// </summary>
         public const int MaxCellPoolSize = 65536;
+        // public const int MaxCellPoolSize = 10;
+
 
 
         /// <summary>
