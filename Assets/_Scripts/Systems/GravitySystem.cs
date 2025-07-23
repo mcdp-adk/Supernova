@@ -5,7 +5,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace _Scripts.Systems
 {
@@ -13,6 +12,12 @@ namespace _Scripts.Systems
     [UpdateAfter(typeof(CellInstantiationFromSupernovaSystem))]
     public partial struct GravitySystem : ISystem
     {
+        private struct SupernovaData
+        {
+            public int3 Coordinate;
+            public int Mass;
+        }
+
         private NativeHashMap<int3, Entity> _cellMap;
 
         [BurstCompile]
@@ -30,27 +35,42 @@ namespace _Scripts.Systems
                 _cellMap = globalDataSystem.CellMap;
             }
 
+            // 获取超新星数据
+            var supernovaDataList = new NativeList<SupernovaData>(Allocator.TempJob);
+            foreach (var supernova in SystemAPI.Query<SupernovaAspect>())
+                supernovaDataList.Add(new SupernovaData
+                {
+                    Coordinate = supernova.Coordinate,
+                    Mass = supernova.Mass
+                });
+
             var gravityJob = new GravityJob
             {
-                manager = state.EntityManager,
-                cellMap = _cellMap
+                CellMap = _cellMap,
+                SupernovaDataArray = supernovaDataList.AsArray()
             };
 
             state.Dependency = gravityJob.Schedule(state.Dependency);
             state.Dependency.Complete();
+            supernovaDataList.Dispose();
         }
 
         [BurstCompile]
         [WithAll(typeof(IsCellAlive))]
         private partial struct GravityJob : IJobEntity
         {
-            public EntityManager manager;
-            public NativeHashMap<int3, Entity> cellMap;
+            public NativeHashMap<int3, Entity> CellMap;
+            [ReadOnly] public NativeArray<SupernovaData> SupernovaDataArray;
 
             private void Execute(CellAspect cell)
             {
-                CellUtility.TryMoveCell(cell.Self, manager, cellMap,
-                    cell.Coordinate - new int3(1, 0, 0));
+                foreach (var data in SupernovaDataArray)
+                {
+                    var _ = data.Coordinate.x + data.Coordinate.y + data.Coordinate.z + data.Mass;
+                }
+
+                CellUtility.TryMoveCell(cell.Self, ref cell.LocalTransform.ValueRW,
+                    CellMap, cell.Coordinate + new int3(0, -1, 0));
             }
         }
     }

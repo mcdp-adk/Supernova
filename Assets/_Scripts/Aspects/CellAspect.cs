@@ -18,6 +18,7 @@ namespace _Scripts.Aspects
         private readonly RefRW<LocalTransform> _cellTransform;
         private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
         private readonly DynamicBuffer<PendingCellUpdateBuffer> _pendingUpdateBuffer;
+        
 
         // ========== 属性接口 ==========
 
@@ -28,8 +29,11 @@ namespace _Scripts.Aspects
         }
 
         public int3 Coordinate => (int3)_cellTransform.ValueRO.Position;
+        
+        public RefRW<LocalTransform> LocalTransform => _cellTransform;
 
         public DynamicBuffer<PendingCellUpdateBuffer> PendingUpdateBuffer => _pendingUpdateBuffer;
+
 
         // ========== 私有方法 ==========
 

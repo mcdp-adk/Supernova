@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using _Scripts.Components;
 using _Scripts.Utilities;
 using Unity.Entities;
 using Unity.Rendering;

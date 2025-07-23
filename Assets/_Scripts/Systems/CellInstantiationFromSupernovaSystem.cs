@@ -31,7 +31,7 @@ namespace _Scripts.Systems
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
                 _cellPoolQueue = globalDataSystem.CellPoolQueue;
             }
-
+            
             // 开启 Cell 实例化 Job
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var instantiateCellJob = new InstantiateCellJob

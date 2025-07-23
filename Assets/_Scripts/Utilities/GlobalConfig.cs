@@ -13,7 +13,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell 池大小
         /// </summary>
-        public const int MaxCellPoolSize = 16384;
+        public const int MaxCellPoolSize = 65536;
 
         /// <summary>
         /// Cell 默认缩放比例

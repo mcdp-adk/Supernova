@@ -72,37 +72,20 @@ namespace _Scripts.Utilities
             return true;
         }
 
-        public static bool TryMoveCell(Entity cell, EntityManager manager,
+        public static bool TryMoveCell(Entity cell, ref LocalTransform localTransform,
             NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
-            cellMap.Remove((int3)manager.GetComponentData<LocalTransform>(cell).Position);
-            manager.SetComponentData(cell, new LocalTransform
-            {
-                Position = targetCoordinate,
-                Rotation = quaternion.identity,
-                Scale = GlobalConfig.DefaultCellScale
-            });
+            cellMap.Remove((int3)localTransform.Position);
+            localTransform.Position = targetCoordinate;
+            localTransform.Rotation = quaternion.identity;
+            localTransform.Scale = GlobalConfig.DefaultCellScale;
 
             return true;
         }
 
-        #region SetCellType
-
-        public static void SetCellType(Entity cell, EntityManager manager, CellTypeEnum targetCellType)
-        {
-            manager.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
-
-            manager.SetComponentData(cell, new CellType { Value = targetCellType });
-            manager.SetComponentData(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
-                MeshID = new BatchMeshID { value = (uint)targetCellType }
-            });
-        }
-
-        public static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
+        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
         {
             ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
             ecb.SetComponent(cell, new CellType { Value = targetCellType });
@@ -112,7 +95,5 @@ namespace _Scripts.Utilities
                 MeshID = new BatchMeshID { value = (uint)targetCellType }
             });
         }
-
-        #endregion
     }
 }
