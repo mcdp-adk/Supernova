@@ -26,7 +26,7 @@ namespace _Scripts.Aspects
         /// <summary>
         /// 位置坐标 - 获取 Supernova 在 3D 空间中的整数坐标
         /// </summary>
-        public int3 Position => (int3)_transform.ValueRO.Position;
+        public int3 Coordinate => (int3)_transform.ValueRO.Position;
 
         /// <summary>
         /// 质量 - 获取 Supernova 的质量值

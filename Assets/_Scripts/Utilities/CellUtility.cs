@@ -50,10 +50,11 @@ namespace _Scripts.Utilities
             ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
         }
 
-        public static void TryAddCellToWorldFromCellPoolQueue(Entity cell, EntityCommandBuffer ecb,
+        public static bool TryAddCellToWorldFromCellPoolQueue(Entity cell, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate, CellTypeEnum cellType)
         {
-            if (!cellMap.TryAdd(targetCoordinate, cell)) return;
+            if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
+            
             ecb.SetComponentEnabled<IsCellAlive>(cell, true);
             ecb.SetComponent(cell, new CellType { Value = cellType });
             ecb.AddComponent<LocalTransform>(cell);
@@ -68,6 +69,8 @@ namespace _Scripts.Utilities
                 MaterialID = new BatchMaterialID { value = (uint)cellType },
                 MeshID = new BatchMeshID { value = (uint)cellType }
             });
+            
+            return true;
         }
 
         public static void SetCellType(Entity cell, CellTypeEnum targetCellType, EntityManager manager)
