@@ -50,11 +50,11 @@ namespace _Scripts.Utilities
             ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
         }
 
-        public static bool TryAddCellToWorldFromCellPoolQueue(Entity cell, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate, CellTypeEnum cellType)
+        public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
+            NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
-            
+
             ecb.SetComponentEnabled<IsCellAlive>(cell, true);
             ecb.SetComponent(cell, new CellType { Value = cellType });
             ecb.AddComponent<LocalTransform>(cell);
@@ -69,7 +69,23 @@ namespace _Scripts.Utilities
                 MaterialID = new BatchMaterialID { value = (uint)cellType },
                 MeshID = new BatchMeshID { value = (uint)cellType }
             });
-            
+
+            return true;
+        }
+
+        public static bool TryMoveCell(Entity cell, EntityManager manager,
+            NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
+        {
+            if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
+
+            cellMap.Remove((int3)manager.GetComponentData<LocalTransform>(cell).Position);
+            manager.SetComponentData(cell, new LocalTransform
+            {
+                Position = targetCoordinate,
+                Rotation = quaternion.identity,
+                Scale = GlobalConfig.DefaultCellScale
+            });
+
             return true;
         }
 

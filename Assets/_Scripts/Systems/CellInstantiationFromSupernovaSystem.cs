@@ -36,7 +36,7 @@ namespace _Scripts.Systems
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
         }
-        
+
         // ========== 实例化 Cell 作业 ==========
 
         [BurstCompile]
@@ -72,9 +72,9 @@ namespace _Scripts.Systems
                     // 尝试从 Cell 池中获取 Cell 并添加到世界
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
-                        CellUtility.TryAddCellToWorldFromCellPoolQueue(
+                        CellUtility.TryAddCellToWorld(
                             cell, ECB, CellMap,
-                            targetCoordinate, supernova.GetRandomCellType(random));
+                            supernova.GetRandomCellType(random), targetCoordinate);
                     }
                     else return;
                 }
