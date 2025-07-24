@@ -3,7 +3,7 @@ using Unity.Entities;
 
 namespace _Scripts.Components
 {
-    // ========== 标识组件 ==========
+    // ========== Tag ==========
     
     public struct SupernovaTag : IComponentData
     {
@@ -13,7 +13,7 @@ namespace _Scripts.Components
     {
     }
 
-    // ========== 属性组件 ==========
+    // ========== Data ==========
     
     public struct Mass : IComponentData
     {
@@ -30,7 +30,7 @@ namespace _Scripts.Components
         public float Value;
     }
 
-    // ========== 配置缓冲 ==========
+    // ========== Buffer ==========
     
     public struct CellConfigBuffer : IBufferElementData
     {

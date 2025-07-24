@@ -1,9 +1,10 @@
 using _Scripts.Utilities;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace _Scripts.Components
 {
-    // ========== Cell 标识组件 ==========
+    // ========== Tag ==========
 
     public struct CellPrototypeTag : IComponentData
     {
@@ -21,18 +22,35 @@ namespace _Scripts.Components
     {
     }
 
-    // ========== Cell 状态组件 ==========
+    // ========== Data ==========
 
     public struct CellType : IComponentData
     {
         public CellTypeEnum Value;
     }
+    
+    public struct LifeTime : IComponentData
+    {
+        public int Value;
+    }
 
-    // ========== Cell 缓冲区组件 ==========
+    public struct Density : IComponentData
+    {
+        public int Value;
+    }
+    
+    public struct Velocity : IComponentData
+    {
+        public float3 Value;
+    }
+    
+    public struct Temperature : IComponentData
+    {
+        public float Value;
+    }
 
-    /// <summary>
-    /// 待更新 Cell 缓冲区 - 存储待处理的 Cell 状态变更
-    /// </summary>
+    // ========== Buffer ==========
+
     public struct PendingCellUpdateBuffer : IBufferElementData
     {
         public bool TargetAliveState;

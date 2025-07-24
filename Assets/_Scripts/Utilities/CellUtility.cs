@@ -27,13 +27,18 @@ namespace _Scripts.Utilities
                 MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
             );
 
+            // Tag
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
             manager.AddComponent<CellPendingDequeue>(prototype);
             manager.SetComponentEnabled<CellPendingDequeue>(prototype, false);
             manager.AddComponent<IsCellAlive>(prototype);
             manager.SetComponentEnabled<IsCellAlive>(prototype, false);
+            
+            // Data
             manager.AddComponent<CellType>(prototype);
+            
+            // Buffer
             manager.AddBuffer<PendingCellUpdateBuffer>(prototype);
         }
 
