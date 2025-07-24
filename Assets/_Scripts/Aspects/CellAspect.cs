@@ -17,7 +17,7 @@ namespace _Scripts.Aspects
         private readonly RefRW<CellType> _cellType;
         private readonly RefRW<LocalTransform> _cellTransform;
         private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
-        private readonly DynamicBuffer<PendingCellUpdateBuffer> _pendingUpdateBuffer;
+        private readonly DynamicBuffer<PendingChangeBuffer> _pendingChangeBuffer;
         
 
         // ========== 属性接口 ==========
@@ -32,7 +32,7 @@ namespace _Scripts.Aspects
         
         public RefRW<LocalTransform> LocalTransform => _cellTransform;
 
-        public DynamicBuffer<PendingCellUpdateBuffer> PendingUpdateBuffer => _pendingUpdateBuffer;
+        public DynamicBuffer<PendingChangeBuffer> PendingChangeBuffer => _pendingChangeBuffer;
 
 
         // ========== 私有方法 ==========

@@ -7,12 +7,11 @@ namespace _Scripts.Utilities
         Cell2 = -2
     }
 
-    public enum PhaseType : byte
+    public enum CellStateEnum : byte
     {
         Solid = 0,
         Liquid = 1,
         Gas = 2,
-        Plasma = 3,
-        None = 255
+        Powder = 3,
     }
 }

@@ -39,7 +39,7 @@ namespace _Scripts.Utilities
             manager.AddComponent<CellType>(prototype);
             
             // Buffer
-            manager.AddBuffer<PendingCellUpdateBuffer>(prototype);
+            manager.AddBuffer<PendingChangeBuffer>(prototype);
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
