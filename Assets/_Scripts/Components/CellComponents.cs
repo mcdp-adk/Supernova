@@ -59,11 +59,6 @@ namespace _Scripts.Components
         public float Value;
     }
 
-    // public struct Density : IComponentData
-    // {
-    //     public int Value;
-    // }
-
     // public struct Hardness : IComponentData
     // {
     //     public float Value;

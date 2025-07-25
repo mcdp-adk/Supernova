@@ -9,9 +9,10 @@ namespace _Scripts.Utilities
 
     public enum CellStateEnum : byte
     {
-        Solid = 0,
-        Liquid = 1,
-        Gas = 2,
-        Powder = 3,
+        None = 0,
+        Solid = 1,
+        Liquid = 2,
+        Gas = 3,
+        Powder = 4,
     }
 }

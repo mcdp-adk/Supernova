@@ -48,11 +48,12 @@ namespace _Scripts.Systems
                 {
                     ImpulseBufferLookup = impulseBufferLookup
                 }.ScheduleParallel(state.Dependency);
-
                 state.Dependency.Complete();
 
                 // 3. 检查是否还有可移动 Cell
+                if (SystemAPI.QueryBuilder().WithAll<IsAlive, Velocity>().Build().CalculateEntityCount() == 0) break;
 
+                // 4. 更新计数
                 step--;
             }
         }
