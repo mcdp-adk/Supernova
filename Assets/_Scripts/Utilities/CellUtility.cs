@@ -34,12 +34,11 @@ namespace _Scripts.Utilities
             manager.SetComponentEnabled<CellPendingDequeue>(prototype, false);
             manager.AddComponent<IsCellAlive>(prototype);
             manager.SetComponentEnabled<IsCellAlive>(prototype, false);
-            
+
             // Data
             manager.AddComponent<CellType>(prototype);
-            
+
             // Buffer
-            manager.AddBuffer<PendingChangeBuffer>(prototype);
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
@@ -59,6 +58,8 @@ namespace _Scripts.Utilities
 
         #endregion
 
+        #region Add Cell to World
+
         public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate)
         {
@@ -77,6 +78,19 @@ namespace _Scripts.Utilities
             return true;
         }
 
+        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
+        {
+            ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
+            ecb.SetComponent(cell, new CellType { Value = targetCellType });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                MeshID = new BatchMeshID { value = (uint)targetCellType }
+            });
+        }
+
+        #endregion
+
         public static bool TryMoveCell(Entity cell, ref LocalTransform localTransform,
             NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
         {
@@ -88,17 +102,6 @@ namespace _Scripts.Utilities
             localTransform.Scale = GlobalConfig.DefaultCellScale;
 
             return true;
-        }
-
-        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
-        {
-            ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
-            ecb.SetComponent(cell, new CellType { Value = targetCellType });
-            ecb.SetComponent(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
-                MeshID = new BatchMeshID { value = (uint)targetCellType }
-            });
         }
     }
 }

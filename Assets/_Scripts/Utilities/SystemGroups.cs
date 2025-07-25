@@ -3,32 +3,28 @@ using Unity.Entities;
 namespace _Scripts.Utilities
 {
     [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
-    public partial class VariableRateCellularAutomataSystemGroup : ComponentSystemGroup
+    public partial class CaSlowSystemGroup : ComponentSystemGroup
     {
         protected override void OnCreate()
         {
             base.OnCreate();
-            RateManager = new RateUtils.VariableRateManager(GlobalConfig.UpdateRateInMS);
+            RateManager = new RateUtils.VariableRateManager(GlobalConfig.SlowUpdateRateInMS);
 
             // 默认禁用该系统组，等待 GlobalDataSystem 完成初始化后再启用
             Enabled = false;
         }
     }
-
-    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    public partial class CellInstantiationSystemGroup : ComponentSystemGroup
+    
+    [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
+    public partial class CaFastSystemGroup : ComponentSystemGroup
     {
-    }
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            RateManager = new RateUtils.VariableRateManager(GlobalConfig.FastUpdateRateInMS);
 
-    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    [UpdateAfter(typeof(CellInstantiationSystemGroup))]
-    public partial class CellPendingChangeSystemGroup : ComponentSystemGroup
-    {
-    }
-
-    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    [UpdateAfter(typeof(CellPendingChangeSystemGroup))]
-    public partial class CellApplyChangeSystemGroup : ComponentSystemGroup
-    {
+            // 默认禁用该系统组，等待 GlobalDataSystem 完成初始化后再启用
+            Enabled = false;
+        }
     }
 }

@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CellPendingChangeSystemGroup))]
+    [UpdateInGroup(typeof(CaSlowSystemGroup))]
     public partial struct GravitySystem : ISystem
     {
         private struct SupernovaData
@@ -67,9 +67,9 @@ namespace _Scripts.Systems
                 {
                     var _ = data.Coordinate.x + data.Coordinate.y + data.Coordinate.z + data.Mass;
                 }
-                
-                CellUtility.TryMoveCell(cell.Self, ref cell.LocalTransform.ValueRW,
-                    CellMap, cell.Coordinate + new int3(0, -1, 0));
+
+                // CellUtility.TryMoveCell(cell.Self, ref cell.LocalTransform.ValueRW,
+                //     CellMap, (int3)cell.LocalTransform.ValueRW.Position + new int3(0, -1, 0));
             }
         }
     }

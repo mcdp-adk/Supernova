@@ -21,8 +21,13 @@ namespace _Scripts.Utilities
         public const float DefaultCellScale = 0.5f;
 
         /// <summary>
-        /// 更新频率（毫秒），用于配置细胞自动机系统组的固定更新间隔
+        /// 慢系统更新频率（毫秒）
         /// </summary>
-        public const uint UpdateRateInMS = 500u;
+        public const uint SlowUpdateRateInMS = 1000u;
+
+        /// <summary>
+        /// 快系统更新频率（毫秒）
+        /// </summary>
+        public const uint FastUpdateRateInMS = 20u;
     }
 }

@@ -12,10 +12,11 @@ namespace _Scripts.Aspects
 
         // ========== 组件引用 ==========
         private readonly RefRO<LocalTransform> _transform;
-        private readonly RefRO<Mass> _mass;
         private readonly RefRO<CellGenerateRange> _generateRange;
         private readonly RefRO<CellGenerateDensity> _generateDensity;
         private readonly DynamicBuffer<CellConfigBuffer> _cellConfigs;
+
+        private readonly RefRO<Mass> _mass;
 
         // ========== 属性接口 ==========
 

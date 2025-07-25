@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CellInstantiationSystemGroup))]
+    [UpdateInGroup(typeof(CaSlowSystemGroup))]
     public partial struct InstantiationFromSupernovaSystem : ISystem
     {
         // ========== 全局数据引用 ==========
