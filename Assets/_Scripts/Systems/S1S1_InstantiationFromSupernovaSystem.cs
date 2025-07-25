@@ -9,7 +9,7 @@ using Unity.Mathematics;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    public partial struct CellInstantiationFromSupernovaSystem : ISystem
+    public partial struct InstantiationFromSupernovaSystem : ISystem
     {
         // ========== 全局数据引用 ==========
         private NativeHashMap<int3, Entity> _cellMap;

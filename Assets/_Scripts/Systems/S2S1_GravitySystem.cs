@@ -9,7 +9,6 @@ using Unity.Mathematics;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    [UpdateAfter(typeof(CellInstantiationFromSupernovaSystem))]
     public partial struct GravitySystem : ISystem
     {
         private struct SupernovaData
