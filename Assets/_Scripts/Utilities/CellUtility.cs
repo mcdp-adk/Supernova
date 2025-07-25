@@ -30,10 +30,10 @@ namespace _Scripts.Utilities
             // Tag
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
-            manager.AddComponent<CellPendingDequeue>(prototype);
-            manager.SetComponentEnabled<CellPendingDequeue>(prototype, false);
-            manager.AddComponent<IsCellAlive>(prototype);
-            manager.SetComponentEnabled<IsCellAlive>(prototype, false);
+            manager.AddComponent<PendingDequeue>(prototype);
+            manager.SetComponentEnabled<PendingDequeue>(prototype, false);
+            manager.AddComponent<IsAlive>(prototype);
+            manager.SetComponentEnabled<IsAlive>(prototype, false);
 
             // Data
             manager.AddComponent<CellType>(prototype);
@@ -47,13 +47,13 @@ namespace _Scripts.Utilities
 
             ecb.SetName(cell, "");
             ecb.RemoveComponent<CellPrototypeTag>(cell);
-            ecb.SetComponentEnabled<CellPendingDequeue>(cell, true);
+            ecb.SetComponentEnabled<PendingDequeue>(cell, true);
         }
 
         public static void EnqueueCellIntoPool(Entity cell, EntityCommandBuffer ecb, NativeQueue<Entity> queue)
         {
             queue.Enqueue(cell);
-            ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
+            ecb.SetComponentEnabled<PendingDequeue>(cell, false);
         }
 
         #endregion
@@ -80,7 +80,7 @@ namespace _Scripts.Utilities
 
         private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
         {
-            ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
+            ecb.SetComponentEnabled<IsAlive>(cell, targetCellType != CellTypeEnum.None);
             ecb.SetComponent(cell, new CellType { Value = targetCellType });
             ecb.SetComponent(cell, new MaterialMeshInfo
             {

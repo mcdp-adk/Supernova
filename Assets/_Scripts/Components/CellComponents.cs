@@ -16,13 +16,13 @@ namespace _Scripts.Components
     {
     }
 
-    public struct CellPendingDequeue : IComponentData, IEnableableComponent
+    public struct PendingDequeue : IComponentData, IEnableableComponent
     {
     }
 
     // 状态标识
 
-    public struct IsCellAlive : IComponentData, IEnableableComponent
+    public struct IsAlive : IComponentData, IEnableableComponent
     {
     }
 
@@ -46,10 +46,10 @@ namespace _Scripts.Components
     {
         public int Value;
     }
-    
+
     // 物理 - 动态属性
 
-    public struct Velocity : IComponentData
+    public struct Velocity : IComponentData, IEnableableComponent
     {
         public float3 Value;
     }
@@ -72,7 +72,7 @@ namespace _Scripts.Components
     // 化学属性
 
     // 化学 - 动态属性
-    
+
     public struct Energy : IComponentData
     {
         public float Value;
@@ -90,7 +90,7 @@ namespace _Scripts.Components
 
     // ========== Buffer ==========
 
-    public struct Impulse : IBufferElementData
+    public struct ImpulseBuffer : IBufferElementData
     {
         public float3 Value;
     }

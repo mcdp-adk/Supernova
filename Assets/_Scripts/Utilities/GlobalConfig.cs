@@ -29,5 +29,10 @@ namespace _Scripts.Utilities
         /// 快系统更新频率（毫秒）
         /// </summary>
         public const uint FastUpdateRateInMS = 20u;
+        
+        /// <summary>
+        /// 最大速度限制
+        /// </summary>
+        public const float MaxVelocity = 100f;
     }
 }

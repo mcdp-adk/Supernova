@@ -15,7 +15,7 @@ namespace _Scripts.Aspects
         public readonly RefRW<MaterialMeshInfo> MaterialMeshInfo;
 
         // 状态标识
-        public readonly EnabledRefRW<IsCellAlive> IsCellAlive;
+        public readonly EnabledRefRW<IsAlive> IsAlive;
 
         // 基本属性
         public readonly RefRW<CellType> CellType;
@@ -24,11 +24,13 @@ namespace _Scripts.Aspects
         // 物理属性
         public readonly RefRW<Mass> Mass;
         public readonly RefRW<Velocity> Velocity;
+        public readonly EnabledRefRW<Velocity> VelocityEnabled;
         public readonly RefRW<Temperature> Temperature;
 
         // 化学属性
         public readonly RefRW<Energy> Energy;
 
         // Buffer
+        public readonly DynamicBuffer<ImpulseBuffer> ImpulseBuffer;
     }
 }

@@ -74,7 +74,7 @@ namespace _Scripts.Systems
         private void AddCellToQueue()
         {
             _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
-            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<CellPendingDequeue>()
+            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<PendingDequeue>()
                          .WithEntityAccess())
             {
                 CellUtility.EnqueueCellIntoPool(cell, _ecb, CellPoolQueue);

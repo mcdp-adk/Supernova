@@ -19,12 +19,6 @@ namespace _Scripts.Systems
 
         private NativeHashMap<int3, Entity> _cellMap;
 
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<IsCellAlive>();
-        }
-
         public void OnUpdate(ref SystemState state)
         {
             // 获取全局数据容器引用
@@ -55,7 +49,7 @@ namespace _Scripts.Systems
         }
 
         [BurstCompile]
-        [WithAll(typeof(IsCellAlive))]
+        [WithAll(typeof(IsAlive))]
         private partial struct GravityJob : IJobEntity
         {
             public NativeHashMap<int3, Entity> CellMap;
