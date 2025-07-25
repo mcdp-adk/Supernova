@@ -1,16 +1,19 @@
 using _Scripts.Aspects;
 using _Scripts.Components;
+using _Scripts.Utilities;
 using Unity.Burst;
 using Unity.Entities;
 
 namespace _Scripts.Systems
 {
+    [UpdateInGroup(typeof(CellApplyChangeSystemGroup))]
     public partial struct CalculateChangeSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            
+            // 确保系统只在有 IsCellAlive 组件时更新
+            state.RequireForUpdate<IsCellAlive>();
         }
 
         [BurstCompile]
@@ -25,7 +28,6 @@ namespace _Scripts.Systems
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
-
         }
 
         [BurstCompile]
@@ -34,7 +36,12 @@ namespace _Scripts.Systems
         {
             private void Execute(CellAspect cell)
             {
-                
+                foreach (var data in cell.PendingChangeBuffer)
+                {
+                    cell.Velocity += data.VelocityDelta;
+                    cell.Temperature += data.TemperatureDelta;
+                    cell.Energy += data.EnergyDelta;
+                }
             }
         }
     }
