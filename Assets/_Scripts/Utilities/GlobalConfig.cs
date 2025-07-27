@@ -42,9 +42,11 @@ namespace _Scripts.Utilities
         {
             private static readonly CellStateEnum[] _states = { CellStateEnum.Solid, CellStateEnum.Liquid };
             private static readonly int[] _masses = { 1, 2 };
+            private static readonly float[] _energies = { 100f, 200f };
 
             public static CellStateEnum GetState(CellTypeEnum type) => _states[-(int)type - 1];
             public static int GetMass(CellTypeEnum type) => _masses[-(int)type - 1];
+            public static float GetEnergy(CellTypeEnum type) => _energies[-(int)type - 1];
         }
     }
 }

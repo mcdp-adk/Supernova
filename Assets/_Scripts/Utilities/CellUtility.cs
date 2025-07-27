@@ -62,7 +62,7 @@ namespace _Scripts.Utilities
 
         public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate,
-            float3 velocity, float temperature, float energy)
+            float3 velocity, float temperature)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
@@ -76,12 +76,16 @@ namespace _Scripts.Utilities
 
             SetCellType(cell, ecb, cellType);
 
+
             // 设置固定属性
             ecb.AddComponent<CellState>(cell);
             ecb.SetComponent(cell, new CellState { Value = GlobalConfig.CellConfig.GetState(cellType) });
 
             ecb.AddComponent<Mass>(cell);
             ecb.SetComponent(cell, new Mass { Value = GlobalConfig.CellConfig.GetMass(cellType) });
+
+            ecb.AddComponent<Energy>(cell);
+            ecb.SetComponent(cell, new Energy { Value = GlobalConfig.CellConfig.GetEnergy(cellType) });
 
 
             // 设置可变属性
@@ -90,9 +94,6 @@ namespace _Scripts.Utilities
 
             ecb.AddComponent<Temperature>(cell);
             ecb.SetComponent(cell, new Temperature { Value = temperature });
-
-            ecb.AddComponent<Energy>(cell);
-            ecb.SetComponent(cell, new Energy { Value = energy });
 
             return true;
         }

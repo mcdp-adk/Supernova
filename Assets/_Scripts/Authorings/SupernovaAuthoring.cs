@@ -16,13 +16,13 @@ namespace _Scripts.Authorings
     public class SupernovaAuthoring : MonoBehaviour
     {
         [Header("超新星设置")] [SerializeField] private int mass = 100;
+        [SerializeField] private int explosionStrength = 10;
+        [SerializeField] private int explosionAngleClamp = 30;
 
         [Header("Cell 生成设置")] [SerializeField] private int generateRange = 10;
-
         [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
 
         [SerializeField] private CellConfig[] cellConfigs;
-
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
@@ -46,6 +46,8 @@ namespace _Scripts.Authorings
 
                 // 超新星设置
                 AddComponent(entity, new Mass { Value = authoring.mass });
+                AddComponent(entity, new ExplosionStrength { Value = authoring.explosionStrength });
+                AddComponent(entity, new ExplosionAngleClamp { Value = authoring.explosionAngleClamp });
 
                 // Cell 生成设置
                 AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
