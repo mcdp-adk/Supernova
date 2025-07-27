@@ -8,7 +8,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 慢系统更新频率（毫秒）
         /// </summary>
-        public const uint SlowUpdateRateInMS = 1000u;
+        public const uint SlowUpdateRateInMS = 500u;
 
         /// <summary>
         /// 快系统更新频率（毫秒）
@@ -18,12 +18,12 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 每帧物理步数缩放倍率
         /// </summary>
-        public const float PhysicsSpeedScale = 0.2f;
+        public const float PhysicsSpeedScale = 1f;
 
         /// <summary>
         /// 最大速度限制
         /// </summary>
-        public const float MaxSpeed = 100f;
+        public const float MaxSpeed = 5f;
 
         /// <summary>
         /// Cell Map 初始容量

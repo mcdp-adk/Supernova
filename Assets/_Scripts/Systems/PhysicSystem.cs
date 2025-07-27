@@ -23,7 +23,7 @@ namespace _Scripts.Systems
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var maxStep = (int)math.floor(GlobalConfig.MaxSpeed * deltaTime * GlobalConfig.PhysicsSpeedScale);
+            var maxStep = math.max(1, (int)math.floor(GlobalConfig.MaxSpeed * deltaTime * GlobalConfig.PhysicsSpeedScale));
 
             var step = maxStep;
             while (step > 0)
