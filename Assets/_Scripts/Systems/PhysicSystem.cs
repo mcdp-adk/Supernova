@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
@@ -25,11 +26,6 @@ namespace _Scripts.Systems
             var deltaTime = SystemAPI.Time.DeltaTime;
             var maxStep = (int)math.floor(GlobalConfig.MaxVelocity * deltaTime);
 
-            // 获取 BufferLookup、ComponentLookup
-            var massLookup = SystemAPI.GetComponentLookup<Mass>(true);
-            var velocityLookup = SystemAPI.GetComponentLookup<Velocity>(true);
-            var impulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>();
-
             var step = maxStep;
             while (step > 0)
             {
@@ -37,16 +33,16 @@ namespace _Scripts.Systems
                 state.Dependency = new TryMoveCellJob
                 {
                     CellMap = _cellMap,
-                    MassLookup = massLookup,
-                    VelocityLookup = velocityLookup,
-                    ImpulseBufferLookup = impulseBufferLookup
+                    MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
+                    VelocityLookup = SystemAPI.GetComponentLookup<Velocity>(),
+                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
                 }.Schedule(state.Dependency);
                 state.Dependency.Complete();
 
                 // 2. 冲量整合与速度更新
                 state.Dependency = new VelocityUpdateJob
                 {
-                    ImpulseBufferLookup = impulseBufferLookup
+                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
                 }.ScheduleParallel(state.Dependency);
                 state.Dependency.Complete();
 
@@ -64,35 +60,37 @@ namespace _Scripts.Systems
         {
             public NativeHashMap<int3, Entity> CellMap;
             [ReadOnly] public ComponentLookup<Mass> MassLookup;
-            [ReadOnly] public ComponentLookup<Velocity> VelocityLookup;
+            public ComponentLookup<Velocity> VelocityLookup;
             public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
 
-            private void Execute(CellAspect cell)
+            private void Execute(Entity self, ref LocalTransform localTransform)
             {
-                var velocity = cell.Velocity.ValueRO.Value;
-                var offset = (int3)math.round(math.normalize(velocity));
-                var currentCoordinate = (int3)cell.LocalTransform.ValueRO.Position;
+                var currentVelocity = VelocityLookup[self].Value;
+                var currentMass = MassLookup[self].Value;
+                var offset = (int3)math.round(math.normalize(currentVelocity));
+                var currentCoordinate = (int3)localTransform.Position;
                 var targetCoordinate = (int3)math.round(currentCoordinate + offset);
 
-                if (CellUtility.TryMoveCell(cell.Self, ref cell.LocalTransform.ValueRW,
+                if (CellUtility.TryMoveCell(self, ref localTransform,
                         CellMap, targetCoordinate))
                 {
                     // 移动成功，消耗一步速度分量
-                    cell.Velocity.ValueRW.Value -= offset;
+                    VelocityLookup[self] = new Velocity { Value = VelocityLookup[self].Value - offset };
                 }
                 else
                 {
                     var targetEntity = CellMap[targetCoordinate];
-                    var selfVelocity = cell.Velocity.ValueRO.Value;
-                    var selfMass = cell.Mass.ValueRO.Value;
                     var targetVelocity = VelocityLookup[targetEntity].Value;
                     var targetMass = MassLookup[targetEntity].Value;
+
                     var collisionNormal = math.normalize(targetCoordinate - currentCoordinate);
-                    var relativeSpeed = math.dot(selfVelocity - targetVelocity, collisionNormal);
-                    var impulseMagnitude = (2 * relativeSpeed) / (selfMass + targetMass);
-                    var selfImpulse = -impulseMagnitude * targetMass * collisionNormal;
-                    var targetImpulse = impulseMagnitude * selfMass * collisionNormal;
-                    ImpulseBufferLookup[cell.Self].Add(new ImpulseBuffer { Value = selfImpulse });
+                    var relativeSpeed = math.dot(currentVelocity - targetVelocity, collisionNormal);
+                    var impulseMagnitude = (2 * relativeSpeed) / (currentMass + targetMass);
+
+                    var currentImpulse = -impulseMagnitude * targetMass * collisionNormal;
+                    var targetImpulse = impulseMagnitude * currentMass * collisionNormal;
+
+                    ImpulseBufferLookup[self].Add(new ImpulseBuffer { Value = currentImpulse });
                     ImpulseBufferLookup[targetEntity].Add(new ImpulseBuffer { Value = targetImpulse });
                 }
             }
