@@ -65,7 +65,7 @@ namespace _Scripts.Systems
                 var currentMass = MassLookup[self].Value;
                 var offset = (int3)math.round(math.normalize(currentVelocity));
                 var currentCoordinate = (int3)localTransform.Position;
-                var targetCoordinate = (int3)math.round(currentCoordinate + offset);
+                var targetCoordinate = currentCoordinate + offset;
 
                 if (!CellUtility.TryMoveCell(self, ref localTransform,
                         CellMap, targetCoordinate))
