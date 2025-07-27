@@ -23,7 +23,7 @@ namespace _Scripts.Systems
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var maxStep = (int)math.floor(GlobalConfig.MaxVelocity * deltaTime * GlobalConfig.PhysicsSpeedScale);
+            var maxStep = (int)math.floor(GlobalConfig.MaxSpeed * deltaTime * GlobalConfig.PhysicsSpeedScale);
 
             var step = maxStep;
             while (step > 0)
@@ -106,12 +106,19 @@ namespace _Scripts.Systems
                 var totalImpulse = float3.zero;
                 foreach (var impulse in ImpulseBufferLookup[cell]) totalImpulse += impulse.Value;
 
+                // 计算新速度
+                var newVelocity = VelocityLookup[cell].Value + totalImpulse / MassLookup[cell].Value;
+
+                // 限制最大速度
+                var speedSq = math.lengthsq(newVelocity);
+                if (speedSq > GlobalConfig.MaxSpeed * GlobalConfig.MaxSpeed)
+                    newVelocity = math.normalize(newVelocity) * GlobalConfig.MaxSpeed;
+
                 // 更新速度
-                VelocityLookup[cell] = new Velocity
-                    { Value = VelocityLookup[cell].Value + totalImpulse / MassLookup[cell].Value };
+                VelocityLookup[cell] = new Velocity { Value = newVelocity };
 
                 // 根据速度模长，启用/禁用 Velocity 组件
-                VelocityLookup.SetComponentEnabled(cell, math.lengthsq(VelocityLookup[cell].Value) >= 1f);
+                VelocityLookup.SetComponentEnabled(cell, math.lengthsq(newVelocity) >= 1f);
 
                 // 清空冲量缓冲区
                 ImpulseBufferLookup[cell].Clear();

@@ -148,10 +148,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 10000
+  mass: 100
   explosionStrength: 3
   explosionAngleClamp: 90
-  generateRange: 100
+  generateRange: 50
   generateDensity: 0.29
   cellConfigs:
   - cellType: -1
@@ -217,11 +217,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 10000
-  explosionStrength: 3
+  mass: 200
+  explosionStrength: 5
   explosionAngleClamp: 90
   generateRange: 100
-  generateDensity: 0.29
+  generateDensity: 0.08
   cellConfigs:
   - cellType: -1
     weight: 1

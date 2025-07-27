@@ -6,10 +6,24 @@ namespace _Scripts.Utilities
     public static class GlobalConfig
     {
         /// <summary>
-        /// 物理速度缩放系数（用于调试慢动作）
-        /// 1.0 = 正常速度，0.5 = 半速，2.0 = 双倍速
+        /// 慢系统更新频率（毫秒）
+        /// </summary>
+        public const uint SlowUpdateRateInMS = 1000u;
+
+        /// <summary>
+        /// 快系统更新频率（毫秒）
+        /// </summary>
+        public const uint FastUpdateRateInMS = 20u;
+
+        /// <summary>
+        /// 每帧物理步数缩放倍率
         /// </summary>
         public const float PhysicsSpeedScale = 0.2f;
+
+        /// <summary>
+        /// 最大速度限制
+        /// </summary>
+        public const float MaxSpeed = 100f;
 
         /// <summary>
         /// Cell Map 初始容量
@@ -27,32 +41,17 @@ namespace _Scripts.Utilities
         public const float DefaultCellScale = 0.5f;
 
         /// <summary>
-        /// 慢系统更新频率（毫秒）
-        /// </summary>
-        public const uint SlowUpdateRateInMS = 1000u;
-
-        /// <summary>
-        /// 快系统更新频率（毫秒）
-        /// </summary>
-        public const uint FastUpdateRateInMS = 20u;
-
-        /// <summary>
-        /// 最大速度限制
-        /// </summary>
-        public const float MaxVelocity = 100f;
-
-        /// <summary>
-        /// 按CellType索引的固定属性配置
+        /// 按 CellType 索引的固定属性配置
         /// </summary>
         public static class CellConfig
         {
-            private static readonly CellStateEnum[] _states = { CellStateEnum.Solid, CellStateEnum.Liquid };
-            private static readonly int[] _masses = { 1, 2 };
-            private static readonly float[] _energies = { 100f, 200f };
+            private static readonly CellStateEnum[] States = { CellStateEnum.Solid, CellStateEnum.Liquid };
+            private static readonly int[] Masses = { 1, 2 };
+            private static readonly float[] Energies = { 100f, 200f };
 
-            public static CellStateEnum GetState(CellTypeEnum type) => _states[-(int)type - 1];
-            public static int GetMass(CellTypeEnum type) => _masses[-(int)type - 1];
-            public static float GetEnergy(CellTypeEnum type) => _energies[-(int)type - 1];
+            public static CellStateEnum GetState(CellTypeEnum type) => States[-(int)type - 1];
+            public static int GetMass(CellTypeEnum type) => Masses[-(int)type - 1];
+            public static float GetEnergy(CellTypeEnum type) => Energies[-(int)type - 1];
         }
     }
 }
