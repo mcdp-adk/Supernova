@@ -67,13 +67,8 @@ namespace _Scripts.Systems
                 var currentCoordinate = (int3)localTransform.Position;
                 var targetCoordinate = (int3)math.round(currentCoordinate + offset);
 
-                if (CellUtility.TryMoveCell(self, ref localTransform,
+                if (!CellUtility.TryMoveCell(self, ref localTransform,
                         CellMap, targetCoordinate))
-                {
-                    // 移动成功，消耗一步速度分量
-                    VelocityLookup[self] = new Velocity { Value = VelocityLookup[self].Value - offset };
-                }
-                else
                 {
                     var targetEntity = CellMap[targetCoordinate];
                     var targetVelocity = VelocityLookup[targetEntity].Value;
