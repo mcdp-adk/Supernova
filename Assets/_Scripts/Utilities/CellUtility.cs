@@ -39,6 +39,7 @@ namespace _Scripts.Utilities
             manager.AddComponent<CellType>(prototype);
 
             // Buffer
+            manager.AddBuffer<ImpulseBuffer>(prototype);
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)

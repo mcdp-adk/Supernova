@@ -1,4 +1,3 @@
-using _Scripts.Aspects;
 using _Scripts.Components;
 using _Scripts.Utilities;
 using Unity.Burst;
@@ -40,10 +39,7 @@ namespace _Scripts.Systems
                 state.Dependency.Complete();
 
                 // 2. 冲量整合与速度更新
-                state.Dependency = new VelocityUpdateJob
-                {
-                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
-                }.ScheduleParallel(state.Dependency);
+                state.Dependency = new VelocityUpdateJob().ScheduleParallel(state.Dependency);
                 state.Dependency.Complete();
 
                 // 3. 检查是否还有可移动 Cell
@@ -100,20 +96,21 @@ namespace _Scripts.Systems
         [WithAll(typeof(IsAlive))]
         private partial struct VelocityUpdateJob : IJobEntity
         {
-            public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
-
-            private void Execute(CellAspect cell)
+            private void Execute(RefRO<Mass> mass, RefRW<Velocity> velocity,
+                EnabledRefRW<Velocity> velocityEnabled, DynamicBuffer<ImpulseBuffer> impulseBuffer)
             {
                 // 计算总冲量
                 var totalImpulse = float3.zero;
-                foreach (var impulse in cell.ImpulseBuffer) totalImpulse += impulse.Value;
+                foreach (var impulse in impulseBuffer) totalImpulse += impulse.Value;
 
                 // 更新速度
-                cell.Velocity.ValueRW.Value += totalImpulse / cell.Mass.ValueRO.Value;
-                ImpulseBufferLookup[cell.Self].Clear();
+                velocity.ValueRW.Value += totalImpulse / mass.ValueRO.Value;
 
                 // 根据速度模长，启用/禁用 Velocity 组件
-                cell.VelocityEnabled.ValueRW = math.lengthsq(cell.Velocity.ValueRO.Value) >= 1f;
+                velocityEnabled.ValueRW = math.lengthsq(velocity.ValueRO.Value) >= 1f;
+
+                // 清空冲量缓冲区
+                impulseBuffer.Clear();
             }
         }
     }
