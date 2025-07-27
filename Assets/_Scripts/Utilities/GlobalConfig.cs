@@ -6,6 +6,12 @@ namespace _Scripts.Utilities
     public static class GlobalConfig
     {
         /// <summary>
+        /// 物理速度缩放系数（用于调试慢动作）
+        /// 1.0 = 正常速度，0.5 = 半速，2.0 = 双倍速
+        /// </summary>
+        public const float PhysicsSpeedScale = 0.2f;
+
+        /// <summary>
         /// Cell Map 初始容量
         /// </summary>
         public const int CellMapInitialCapacity = 4096;
