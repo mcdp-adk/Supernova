@@ -54,15 +54,13 @@ namespace _Scripts.Systems
                 foreach (var supernova in SupernovaDataArray)
                 {
                     var direction = supernova.Coordinate - cellPosition;
-                    var distanceSquared = math.lengthsq((float3)direction);
+                    var distanceSquared = math.lengthsq(direction);
 
-                    if (distanceSquared > 0.1f)
-                    {
-                        var distance = math.sqrt(distanceSquared);
-                        var impulseMagnitude = supernova.Mass / distanceSquared;
-                        var impulse = math.normalize((float3)direction) * impulseMagnitude;
-                        impulseBuffer.Add(new ImpulseBuffer { Value = impulse });
-                    }
+                    // 如果距离过近则跳过，避免除以零或过大冲量
+                    if (!(distanceSquared > 0.1f)) continue;
+                    var impulseMagnitude = supernova.Mass * cellMass / distanceSquared;
+                    var impulse = math.normalize(direction) * impulseMagnitude;
+                    impulseBuffer.Add(new ImpulseBuffer { Value = impulse });
                 }
             }
         }
