@@ -5,11 +5,11 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    [UpdateAfter(typeof(CellInstantiationFromSupernovaSystem))]
+    [UpdateInGroup(typeof(CaSlowSystemGroup))]
     public partial struct GravitySystem : ISystem
     {
         private struct SupernovaData
@@ -18,23 +18,8 @@ namespace _Scripts.Systems
             public int Mass;
         }
 
-        private NativeHashMap<int3, Entity> _cellMap;
-
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<IsCellAlive>();
-        }
-
         public void OnUpdate(ref SystemState state)
         {
-            // 获取全局数据容器引用
-            if (!_cellMap.IsCreated)
-            {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
-                _cellMap = globalDataSystem.CellMap;
-            }
-
             // 获取超新星数据
             var supernovaDataList = new NativeList<SupernovaData>(Allocator.TempJob);
             foreach (var supernova in SystemAPI.Query<SupernovaAspect>())
@@ -46,7 +31,6 @@ namespace _Scripts.Systems
 
             var gravityJob = new GravityJob
             {
-                CellMap = _cellMap,
                 SupernovaDataArray = supernovaDataList.AsArray()
             };
 
@@ -56,21 +40,28 @@ namespace _Scripts.Systems
         }
 
         [BurstCompile]
-        [WithAll(typeof(IsCellAlive))]
+        [WithAll(typeof(IsAlive))]
         private partial struct GravityJob : IJobEntity
         {
-            public NativeHashMap<int3, Entity> CellMap;
             [ReadOnly] public NativeArray<SupernovaData> SupernovaDataArray;
 
-            private void Execute(CellAspect cell)
+            private void Execute(RefRO<Mass> mass, RefRO<LocalTransform> localTransform,
+                DynamicBuffer<ImpulseBuffer> impulseBuffer)
             {
-                foreach (var data in SupernovaDataArray)
-                {
-                    var _ = data.Coordinate.x + data.Coordinate.y + data.Coordinate.z + data.Mass;
-                }
+                var cellPosition = (int3)localTransform.ValueRO.Position;
+                var cellMass = mass.ValueRO.Value;
 
-                CellUtility.TryMoveCell(cell.Self, ref cell.LocalTransform.ValueRW,
-                    CellMap, cell.Coordinate + new int3(0, -1, 0));
+                foreach (var supernova in SupernovaDataArray)
+                {
+                    var direction = supernova.Coordinate - cellPosition;
+                    var distanceSquared = math.lengthsq(direction);
+
+                    // 如果距离过近则跳过，避免除以零或过大冲量
+                    if (!(distanceSquared > 0.1f)) continue;
+                    var impulseMagnitude = supernova.Mass * cellMass / distanceSquared;
+                    var impulse = math.normalize(direction) * impulseMagnitude;
+                    impulseBuffer.Add(new ImpulseBuffer { Value = impulse });
+                }
             }
         }
     }

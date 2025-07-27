@@ -3,35 +3,40 @@ using Unity.Entities;
 
 namespace _Scripts.Components
 {
-    // ========== 标识组件 ==========
-    
+    // ========== Tag ==========
+
     public struct SupernovaTag : IComponentData
     {
     }
-    
+
     public struct ShouldInitializeCell : IComponentData, IEnableableComponent
     {
     }
 
-    // ========== 属性组件 ==========
-    
-    public struct Mass : IComponentData
+    // ========== Data ==========
+
+    public struct ExplosionStrength : IComponentData
     {
         public int Value;
     }
-    
+
+    public struct ExplosionAngleClamp : IComponentData
+    {
+        public int Value;
+    }
+
     public struct CellGenerateRange : IComponentData
     {
         public int Value;
     }
-    
+
     public struct CellGenerateDensity : IComponentData
     {
         public float Value;
     }
 
-    // ========== 配置缓冲 ==========
-    
+    // ========== Buffer ==========
+
     public struct CellConfigBuffer : IBufferElementData
     {
         public CellTypeEnum CellType;

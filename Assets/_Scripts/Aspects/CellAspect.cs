@@ -1,51 +1,36 @@
-using _Scripts.Components;
-using _Scripts.Utilities;
-using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Rendering;
-using Unity.Transforms;
-using UnityEngine.Rendering;
-
-namespace _Scripts.Aspects
-{
-    public readonly partial struct CellAspect : IAspect
-    {
-        public readonly Entity Self;
-
-        // ========== 组件引用 ==========
-        private readonly EnabledRefRW<IsCellAlive> _isCellAlive;
-        private readonly RefRW<CellType> _cellType;
-        private readonly RefRW<LocalTransform> _cellTransform;
-        private readonly RefRW<MaterialMeshInfo> _materialMeshInfo;
-        private readonly DynamicBuffer<PendingCellUpdateBuffer> _pendingUpdateBuffer;
-        
-
-        // ========== 属性接口 ==========
-
-        public CellTypeEnum CellType
-        {
-            get => _cellType.ValueRO.Value;
-            set => SetCellType(value);
-        }
-
-        public int3 Coordinate => (int3)_cellTransform.ValueRO.Position;
-        
-        public RefRW<LocalTransform> LocalTransform => _cellTransform;
-
-        public DynamicBuffer<PendingCellUpdateBuffer> PendingUpdateBuffer => _pendingUpdateBuffer;
-
-
-        // ========== 私有方法 ==========
-
-        private void SetCellType(CellTypeEnum targetCellType)
-        {
-            _isCellAlive.ValueRW = targetCellType != CellTypeEnum.None;
-            _cellType.ValueRW.Value = targetCellType;
-            _materialMeshInfo.ValueRW = new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
-                MeshID = new BatchMeshID { value = (uint)targetCellType }
-            };
-        }
-    }
-}
+// using _Scripts.Components;
+// using Unity.Entities;
+// using Unity.Rendering;
+// using Unity.Transforms;
+//
+// namespace _Scripts.Aspects
+// {
+//     public readonly partial struct CellAspect : IAspect
+//     {
+//         // 实体引用
+//         public readonly Entity Self;
+//
+//         // 系统组件
+//         public readonly RefRW<LocalTransform> LocalTransform;
+//         public readonly RefRW<MaterialMeshInfo> MaterialMeshInfo;
+//
+//         // 状态标识
+//         public readonly EnabledRefRW<IsAlive> IsAlive;
+//
+//         // 基本属性
+//         public readonly RefRW<CellType> CellType;
+//         public readonly RefRW<CellState> CellState;
+//
+//         // 物理属性
+//         public readonly RefRW<Mass> Mass;
+//         public readonly RefRW<Velocity> Velocity;
+//         public readonly EnabledRefRW<Velocity> VelocityEnabled;
+//         public readonly RefRW<Temperature> Temperature;
+//
+//         // 化学属性
+//         public readonly RefRW<Energy> Energy;
+//
+//         // Buffer
+//         public readonly DynamicBuffer<ImpulseBuffer> ImpulseBuffer;
+//     }
+// }

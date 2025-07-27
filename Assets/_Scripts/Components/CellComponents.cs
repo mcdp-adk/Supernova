@@ -1,9 +1,12 @@
 using _Scripts.Utilities;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace _Scripts.Components
 {
-    // ========== Cell 标识组件 ==========
+    // ========== Tag ==========
+
+    // 基本标识
 
     public struct CellPrototypeTag : IComponentData
     {
@@ -13,28 +16,77 @@ namespace _Scripts.Components
     {
     }
 
-    public struct CellPendingDequeue : IComponentData, IEnableableComponent
+    public struct PendingDequeue : IComponentData, IEnableableComponent
     {
     }
 
-    public struct IsCellAlive : IComponentData, IEnableableComponent
+    // 状态标识
+
+    public struct IsAlive : IComponentData, IEnableableComponent
     {
     }
 
-    // ========== Cell 状态组件 ==========
+    // ========== Data ==========
+
+    // 基本属性
 
     public struct CellType : IComponentData
     {
         public CellTypeEnum Value;
     }
 
-    // ========== Cell 缓冲区组件 ==========
-
-    /// <summary>
-    /// 待更新 Cell 缓冲区 - 存储待处理的 Cell 状态变更
-    /// </summary>
-    public struct PendingCellUpdateBuffer : IBufferElementData
+    public struct CellState : IComponentData
     {
-        public bool TargetAliveState;
+        public CellStateEnum Value;
+    }
+
+    // 物理 - 静态属性
+
+    public struct Mass : IComponentData
+    {
+        public int Value;
+    }
+
+    // 物理 - 动态属性
+
+    public struct Velocity : IComponentData, IEnableableComponent
+    {
+        public float3 Value;
+    }
+
+    public struct Temperature : IComponentData
+    {
+        public float Value;
+    }
+
+    // public struct Hardness : IComponentData
+    // {
+    //     public float Value;
+    // }
+
+    // 化学属性
+
+    // 化学 - 动态属性
+
+    public struct Energy : IComponentData
+    {
+        public float Value;
+    }
+
+    // public struct Wetness : IComponentData
+    // {
+    //     public float Value;
+    // }
+
+    // public struct Flammability : IComponentData
+    // {
+    //     public float Value;
+    // }
+
+    // ========== Buffer ==========
+
+    public struct ImpulseBuffer : IBufferElementData
+    {
+        public float3 Value;
     }
 }

@@ -8,8 +8,8 @@ using Unity.Mathematics;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(VariableRateCellularAutomataSystemGroup))]
-    public partial struct CellInstantiationFromSupernovaSystem : ISystem
+    [UpdateInGroup(typeof(CaSlowSystemGroup))]
+    public partial struct InstantiationFromSupernovaSystem : ISystem
     {
         // ========== 全局数据引用 ==========
         private NativeHashMap<int3, Entity> _cellMap;
@@ -64,6 +64,8 @@ namespace _Scripts.Systems
                 var range = supernova.GenerateRange;
                 var rangeSquared = range * range;
                 var density = supernova.GenerateDensity;
+                var explosionStrength = supernova.ExplosionStrength;
+                var explosionAngleClamp = supernova.ExplosionAngleClamp;
                 var random = new Random(math.hash(center));
 
                 // 在生成范围内随机生成cell
@@ -80,12 +82,20 @@ namespace _Scripts.Systems
                     // 检查是否在球形范围内
                     if (math.lengthsq(offset) > rangeSquared) continue;
 
+                    // 计算爆发速度
+                    var direction = math.normalizesafe((float3)offset);
+                    var angle = random.NextFloat(-explosionAngleClamp, explosionAngleClamp);
+                    var rotation = quaternion.AxisAngle(math.up(), math.radians(angle));
+                    var finalDirection = math.mul(rotation, direction);
+                    var velocity = finalDirection * explosionStrength;
+
                     // 尝试从 Cell 池中获取 Cell 并添加到世界
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
                         CellUtility.TryAddCellToWorld(
                             cell, ECB, CellMap,
-                            supernova.GetRandomCellType(random), targetCoordinate);
+                            supernova.GetRandomCellType(random), targetCoordinate,
+                            velocity, 20f);
                     }
                     else return;
                 }

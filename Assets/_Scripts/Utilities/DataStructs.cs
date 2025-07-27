@@ -1,6 +1,3 @@
-using _Scripts.Components;
-using Unity.Mathematics;
-
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum
@@ -9,10 +6,13 @@ namespace _Scripts.Utilities
         Cell1 = -1,
         Cell2 = -2
     }
-    
-    public struct CellData
+
+    public enum CellStateEnum : byte
     {
-        public CellTypeEnum CellType;
-        public int3 Coordinate;
+        None = 0,
+        Solid = 1,
+        Liquid = 2,
+        Gas = 3,
+        Powder = 4,
     }
 }

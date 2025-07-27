@@ -14,7 +14,7 @@ namespace _Scripts.Systems
 
         public NativeHashMap<int3, Entity> CellMap { get; private set; }
         public NativeQueue<Entity> CellPoolQueue { get; private set; }
-        
+
         private EntityCommandBuffer _ecb;
 
         // ========== 生命周期 ==========
@@ -26,20 +26,17 @@ namespace _Scripts.Systems
         }
 
         protected override void OnUpdate()
-        { 
-            // 生成 Cell
-            var isInstantiateComplete = InstantiateCell();
-            if (!isInstantiateComplete) return;
-
-            // 添加 Cell 到队列
+        {
+            if (!InstantiateCell()) return;
             AddCellToQueue();
 
-            // 获取 VariableRateCellularAutomataSystemGroup 系统并启用更新
-            var cellularAutomataSystemGroup = World.GetExistingSystemManaged<VariableRateCellularAutomataSystemGroup>();
-            if (cellularAutomataSystemGroup == null) return;
+            var caSlowSystemGroup = World.GetExistingSystemManaged<CaSlowSystemGroup>();
+            var caFastSystemGroup = World.GetExistingSystemManaged<CaFastSystemGroup>();
+            if (caSlowSystemGroup == null || caFastSystemGroup == null) return;
             Enabled = false;
-            cellularAutomataSystemGroup.Enabled = true;
-            Debug.Log("初始化成功！已启用更新：[GlobalDataSystem] VariableRateCellularAutomataSystemGroup");
+            caSlowSystemGroup.Enabled = true;
+            caFastSystemGroup.Enabled = true;
+            Debug.Log("[GlobalDataSystem] 初始化完成，Cellular Automata 系统更新已启用。");
         }
 
         protected override void OnDestroy()
@@ -70,14 +67,15 @@ namespace _Scripts.Systems
             for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
                 CellUtility.InstantiateFromPrototype(prototype, _ecb);
             _ecb.Playback(EntityManager);
-            
+
             return true;
         }
 
         private void AddCellToQueue()
         {
             _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
-            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<CellPendingDequeue>().WithEntityAccess())
+            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<PendingDequeue>()
+                         .WithEntityAccess())
             {
                 CellUtility.EnqueueCellIntoPool(cell, _ecb, CellPoolQueue);
             }

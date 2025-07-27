@@ -27,14 +27,19 @@ namespace _Scripts.Utilities
                 MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
             );
 
+            // Tag
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
-            manager.AddComponent<CellPendingDequeue>(prototype);
-            manager.SetComponentEnabled<CellPendingDequeue>(prototype, false);
-            manager.AddComponent<IsCellAlive>(prototype);
-            manager.SetComponentEnabled<IsCellAlive>(prototype, false);
+            manager.AddComponent<PendingDequeue>(prototype);
+            manager.SetComponentEnabled<PendingDequeue>(prototype, false);
+            manager.AddComponent<IsAlive>(prototype);
+            manager.SetComponentEnabled<IsAlive>(prototype, false);
+
+            // Data
             manager.AddComponent<CellType>(prototype);
-            manager.AddBuffer<PendingCellUpdateBuffer>(prototype);
+
+            // Buffer
+            manager.AddBuffer<ImpulseBuffer>(prototype);
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
@@ -43,19 +48,22 @@ namespace _Scripts.Utilities
 
             ecb.SetName(cell, "");
             ecb.RemoveComponent<CellPrototypeTag>(cell);
-            ecb.SetComponentEnabled<CellPendingDequeue>(cell, true);
+            ecb.SetComponentEnabled<PendingDequeue>(cell, true);
         }
 
         public static void EnqueueCellIntoPool(Entity cell, EntityCommandBuffer ecb, NativeQueue<Entity> queue)
         {
             queue.Enqueue(cell);
-            ecb.SetComponentEnabled<CellPendingDequeue>(cell, false);
+            ecb.SetComponentEnabled<PendingDequeue>(cell, false);
         }
 
         #endregion
 
+        #region Add Cell to World
+
         public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate)
+            NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate,
+            float3 velocity, float temperature)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
@@ -69,8 +77,40 @@ namespace _Scripts.Utilities
 
             SetCellType(cell, ecb, cellType);
 
+
+            // 设置固定属性
+            ecb.AddComponent<CellState>(cell);
+            ecb.SetComponent(cell, new CellState { Value = GlobalConfig.CellConfig.GetState(cellType) });
+
+            ecb.AddComponent<Mass>(cell);
+            ecb.SetComponent(cell, new Mass { Value = GlobalConfig.CellConfig.GetMass(cellType) });
+
+            ecb.AddComponent<Energy>(cell);
+            ecb.SetComponent(cell, new Energy { Value = GlobalConfig.CellConfig.GetEnergy(cellType) });
+
+
+            // 设置可变属性
+            ecb.AddComponent<Velocity>(cell);
+            ecb.SetComponent(cell, new Velocity { Value = velocity });
+
+            ecb.AddComponent<Temperature>(cell);
+            ecb.SetComponent(cell, new Temperature { Value = temperature });
+
             return true;
         }
+
+        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
+        {
+            ecb.SetComponentEnabled<IsAlive>(cell, targetCellType != CellTypeEnum.None);
+            ecb.SetComponent(cell, new CellType { Value = targetCellType });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                MeshID = new BatchMeshID { value = (uint)targetCellType }
+            });
+        }
+
+        #endregion
 
         public static bool TryMoveCell(Entity cell, ref LocalTransform localTransform,
             NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
@@ -83,17 +123,6 @@ namespace _Scripts.Utilities
             localTransform.Scale = GlobalConfig.DefaultCellScale;
 
             return true;
-        }
-
-        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
-        {
-            ecb.SetComponentEnabled<IsCellAlive>(cell, targetCellType != CellTypeEnum.None);
-            ecb.SetComponent(cell, new CellType { Value = targetCellType });
-            ecb.SetComponent(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
-                MeshID = new BatchMeshID { value = (uint)targetCellType }
-            });
         }
     }
 }
