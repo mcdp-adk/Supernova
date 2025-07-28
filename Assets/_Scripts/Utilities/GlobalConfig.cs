@@ -28,7 +28,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell Map 初始容量
         /// </summary>
-        public const int CellMapInitialCapacity = 4096;
+        public const int CellMapInitialCapacity = 65536;
 
         /// <summary>
         /// Cell 池大小
