@@ -1,3 +1,5 @@
+using Unity.Mathematics;
+
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum

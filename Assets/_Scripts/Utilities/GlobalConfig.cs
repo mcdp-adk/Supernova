@@ -26,6 +26,11 @@ namespace _Scripts.Utilities
         public const float MaxSpeed = 5f;
 
         /// <summary>
+        /// 最大 Cell 数量
+        /// </summary>
+        public const int MaxCellCount = 100000;
+
+        /// <summary>
         /// Cell Map 初始容量
         /// </summary>
         public const int CellMapInitialCapacity = 65536;
