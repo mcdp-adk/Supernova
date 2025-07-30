@@ -48,7 +48,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell 默认缩放比例
         /// </summary>
-        public const float DefaultCellScale = 0.5f;
+        public const float DefaultCellScale = 1f;
 
         /// <summary>
         /// 按 CellType 索引的固定属性配置

@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 369b9ebe3a62b904dbc19bd332b44086, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -259,8 +259,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1018137620}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.32093942, y: -0.37252143, z: 0.13784431, w: 0.85978174}
-  m_LocalPosition: {x: 23.612667, y: 145.07076, z: -161.70636}
+  m_LocalRotation: {x: 0.011553862, y: -0.97487694, z: -0.051801782, w: -0.21632883}
+  m_LocalPosition: {x: -92.05494, y: 2.6661263, z: 61.762543}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -496,6 +496,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 511696840703279227, guid: 59efe40cb93ecb04f98fa3ffc3e03e42, type: 3}
+      propertyPath: cellPrefabConfigs.Array.data[0].cellMesh
+      value: 
+      objectReference: {fileID: 4300000, guid: 08b3731ad9da0bf47bcd971606e56937, type: 3}
+    - target: {fileID: 511696840703279227, guid: 59efe40cb93ecb04f98fa3ffc3e03e42, type: 3}
+      propertyPath: cellPrefabConfigs.Array.data[1].cellMesh
+      value: 
+      objectReference: {fileID: 4300000, guid: b9f6d5d9a7a5dfe4eba266fecd0ba0d1, type: 3}
+    - target: {fileID: 511696840703279227, guid: 59efe40cb93ecb04f98fa3ffc3e03e42, type: 3}
+      propertyPath: cellPrefabConfigs.Array.data[0].cellMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: a6c57a8d7cad1ec4ca946895c56815d5, type: 2}
+    - target: {fileID: 511696840703279227, guid: 59efe40cb93ecb04f98fa3ffc3e03e42, type: 3}
+      propertyPath: cellPrefabConfigs.Array.data[1].cellMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: a6c57a8d7cad1ec4ca946895c56815d5, type: 2}
     - target: {fileID: 1066637438658829926, guid: 59efe40cb93ecb04f98fa3ffc3e03e42, type: 3}
       propertyPath: m_Name
       value: Cell Prototype Creator
