@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 10000
+  mass: 1000
   explosionStrength: 7
   explosionAngleClamp: 45
   generateRange: 50
@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 20000
+  mass: 2000
   explosionStrength: 10
   explosionAngleClamp: 90
   generateRange: 100
@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 10000
+  mass: 750
   explosionStrength: 5
   explosionAngleClamp: 60
   generateRange: 50

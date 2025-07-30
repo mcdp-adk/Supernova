@@ -21,6 +21,11 @@ namespace _Scripts.Utilities
         public const float PhysicsSpeedScale = 1f;
 
         /// <summary>
+        /// 碰撞时的冲量损失系数
+        /// </summary>
+        public const float ImpulseLossFactor = 0.8f;
+
+        /// <summary>
         /// 最大速度限制
         /// </summary>
         public const float MaxSpeed = 5f;

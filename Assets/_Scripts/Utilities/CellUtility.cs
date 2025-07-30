@@ -103,7 +103,7 @@ namespace _Scripts.Utilities
         {
             ecb.SetComponentEnabled<IsAlive>(cell, targetCellType != CellTypeEnum.None);
 
-            targetCellType = CellTypeEnum.None;
+            // targetCellType = CellTypeEnum.None;
 
             ecb.SetComponent(cell, new CellType { Value = targetCellType });
             ecb.SetComponent(cell, new MaterialMeshInfo

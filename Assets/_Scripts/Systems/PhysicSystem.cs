@@ -23,7 +23,8 @@ namespace _Scripts.Systems
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var maxStep = math.max(1, (int)math.floor(GlobalConfig.MaxSpeed * deltaTime * GlobalConfig.PhysicsSpeedScale));
+            var maxStep = math.max(1,
+                (int)math.floor(GlobalConfig.MaxSpeed * deltaTime * GlobalConfig.PhysicsSpeedScale));
 
             var step = maxStep;
             while (step > 0)
@@ -72,23 +73,24 @@ namespace _Scripts.Systems
                 var currentCoordinate = (int3)localTransform.Position;
                 var targetCoordinate = currentCoordinate + offset;
 
-                if (!CellUtility.TryMoveCell(self, ref localTransform,
-                        CellMap, targetCoordinate))
-                {
-                    var targetEntity = CellMap[targetCoordinate];
-                    var targetVelocity = VelocityLookup[targetEntity].Value;
-                    var targetMass = MassLookup[targetEntity].Value;
+                // 如果目标坐标已经有 Cell，尝试处理碰撞
+                if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, targetCoordinate)) return;
 
-                    var collisionNormal = math.normalize(targetCoordinate - currentCoordinate);
-                    var relativeSpeed = math.dot(currentVelocity - targetVelocity, collisionNormal);
-                    var impulseMagnitude = (2 * relativeSpeed) / (currentMass + targetMass);
+                var targetEntity = CellMap[targetCoordinate];
+                var targetVelocity = VelocityLookup[targetEntity].Value;
+                var targetMass = MassLookup[targetEntity].Value;
 
-                    var currentImpulse = -impulseMagnitude * targetMass * collisionNormal;
-                    var targetImpulse = impulseMagnitude * currentMass * collisionNormal;
+                var collisionNormal = math.normalize(targetCoordinate - currentCoordinate);
+                var relativeSpeed = math.dot(currentVelocity - targetVelocity, collisionNormal);
+                var impulseMagnitude = (2 * relativeSpeed) / (currentMass + targetMass);
 
-                    ImpulseBufferLookup[self].Add(new ImpulseBuffer { Value = currentImpulse });
-                    ImpulseBufferLookup[targetEntity].Add(new ImpulseBuffer { Value = targetImpulse });
-                }
+                // 应用冲量损失
+                var adjustedImpulseMagnitude = impulseMagnitude * GlobalConfig.ImpulseLossFactor;
+                var currentImpulse = -adjustedImpulseMagnitude * targetMass * collisionNormal;
+                var targetImpulse = adjustedImpulseMagnitude * currentMass * collisionNormal;
+
+                ImpulseBufferLookup[self].Add(new ImpulseBuffer { Value = currentImpulse });
+                ImpulseBufferLookup[targetEntity].Add(new ImpulseBuffer { Value = targetImpulse });
             }
         }
 
