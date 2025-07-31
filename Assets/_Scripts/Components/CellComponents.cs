@@ -59,11 +59,6 @@ namespace _Scripts.Components
         public float Value;
     }
 
-    // public struct Hardness : IComponentData
-    // {
-    //     public float Value;
-    // }
-
     // 化学属性
 
     // 化学 - 动态属性
@@ -72,16 +67,6 @@ namespace _Scripts.Components
     {
         public float Value;
     }
-
-    // public struct Wetness : IComponentData
-    // {
-    //     public float Value;
-    // }
-
-    // public struct Flammability : IComponentData
-    // {
-    //     public float Value;
-    // }
 
     // ========== Buffer ==========
 

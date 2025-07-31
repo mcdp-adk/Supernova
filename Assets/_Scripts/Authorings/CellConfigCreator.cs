@@ -9,7 +9,19 @@ namespace _Scripts.Authorings
     public class CellConfigCreator : MonoBehaviour
     {
         [SerializeField] private TextAsset csvAsset;
+        private static CellConfigCreator Instance { get; set; }
         private Entity _cellConfigEntity;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -19,8 +31,14 @@ namespace _Scripts.Authorings
                 return;
             }
 
+            var configs = ParseCellConfigsFromCsv(csvAsset.text);
+            CreateCellConfigEntity(configs);
+        }
+
+        private static List<CellConfig> ParseCellConfigsFromCsv(string csvText)
+        {
             var configs = new List<CellConfig>();
-            var lines = csvAsset.text.Split('\n');
+            var lines = csvText.Split('\n');
 
             for (var i = 1; i < lines.Length; i++)
             {
@@ -38,7 +56,12 @@ namespace _Scripts.Authorings
                 configs.Add(config);
             }
 
-            _cellConfigEntity = CellUtility.CreateCellConfigEntity("CellConfig",
+            return configs;
+        }
+
+        private void CreateCellConfigEntity(List<CellConfig> configs)
+        {
+            _cellConfigEntity = CellUtility.CreateCellConfigEntity("Cell_Configs",
                 World.DefaultGameObjectInjectionWorld.EntityManager, configs);
 
             Debug.Log("[CellConfigCreator] Cell Config Entity 创建完成");

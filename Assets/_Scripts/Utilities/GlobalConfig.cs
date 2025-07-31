@@ -49,19 +49,5 @@ namespace _Scripts.Utilities
         /// Cell 默认缩放比例
         /// </summary>
         public const float DefaultCellScale = 1f;
-
-        /// <summary>
-        /// 按 CellType 索引的固定属性配置
-        /// </summary>
-        public static class CellConfig
-        {
-            private static readonly CellStateEnum[] States = { CellStateEnum.Solid, CellStateEnum.Liquid };
-            private static readonly int[] Masses = { 1, 2 };
-            private static readonly float[] Energies = { 100f, 200f };
-
-            public static CellStateEnum GetState(CellTypeEnum type) => States[-(int)type - 1];
-            public static int GetMass(CellTypeEnum type) => Masses[-(int)type - 1];
-            public static float GetEnergy(CellTypeEnum type) => Energies[-(int)type - 1];
-        }
     }
 }

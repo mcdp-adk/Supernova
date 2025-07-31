@@ -2,75 +2,102 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 项目核心架构
+## 项目概述
 
-**Supernova** 是基于 Unity DOTS 的超新星粒子物理模拟，使用 ECS 架构实现高效细胞自动机系统。
+这是一个基于 Unity ECS (Entity Component System) 架构的 Supernova 模拟项目，专注于细胞自动机和粒子系统模拟。项目使用 DOTS (Data-Oriented Tech Stack) 进行高性能计算，并通过 VFX Graph 实现视觉效果。
 
-### 系统更新频率
-- **CaSlowSystemGroup**: 500ms 更新 - 引力计算 + 粒子生成
-- **CaFastSystemGroup**: 20ms 更新 - 物理模拟 + 碰撞检测
-- **LateSimulation**: VFX 数据同步
+## 技术架构
 
-### 核心数据流
-```mermaid
-graph LR
-    A[SupernovaAuthoring] --> B[CellPrototypeCreator]
-    B --> C[GlobalDataSystem]
-    C --> D[对象池初始化]
-    D --> E[65,536 细胞实体]
-    E --> F[InstantiationFromSupernovaSystem]
-    F --> G[PhysicSystem]
-    G --> H[CellVFXDataSystem]
+### 核心框架
+- **Unity DOTS/ECS**: 使用 Entities 包进行数据导向设计
+- **Visual Effect Graph**: 基于 GPU 的粒子系统渲染
+- **Burst Compiler**: 通过 [BurstCompile] 特性优化性能
+- **Job System**: 并行计算框架
+
+### 代码结构
+
 ```
+Assets/_Scripts/
+├── Components/          # ECS 组件定义
+│   ├── CellComponents.cs    # 细胞相关组件
+│   └── ConfigComponents.cs  # 配置相关组件
+├── Systems/            # ECS 系统
+│   ├── CellVFXDataSystem.cs    # 细胞VFX数据传输系统
+│   ├── PhysicSystem.cs         # 物理系统
+│   └── S1S1_InstantiationFromSupernovaSystem.cs # 实例化系统
+├── Authorings/         # MonoBehaviour 到 ECS 的桥接
+│   ├── CellConfigCreator.cs    # 细胞配置创建器
+│   └── CellPrototypeCreator.cs # 细胞原型创建器
+├── Aspects/            # ECS 方面定义
+├── Utilities/          # 工具类和数据结构
+│   ├── GlobalConfig.cs       # 全局配置
+│   └── DataStructs.cs        # 数据结构定义
+└── Prefabs/            # 预制体
+    ├── Cell VFX.vfx         # 细胞视觉特效
+    └── Cell Config Creator.prefab
+```
+
+### 主要系统流程
+
+1. **初始化流程**: CellConfigCreator 从 CSV 文件读取配置 → 创建 CellConfigEntity
+2. **实例化流程**: SupernovaAuthoring 触发实例化 → S1S1_InstantiationFromSupernovaSystem 创建细胞实体
+3. **物理模拟**: PhysicSystem 处理细胞运动和交互
+4. **VFX 同步**: CellVFXDataSystem 将实体数据同步到 Visual Effect Graph
 
 ## 开发命令
 
-### Unity 编辑器
+### Unity 编辑器命令
 ```bash
-# 打开项目
-Unity.exe -projectPath .
+# 打开 Unity 项目
+Unity -projectPath .
 
-# 命令行构建（需创建 BuildScript）
-Unity.exe -quit -batchmode -executeMethod BuildScript.Build
+# 运行测试场景
+Unity -projectPath . -executeMethod UnityEditor.SceneManagement.EditorSceneManager.OpenScene -scene Assets/Scenes/Test.unity
 ```
 
-### 调试工具
-- **Entity Debugger**: Window → DOTS → Entity Debugger
-- **Profiler**: Window → Analysis → Profiler → 启用 DOTS 模块
-- **Scene 视图**: 显示超新星生成范围 Gizmos
+### 构建命令
+```bash
+# Windows 构建
+Unity -quit -batchmode -projectPath . -executeMethod UnityEditor.BuildPipeline.BuildPlayer -scene Assets/Scenes/Test.unity -outputPath Build/Windows/Supernova.exe -targetPlatform StandaloneWindows64
 
-### 关键配置常量
-- `MaxCellPoolSize = 65536` - 最大细胞数量
-- `MaxSpeed = 5f` - 粒子最大速度
-- `MaxCellCount = 10000` - VFX 最大渲染数量
-
-## 系统依赖关系
-```mermaid
-graph TD
-    GlobalDataSystem --> |初始化| CaSlowSystemGroup
-    GlobalDataSystem --> |初始化| CaFastSystemGroup
-    S1S1_InstantiationFromSupernovaSystem --> |使用| GlobalDataSystem.CellPoolQueue
-    PhysicSystem --> |使用| GlobalDataSystem.CellMap
-    GravitySystem --> |使用| SupernovaAspect
-    CellVFXDataSystem --> |收集| 所有 IsAlive 实体
+# Android 构建
+Unity -quit -batchmode -projectPath . -executeMethod UnityEditor.BuildPipeline.BuildPlayer -scene Assets/Scenes/Test.unity -outputPath Build/Android/Supernova.apk -targetPlatform Android
 ```
 
-## 快速开发检查清单
+### 调试和测试
+```bash
+# 打开 Unity Profiler
+Unity -projectPath . -profiler-enable
 
-### 新增功能前检查
-1. 确认系统分组归属（Slow/Fast/Late）
-2. 验证 NativeContainer 生命周期管理
-3. 检查 BurstCompile 兼容性
-4. 测试 Entity Debugger 中组件状态
+# 运行性能测试（如果存在）
+Unity -projectPath . -runTests -testPlatform EditMode -testResults TestResults.xml
+```
 
-### 常见修改点
-- **新增粒子类型**: 扩展 CellTypeEnum 和 CellStateEnum
-- **修改物理规则**: 编辑 PhysicSystem.TryMoveCellJob
-- **调整引力公式**: 修改 GravitySystem 计算逻辑
-- **增强 VFX**: 扩展 CellVFXDataSystem 数据收集
+## 关键配置
 
-### 性能调优要点
-- 使用 Burst 编译所有 Job
-- 验证 NativeContainer 正确释放
-- 监控 Entity Debugger 中实体数量
-- Profiler 中检查 System 执行时间
+### CSV 配置格式
+位于 `Assets/Settings/CellConfigs.csv`：
+```csv
+ID,Type,State,Mass,...
+1,RedBloodCell,Active,10
+2,WhiteBloodCell,Inactive,15
+```
+
+### 全局配置
+在 `Assets/_Scripts/Utilities/GlobalConfig.cs` 中定义：
+- `MaxCellCount`: 最大细胞数量限制
+- 各种物理和渲染参数
+
+## 重要文件路径
+
+- **主场景**: `Assets/Scenes/Test.unity`
+- **VFX 资源**: `Assets/Prefabs/Cell VFX.vfx`
+- **配置文件**: `Assets/Settings/CellConfigs.csv`
+- **系统代码**: `Assets/_Scripts/Systems/`
+
+## 开发提示
+
+1. **ECS 调试**: 使用 Unity 的 Entity Debugger 窗口查看实体和组件状态
+2. **性能优化**: 标记为 [BurstCompile] 的 Job 会自动优化，确保使用 Burst Inspector 检查生成的代码
+3. **VFX 绑定**: CellVFXDataSystem 中定义的 Shader 属性名必须与 VFX Graph 中的属性名完全匹配
+4. **内存管理**: 使用 NativeArray/NativeList 时务必正确 Dispose，避免内存泄漏

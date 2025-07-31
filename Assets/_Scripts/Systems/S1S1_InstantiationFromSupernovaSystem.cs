@@ -11,6 +11,12 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(CaSlowSystemGroup))]
     public partial struct InstantiationFromSupernovaSystem : ISystem
     {
+        [BurstCompile]
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<CellConfigTag>();
+        }
+
         // ========== 全局数据引用 ==========
         private NativeHashMap<int3, Entity> _cellMap;
         private NativeQueue<Entity> _cellPoolQueue;
@@ -31,14 +37,16 @@ namespace _Scripts.Systems
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
                 _cellPoolQueue = globalDataSystem.CellPoolQueue;
             }
-            
+
             // 开启 Cell 实例化 Job
             var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
             var instantiateCellJob = new InstantiateCellJob
             {
+                Manager = state.EntityManager,
                 ECB = ecb,
                 CellMap = _cellMap,
-                CellPoolQueue = _cellPoolQueue
+                CellPoolQueue = _cellPoolQueue,
+                ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>()
             };
 
             // 等待 Job 完成后回放 Entity 修改
@@ -53,9 +61,11 @@ namespace _Scripts.Systems
         [WithAll(typeof(ShouldInitializeCell))]
         private partial struct InstantiateCellJob : IJobEntity
         {
+            public EntityManager Manager;
             public EntityCommandBuffer ECB;
             public NativeHashMap<int3, Entity> CellMap;
             public NativeQueue<Entity> CellPoolQueue;
+            public Entity ConfigEntity;
 
             private void Execute(SupernovaAspect supernova,
                 EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
@@ -83,7 +93,7 @@ namespace _Scripts.Systems
                     if (math.lengthsq(offset) > rangeSquared) continue;
 
                     // 计算爆发速度
-                    var direction = math.normalizesafe((float3)offset);
+                    var direction = math.normalizesafe(offset);
                     var angle = random.NextFloat(-explosionAngleClamp, explosionAngleClamp);
                     var rotation = quaternion.AxisAngle(math.up(), math.radians(angle));
                     var finalDirection = math.mul(rotation, direction);
@@ -93,9 +103,8 @@ namespace _Scripts.Systems
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
                         CellUtility.TryAddCellToWorld(
-                            cell, ECB, CellMap,
-                            supernova.GetRandomCellType(random), targetCoordinate,
-                            velocity, 20f);
+                            cell, Manager, ECB, CellMap, supernova.GetRandomCellType(random),
+                            targetCoordinate, velocity, 20f, ConfigEntity);
                     }
                     else return;
                 }
