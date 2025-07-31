@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using _Scripts.Components;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace _Scripts.Utilities
@@ -40,6 +42,20 @@ namespace _Scripts.Utilities
 
             // Buffer
             manager.AddBuffer<ImpulseBuffer>(prototype);
+        }
+
+        public static Entity CreateCellConfigEntity(string entityName, EntityManager manager,
+            List<CellConfig> cellConfigs)
+        {
+            var configEntity = manager.CreateEntity();
+            manager.SetName(configEntity, entityName);
+            manager.AddComponent<CellConfigTag>(configEntity);
+
+            var buffer = manager.AddBuffer<CellConfigBuffer>(configEntity);
+            foreach (var cellConfig in cellConfigs)
+                buffer.Add(new CellConfigBuffer { Data = cellConfig });
+
+            return configEntity;
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)

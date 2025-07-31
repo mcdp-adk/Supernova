@@ -44,4 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d280a16465894f369a1561e9c882e947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  csvPath: Assets/Settings/CellConfigs.csv
+  csvAsset: {fileID: 4900000, guid: d615ac29ba0757348a4a4202d3ffceb4, type: 3}

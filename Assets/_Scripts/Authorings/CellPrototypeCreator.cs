@@ -17,7 +17,7 @@ namespace _Scripts.Authorings
             public Mesh cellMesh;
             public Material cellMaterial;
         }
-        
+
         [SerializeField] private CellPrefabConfig[] cellPrefabConfigs;
         private static CellPrototypeCreator Instance { get; set; }
         private RenderMeshArray _renderMeshArray;
@@ -37,6 +37,8 @@ namespace _Scripts.Authorings
         {
             CellUtility.CreatePrototype("Cell_Prototype", World.DefaultGameObjectInjectionWorld.EntityManager,
                 GetRenderMeshDescription(), GetRenderMeshArray());
+
+            Debug.Log("[CellPrototypeCreator] Cell Prototype Entity 创建完成");
         }
 
         private static RenderMeshDescription GetRenderMeshDescription()

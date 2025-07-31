@@ -1,22 +1,33 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 using _Scripts.Utilities;
+using Unity.Entities;
 
 namespace _Scripts.Authorings
 {
     public class CellConfigCreator : MonoBehaviour
     {
-        [SerializeField] private string csvPath;
+        [SerializeField] private TextAsset csvAsset;
+        private Entity _cellConfigEntity;
 
-        private void OnEnable()
+        private void Start()
         {
-            var lines = File.ReadAllLines(csvPath);
+            if (csvAsset == null)
+            {
+                Debug.LogError("[CellConfigCreator] CSV Asset 未设置，请在 Inspector 中设置 CSV 文件。");
+                return;
+            }
+
+            var configs = new List<CellConfig>();
+            var lines = csvAsset.text.Split('\n');
 
             for (var i = 1; i < lines.Length; i++)
             {
-                var values = lines[i].Split(',');
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line)) continue;
 
+                var values = line.Split(',');
                 var config = new CellConfig
                 {
                     Type = Enum.TryParse(values[1], out CellTypeEnum type) ? type : CellTypeEnum.None,
@@ -24,8 +35,13 @@ namespace _Scripts.Authorings
                     Mass = int.TryParse(values[3], out var mass) ? mass : 1
                 };
 
-                Debug.Log($"配置: {values[0]} - Type:{config.Type}, State:{config.State}, Mass:{config.Mass}");
+                configs.Add(config);
             }
+
+            _cellConfigEntity = CellUtility.CreateCellConfigEntity("CellConfig",
+                World.DefaultGameObjectInjectionWorld.EntityManager, configs);
+
+            Debug.Log("[CellConfigCreator] Cell Config Entity 创建完成");
         }
     }
 }
