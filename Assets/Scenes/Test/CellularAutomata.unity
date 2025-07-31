@@ -153,11 +153,11 @@ MonoBehaviour:
   explosionAngleClamp: 45
   generateRange: 50
   generateDensity: 0.29
-  cellConfigs:
+  cellGenerationConfigs:
   - cellType: -1
-    weight: 1
-  - cellType: -2
     weight: 3
+  - cellType: -2
+    weight: 2
 --- !u!4 &1167914567
 Transform:
   m_ObjectHideFlags: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
   explosionAngleClamp: 90
   generateRange: 100
   generateDensity: 0.08
-  cellConfigs:
+  cellGenerationConfigs:
   - cellType: -1
     weight: 1
   - cellType: -2
@@ -261,11 +261,11 @@ MonoBehaviour:
   explosionAngleClamp: 60
   generateRange: 50
   generateDensity: 0.29
-  cellConfigs:
+  cellGenerationConfigs:
   - cellType: -1
-    weight: 1
-  - cellType: -2
     weight: 3
+  - cellType: -2
+    weight: 1
 --- !u!4 &1963291542
 Transform:
   m_ObjectHideFlags: 0

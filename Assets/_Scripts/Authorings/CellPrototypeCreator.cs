@@ -10,8 +10,6 @@ namespace _Scripts.Authorings
 {
     public class CellPrototypeCreator : MonoBehaviour
     {
-        private static CellPrototypeCreator Instance { get; set; }
-
         [Serializable]
         private struct CellPrefabConfig
         {
@@ -19,9 +17,9 @@ namespace _Scripts.Authorings
             public Mesh cellMesh;
             public Material cellMaterial;
         }
-
+        
         [SerializeField] private CellPrefabConfig[] cellPrefabConfigs;
-
+        private static CellPrototypeCreator Instance { get; set; }
         private RenderMeshArray _renderMeshArray;
 
         private void Awake()

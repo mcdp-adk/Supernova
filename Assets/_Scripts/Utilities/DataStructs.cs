@@ -1,5 +1,3 @@
-using Unity.Mathematics;
-
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum
@@ -13,8 +11,13 @@ namespace _Scripts.Utilities
     {
         None = 0,
         Solid = 1,
-        Liquid = 2,
-        Gas = 3,
-        Powder = 4,
+        Liquid = 2
+    }
+    
+    public struct CellConfig
+    {
+        public CellTypeEnum Type;
+        public CellStateEnum State;
+        public int Mass;
     }
 }

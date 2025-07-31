@@ -48,8 +48,8 @@ namespace _Scripts.Systems
 
         protected override void OnUpdate()
         {
-            var positionList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
-            var velocityList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
+            using var positionList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
+            using var velocityList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
 
             var bufferCollectionJob = new BufferCollectionJob
             {
@@ -59,16 +59,13 @@ namespace _Scripts.Systems
             bufferCollectionJob.ScheduleParallel(Dependency).Complete();
 
             var cellCount = positionList.Length;
+            _cellVFX.SetInt(CellCountProperty, cellCount);
 
+            if (cellCount == 0) return;
             _positionBuffer.SetData(positionList.AsArray());
             _velocityBuffer.SetData(velocityList.AsArray());
-
-            _cellVFX.SetInt(CellCountProperty, cellCount);
             _cellVFX.SetGraphicsBuffer(PositionBufferProperty, _positionBuffer);
             _cellVFX.SetGraphicsBuffer(VelocityBufferProperty, _velocityBuffer);
-
-            positionList.Dispose();
-            velocityList.Dispose();
         }
 
         [BurstCompile]

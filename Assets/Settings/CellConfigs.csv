@@ -1,0 +1,3 @@
+﻿名字,CellType,CellState,Mass,Velocity,Temperature,Water,IgnitionPoint
+1,Cell1,Solid,1,,,,
+2,Cell2,Liquid,2,,,,

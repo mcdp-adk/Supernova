@@ -37,7 +37,7 @@ namespace _Scripts.Components
 
     // ========== Buffer ==========
 
-    public struct CellConfigBuffer : IBufferElementData
+    public struct CellGenerationConfigBuffer : IBufferElementData
     {
         public CellTypeEnum CellType;
         public int Weight;

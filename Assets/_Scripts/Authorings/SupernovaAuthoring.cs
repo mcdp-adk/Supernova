@@ -7,7 +7,7 @@ using UnityEngine;
 namespace _Scripts.Authorings
 {
     [Serializable]
-    public struct CellConfig
+    public struct CellGenerationConfig
     {
         public CellTypeEnum cellType;
         public int weight;
@@ -22,7 +22,7 @@ namespace _Scripts.Authorings
         [Header("Cell 生成设置")] [SerializeField] private int generateRange = 10;
         [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
 
-        [SerializeField] private CellConfig[] cellConfigs;
+        [SerializeField] private CellGenerationConfig[] cellGenerationConfigs;
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
@@ -54,10 +54,10 @@ namespace _Scripts.Authorings
                 AddComponent(entity, new CellGenerateDensity { Value = authoring.generateDensity });
 
                 // 设置不同类型的 Cell 的生成权重
-                var buffer = AddBuffer<CellConfigBuffer>(entity);
-                foreach (var config in authoring.cellConfigs)
+                var buffer = AddBuffer<CellGenerationConfigBuffer>(entity);
+                foreach (var config in authoring.cellGenerationConfigs)
                 {
-                    buffer.Add(new CellConfigBuffer { CellType = config.cellType, Weight = config.weight });
+                    buffer.Add(new CellGenerationConfigBuffer { CellType = config.cellType, Weight = config.weight });
                 }
             }
         }
