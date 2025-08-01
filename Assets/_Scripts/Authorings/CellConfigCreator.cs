@@ -48,9 +48,23 @@ namespace _Scripts.Authorings
                 var values = line.Split(',');
                 var config = new CellConfig
                 {
-                    Type = Enum.TryParse(values[1], out CellTypeEnum type) ? type : CellTypeEnum.None,
-                    State = Enum.TryParse(values[2], out CellStateEnum state) ? state : CellStateEnum.None,
-                    Mass = int.TryParse(values[3], out var mass) ? mass : 1
+                    Type = Enum.TryParse(values[1], true, out CellTypeEnum type) ? type : CellTypeEnum.None,
+                    State = Enum.TryParse(values[2], true, out CellStateEnum state) ? state : CellStateEnum.None,
+                    Mass = int.TryParse(values[3], out var mass) ? mass : 1,
+                    TemperatureDefault = float.TryParse(values[4], out var tempDefault) ? tempDefault : 20f,
+                    TemperatureMin = float.TryParse(values[5], out var tempMin) ? tempMin : -99999f,
+                    TemperatureMax = float.TryParse(values[6], out var tempMax) ? tempMax : 99999f,
+                    HeatConductivity = float.TryParse(values[7], out var heatCond) ? heatCond : 0.5f,
+                    IgnitionPoint = float.TryParse(values[8], out var ignition) ? ignition : 99999f,
+                    ExplosionPoint = float.TryParse(values[9], out var explosion) ? explosion : 99999f,
+                    EnergyDefault = float.TryParse(values[10], out var energy) ? energy : 0f,
+                    MoistureDefault = float.TryParse(values[11], out var moistDefault) ? moistDefault : 0f,
+                    MoistureMin = float.TryParse(values[12], out var moistMin) ? moistMin : 0f,
+                    MoistureMax = float.TryParse(values[13], out var moistMax) ? moistMax : 1f,
+                    DropChanceGold = float.TryParse(values[14], out var gold) ? gold : 0f,
+                    DropChanceSilver = float.TryParse(values[15], out var silver) ? silver : 0f,
+                    DropChanceCopper = float.TryParse(values[16], out var copper) ? copper : 0f,
+                    DropChanceIron = float.TryParse(values[17], out var iron) ? iron : 0f
                 };
 
                 configs.Add(config);
