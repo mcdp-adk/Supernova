@@ -68,6 +68,11 @@ namespace _Scripts.Components
         public float Value;
     }
 
+    public struct Moisture : IComponentData
+    {
+        public float Value;
+    }
+
     // ========== Buffer ==========
 
     public struct ImpulseBuffer : IBufferElementData
