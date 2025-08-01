@@ -103,8 +103,8 @@ namespace _Scripts.Systems
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
                         CellUtility.TryAddCellToWorld(
-                            cell, Manager, ECB, CellMap, supernova.GetRandomCellType(random),
-                            targetCoordinate, velocity, 20f, ConfigEntity);
+                            cell, Manager, ECB, CellMap, ConfigEntity,
+                            supernova.GetRandomCellType(random), targetCoordinate, velocity);
                     }
                     else return;
                 }

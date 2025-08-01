@@ -46,7 +46,7 @@ Shader "Animmal (URP)/Surface"
 		AlphaToMask Off
 		
 		HLSLINCLUDE
-		#pragma target 3.0
+		#pragma target 4.5
 
 		#pragma prefer_hlslcc gles
 		#pragma exclude_renderers d3d11_9x 
@@ -170,6 +170,7 @@ Shader "Animmal (URP)/Surface"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#pragma multi_compile_instancing
+			#pragma multi_compile _ DOTS_INSTANCING_ON
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
@@ -1783,6 +1784,7 @@ Shader "Animmal (URP)/Surface"
 			
 			#define _NORMAL_DROPOFF_TS 1
 			#pragma multi_compile_instancing
+			#pragma multi_compile _ DOTS_INSTANCING_ON
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1

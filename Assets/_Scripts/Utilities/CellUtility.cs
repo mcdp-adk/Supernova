@@ -78,8 +78,8 @@ namespace _Scripts.Utilities
         #region Add Cell to World
 
         public static bool TryAddCellToWorld(Entity cell, EntityManager manager, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap,
-            CellTypeEnum cellType, int3 targetCoordinate, float3 velocity, float temperature, Entity configEntity)
+            NativeHashMap<int3, Entity> cellMap, Entity configEntity,
+            CellTypeEnum cellType, int3 targetCoordinate, float3 velocity)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
@@ -95,22 +95,23 @@ namespace _Scripts.Utilities
 
             var config = GetCellConfig(manager, configEntity, cellType);
 
-            // 设置固定属性
             ecb.AddComponent<CellState>(cell);
             ecb.SetComponent(cell, new CellState { Value = config.State });
 
             ecb.AddComponent<Mass>(cell);
             ecb.SetComponent(cell, new Mass { Value = config.Mass });
 
-            ecb.AddComponent<Energy>(cell);
-            ecb.SetComponent(cell, new Energy { Value = 100f });
-
-            // 设置可变属性
             ecb.AddComponent<Velocity>(cell);
             ecb.SetComponent(cell, new Velocity { Value = velocity });
 
             ecb.AddComponent<Temperature>(cell);
-            ecb.SetComponent(cell, new Temperature { Value = temperature });
+            ecb.SetComponent(cell, new Temperature { Value = config.TemperatureDefault });
+
+            ecb.AddComponent<Moisture>(cell);
+            ecb.SetComponent(cell, new Moisture { Value = config.MoistureDefault });
+
+            ecb.AddComponent<Energy>(cell);
+            ecb.SetComponent(cell, new Energy { Value = config.EnergyDefault });
 
             return true;
         }
