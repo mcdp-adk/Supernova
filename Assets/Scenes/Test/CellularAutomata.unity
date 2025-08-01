@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 10000
-  explosionStrength: 5
+  explosionStrength: 100
   explosionAngleClamp: 90
   generateRange: 100
   generateDensity: 0.08

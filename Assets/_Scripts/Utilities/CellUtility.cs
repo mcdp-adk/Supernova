@@ -39,9 +39,6 @@ namespace _Scripts.Utilities
 
             // Data
             manager.AddComponent<CellType>(prototype);
-
-            // Buffer
-            manager.AddBuffer<ImpulseBuffer>(prototype);
         }
 
         public static Entity CreateCellConfigEntity(string entityName, EntityManager manager,
@@ -79,7 +76,7 @@ namespace _Scripts.Utilities
 
         public static bool TryAddCellToWorld(Entity cell, EntityManager manager, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, Entity configEntity,
-            CellTypeEnum cellType, int3 targetCoordinate, float3 velocity)
+            CellTypeEnum cellType, int3 targetCoordinate, float3 initialImpulse)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
@@ -94,24 +91,14 @@ namespace _Scripts.Utilities
             SetCellType(cell, ecb, cellType);
 
             var config = GetCellConfig(manager, configEntity, cellType);
-
-            ecb.AddComponent<CellState>(cell);
-            ecb.SetComponent(cell, new CellState { Value = config.State });
-
-            ecb.AddComponent<Mass>(cell);
-            ecb.SetComponent(cell, new Mass { Value = config.Mass });
-
-            ecb.AddComponent<Velocity>(cell);
-            ecb.SetComponent(cell, new Velocity { Value = velocity });
-
-            ecb.AddComponent<Temperature>(cell);
-            ecb.SetComponent(cell, new Temperature { Value = config.TemperatureDefault });
-
-            ecb.AddComponent<Moisture>(cell);
-            ecb.SetComponent(cell, new Moisture { Value = config.MoistureDefault });
-
-            ecb.AddComponent<Energy>(cell);
-            ecb.SetComponent(cell, new Energy { Value = config.EnergyDefault });
+            ecb.AddComponent(cell, new CellState { Value = config.State });
+            ecb.AddComponent(cell, new Mass { Value = config.Mass });
+            ecb.AddComponent(cell, new Velocity { Value = float3.zero });
+            ecb.SetComponentEnabled<Velocity>(cell, false);
+            ecb.AddComponent(cell, new Temperature { Value = config.TemperatureDefault });
+            ecb.AddComponent(cell, new Moisture { Value = config.MoistureDefault });
+            ecb.AddComponent(cell, new Energy { Value = config.EnergyDefault });
+            ecb.AddBuffer<ImpulseBuffer>(cell).Add(new ImpulseBuffer { Value = initialImpulse });
 
             return true;
         }

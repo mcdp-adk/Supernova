@@ -92,19 +92,19 @@ namespace _Scripts.Systems
                     // 检查是否在球形范围内
                     if (math.lengthsq(offset) > rangeSquared) continue;
 
-                    // 计算爆发速度
+                    // 计算爆发冲量
                     var direction = math.normalizesafe(offset);
                     var angle = random.NextFloat(-explosionAngleClamp, explosionAngleClamp);
                     var rotation = quaternion.AxisAngle(math.up(), math.radians(angle));
                     var finalDirection = math.mul(rotation, direction);
-                    var velocity = finalDirection * explosionStrength;
+                    var initialImpulse = finalDirection * explosionStrength;
 
                     // 尝试从 Cell 池中获取 Cell 并添加到世界
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
                         CellUtility.TryAddCellToWorld(
                             cell, Manager, ECB, CellMap, ConfigEntity,
-                            supernova.GetRandomCellType(random), targetCoordinate, velocity);
+                            supernova.GetRandomCellType(random), targetCoordinate, initialImpulse);
                     }
                     else return;
                 }
