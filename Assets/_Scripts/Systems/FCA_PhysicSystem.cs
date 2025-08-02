@@ -40,9 +40,11 @@ namespace _Scripts.Systems
                     Manager = state.EntityManager,
                     CellMap = _cellMap,
                     ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>(),
+                    CellStateLookup = SystemAPI.GetComponentLookup<CellState>(true),
                     MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
+                    LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(),
                     VelocityLookup = SystemAPI.GetComponentLookup<Velocity>(),
-                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
+                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>(),
                 }.Schedule(state.Dependency);
                 state.Dependency.Complete();
 
@@ -70,21 +72,23 @@ namespace _Scripts.Systems
             public EntityManager Manager;
             public NativeHashMap<int3, Entity> CellMap;
             [ReadOnly] public Entity ConfigEntity;
+            [ReadOnly] public ComponentLookup<CellState> CellStateLookup;
             [ReadOnly] public ComponentLookup<Mass> MassLookup;
+            public ComponentLookup<LocalTransform> LocalTransformLookup;
             public ComponentLookup<Velocity> VelocityLookup;
             public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
 
-            private void Execute(Entity self, in CellType cellType, in CellState cellState,
-                ref LocalTransform localTransform)
+            private void Execute(Entity self, in CellType cellType)
             {
+                var cellState = CellStateLookup[self];
                 var velocity = VelocityLookup[self].Value;
                 var direction = math.normalize(velocity);
                 var offset = (int3)math.round(direction);
-                var currentCoordinate = (int3)localTransform.Position;
+                var currentCoordinate = (int3)LocalTransformLookup[self].Position;
 
                 // 1. 尝试移动到目标位置
                 var targetCoordinate = currentCoordinate + offset;
-                if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, targetCoordinate)) return;
+                if (TryMoveCell(self, CellMap, targetCoordinate)) return;
 
                 // 2. 获取最接近速度方向的轴为主方向
                 var primaryDirection = GetPrimaryDirection(direction);
@@ -101,7 +105,7 @@ namespace _Scripts.Systems
 
                 for (var i = 0; i < maxTries; i++)
                 {
-                    if (!CellUtility.TryMoveCell(self, ref localTransform, CellMap, coordinates[i])) continue;
+                    if (!TryMoveCell(self, CellMap, coordinates[i])) continue;
 
                     // 移动成功后，应用 Viscosity 影响
                     var movementEfficiency = 1.0f - cellConfig.Viscosity;
@@ -115,6 +119,43 @@ namespace _Scripts.Systems
             }
 
             #region 辅助方法
+
+            private bool TryMoveCell(Entity cell, NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
+            {
+                if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
+
+                var localTransform = LocalTransformLookup[cell];
+                cellMap.Remove((int3)localTransform.Position);
+                localTransform.Position = targetCoordinate;
+                LocalTransformLookup[cell] = localTransform;
+                return true;
+            }
+
+            private bool TrySwapCell(Entity currentCell, Entity targetCell, NativeHashMap<int3, Entity> cellMap)
+            {
+                var currentTransform = LocalTransformLookup[currentCell];
+                var targetTransform = LocalTransformLookup[targetCell];
+
+                var currentCoordinate = (int3)currentTransform.Position;
+                var targetCoordinate = (int3)targetTransform.Position;
+
+                // 移除旧映射
+                cellMap.Remove(currentCoordinate);
+                cellMap.Remove(targetCoordinate);
+
+                // 添加新映射
+                cellMap.TryAdd(targetCoordinate, currentCell);
+                cellMap.TryAdd(currentCoordinate, targetCell);
+
+                // 交换位置
+                currentTransform.Position = targetCoordinate;
+                targetTransform.Position = currentCoordinate;
+
+                LocalTransformLookup[currentCell] = currentTransform;
+                LocalTransformLookup[targetCell] = targetTransform;
+
+                return true;
+            }
 
             private static int3 GetPrimaryDirection(float3 normalizedVelocity)
             {
