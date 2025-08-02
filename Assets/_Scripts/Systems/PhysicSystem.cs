@@ -11,6 +11,11 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(CaFastSystemGroup))]
     public partial struct PhysicSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<CellConfigTag>();
+        }
+
         private NativeHashMap<int3, Entity> _cellMap;
 
         public void OnUpdate(ref SystemState state)
@@ -32,9 +37,10 @@ namespace _Scripts.Systems
                 // 1. 移动与碰撞
                 state.Dependency = new TryMoveCellJob
                 {
+                    Manager = state.EntityManager,
                     CellMap = _cellMap,
+                    ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>(),
                     MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
-                    CellStateLookup = SystemAPI.GetComponentLookup<CellState>(true),
                     VelocityLookup = SystemAPI.GetComponentLookup<Velocity>(),
                     ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
                 }.Schedule(state.Dependency);
@@ -61,99 +67,54 @@ namespace _Scripts.Systems
         [WithAll(typeof(IsAlive), typeof(Velocity))]
         private partial struct TryMoveCellJob : IJobEntity
         {
+            public EntityManager Manager;
             public NativeHashMap<int3, Entity> CellMap;
+            [ReadOnly] public Entity ConfigEntity;
             [ReadOnly] public ComponentLookup<Mass> MassLookup;
-            [ReadOnly] public ComponentLookup<CellState> CellStateLookup;
             public ComponentLookup<Velocity> VelocityLookup;
             public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
 
-            private void Execute(Entity self, ref LocalTransform localTransform)
+            private void Execute(Entity self, in CellType cellType, in CellState cellState,
+                ref LocalTransform localTransform)
             {
                 var velocity = VelocityLookup[self].Value;
-                var speed = math.length(velocity);
-                var cellState = CellStateLookup[self].Value;
-                var normalizedVelocity = math.normalize(velocity);
-                var offset = (int3)math.round(normalizedVelocity);
-                var currentPos = (int3)localTransform.Position;
+                var direction = math.normalize(velocity);
+                var offset = (int3)math.round(direction);
+                var currentCoordinate = (int3)localTransform.Position;
 
-                // 1. 所有Cell都先尝试主目标
-                var primaryTarget = currentPos + offset;
-                if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, primaryTarget)) return;
+                // 1. 尝试移动到目标位置
+                var targetCoordinate = currentCoordinate + offset;
+                if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, targetCoordinate)) return;
 
-                // 2. 确定"底面"方向（最接近速度方向的轴）
-                var bottomDirection = GetPrimaryDirection(normalizedVelocity);
-                var bottomCenter = currentPos + bottomDirection;
+                // 2. 获取最接近速度方向的轴为主方向
+                var primaryDirection = GetPrimaryDirection(direction);
 
-                // 3. Solid尝试底面中心
-                if (cellState >= CellStateEnum.Solid && !bottomCenter.Equals(primaryTarget))
+                // 3. 获取 Cell 配置以获得 Fluidity
+                var cellConfig = CellUtility.GetCellConfig(Manager, ConfigEntity, cellType.Value);
+                var fluidity = cellConfig.Fluidity;
+
+                // 4. 获取并根据 Fluidity 控制遍历的可用坐标
+                var coordinates =
+                    GetAvailableCoordinates(currentCoordinate, primaryDirection, direction, cellState.Value);
+                var tryRatio = fluidity * fluidity; // 平方关系，低端更陡峭
+                var maxTries = math.max(1, (int)(coordinates.Length * tryRatio));
+
+                for (var i = 0; i < maxTries; i++)
                 {
-                    if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, bottomCenter))
-                    {
-                        // 应用速度损耗
-                        VelocityLookup[self] = new Velocity { Value = velocity * GlobalConfig.BottomCenterDamping };
-                        return;
-                    }
+                    if (!CellUtility.TryMoveCell(self, ref localTransform, CellMap, coordinates[i])) continue;
+
+                    // 移动成功后，应用 Viscosity 影响
+                    var movementEfficiency = 1.0f - cellConfig.Viscosity;
+                    var currentVelocity = VelocityLookup[self].Value;
+                    VelocityLookup[self] = new Velocity { Value = currentVelocity * movementEfficiency };
+                    return;
                 }
 
-                // 4. Powder尝试底层位置（需要满足速度门槛）
-                if (cellState >= CellStateEnum.Powder && speed > GlobalConfig.PowderSideMovementThreshold)
-                {
-                    var bottomLayer = GetBottomLayerPositions(currentPos, bottomDirection, normalizedVelocity);
-                    var maxAttempts = math.min(bottomLayer.Length, GlobalConfig.MaxPowderAttempts);
-                    
-                    for (int i = 0; i < maxAttempts; i++)
-                    {
-                        if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, bottomLayer[i]))
-                        {
-                            // 应用更大的速度损耗
-                            VelocityLookup[self] = new Velocity { Value = velocity * GlobalConfig.BottomLayerDamping };
-                            bottomLayer.Dispose();
-                            return;
-                        }
-                    }
-                    bottomLayer.Dispose();
-                }
-
-                // 5. Liquid尝试底层和中层位置
-                if (cellState >= CellStateEnum.Liquid)
-                {
-                    // 5.1 先尝试底层
-                    var bottomLayer = GetBottomLayerPositions(currentPos, bottomDirection, normalizedVelocity);
-                    var maxBottomAttempts = math.min(bottomLayer.Length, GlobalConfig.MaxLiquidBottomAttempts);
-                    
-                    for (int i = 0; i < maxBottomAttempts; i++)
-                    {
-                        if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, bottomLayer[i]))
-                        {
-                            VelocityLookup[self] = new Velocity { Value = velocity * GlobalConfig.BottomLayerDamping };
-                            bottomLayer.Dispose();
-                            return;
-                        }
-                    }
-                    bottomLayer.Dispose();
-                    
-                    // 5.2 高速时尝试中层
-                    if (speed > GlobalConfig.LiquidMiddleLayerThreshold)
-                    {
-                        var middleLayer = GetMiddleLayerPositions(currentPos, bottomDirection, normalizedVelocity);
-                        var maxMiddleAttempts = math.min(middleLayer.Length, GlobalConfig.MaxLiquidMiddleAttempts);
-                        
-                        for (int i = 0; i < maxMiddleAttempts; i++)
-                        {
-                            if (CellUtility.TryMoveCell(self, ref localTransform, CellMap, middleLayer[i]))
-                            {
-                                VelocityLookup[self] = new Velocity { Value = velocity * GlobalConfig.MiddleLayerDamping };
-                                middleLayer.Dispose();
-                                return;
-                            }
-                        }
-                        middleLayer.Dispose();
-                    }
-                }
-
-                // 6. 处理碰撞
-                HandleCollision(self, primaryTarget, currentPos);
+                // 5. 处理碰撞
+                HandleCollision(self, targetCoordinate, currentCoordinate);
             }
+
+            #region 辅助方法
 
             private static int3 GetPrimaryDirection(float3 normalizedVelocity)
             {
@@ -163,84 +124,92 @@ namespace _Scripts.Systems
                 return new int3(0, 0, (int)math.sign(normalizedVelocity.z));
             }
 
-            private NativeArray<int3> GetBottomLayerPositions(int3 current, int3 bottomDirection, float3 normalizedVelocity)
+            private static NativeArray<int3> GetAvailableCoordinates(int3 currentCoordinate,
+                int3 primaryDirection, float3 direction, CellStateEnum cellState)
             {
-                var positions = new NativeArray<int3>(8, Allocator.Temp);
+                var maxCoordinates = cellState switch
+                {
+                    CellStateEnum.Solid => 1,
+                    CellStateEnum.Powder => 9,
+                    CellStateEnum.Liquid => 17,
+                    _ => 1
+                };
+
+                var coordinates = new NativeArray<int3>(maxCoordinates, Allocator.Temp);
                 var index = 0;
 
-                // 根据底面方向确定平面上的8个位置
-                for (int i = -1; i <= 1; i++)
-                for (int j = -1; j <= 1; j++)
+                // 1. 主方向中心块
+                if (cellState >= CellStateEnum.Solid)
                 {
-                    if (i == 0 && j == 0) continue; // 跳过中心
-
-                    int3 pos;
-                    if (bottomDirection.x != 0) // X轴为主方向
-                        pos = current + new int3(bottomDirection.x, i, j);
-                    else if (bottomDirection.y != 0) // Y轴为主方向
-                        pos = current + new int3(i, bottomDirection.y, j);
-                    else // Z轴为主方向
-                        pos = current + new int3(i, j, bottomDirection.z);
-
-                    positions[index++] = pos;
+                    coordinates[index++] = currentCoordinate + primaryDirection;
                 }
 
-                // 简单排序：根据与速度方向的相似度
-                SortPositionsByDirection(positions, current, normalizedVelocity);
-
-                return positions;
-            }
-
-            private NativeArray<int3> GetMiddleLayerPositions(int3 current, int3 bottomDirection, float3 normalizedVelocity)
-            {
-                var positions = new NativeArray<int3>(8, Allocator.Temp);
-                var index = 0;
-
-                // 获取与底面垂直的平面上的8个位置
-                for (int i = -1; i <= 1; i++)
-                for (int j = -1; j <= 1; j++)
+                // 2. 底层坐标
+                if (cellState >= CellStateEnum.Powder)
                 {
-                    if (i == 0 && j == 0) continue;
-
-                    int3 pos;
-                    if (bottomDirection.x != 0) // 底面在X方向
-                        pos = current + new int3(0, i, j);
-                    else if (bottomDirection.y != 0) // 底面在Y方向
-                        pos = current + new int3(i, 0, j);
-                    else // 底面在Z方向
-                        pos = current + new int3(i, j, 0);
-
-                    positions[index++] = pos;
-                }
-
-                // 排序
-                SortPositionsByDirection(positions, current, normalizedVelocity);
-
-                return positions;
-            }
-            
-            // 根据与速度方向的相似度对位置进行排序
-            private void SortPositionsByDirection(NativeArray<int3> positions, int3 current, float3 velocity)
-            {
-                // 使用简单的冒泡排序（对于8个元素足够高效）
-                for (int i = 0; i < positions.Length - 1; i++)
-                {
-                    for (int j = 0; j < positions.Length - i - 1; j++)
+                    for (var i = -1; i <= 1; i++)
+                    for (var j = -1; j <= 1; j++)
                     {
-                        var dir1 = math.normalize(positions[j] - current);
-                        var dir2 = math.normalize(positions[j + 1] - current);
-                        var dot1 = math.dot(dir1, velocity);
-                        var dot2 = math.dot(dir2, velocity);
-                        
-                        if (dot1 < dot2)
-                        {
-                            (positions[j], positions[j + 1]) = (positions[j + 1], positions[j]);
-                        }
+                        if (i == 0 && j == 0) continue; // 跳过中心
+
+                        var pos = currentCoordinate;
+                        // X 轴为主方向
+                        if (primaryDirection.x != 0) pos += new int3(primaryDirection.x, i, j);
+                        // Y 轴为主方向
+                        else if (primaryDirection.y != 0) pos += new int3(i, primaryDirection.y, j);
+                        // Z 轴为主方向
+                        else pos += new int3(i, j, primaryDirection.z);
+
+                        coordinates[index++] = pos;
                     }
                 }
+
+                // 3. 中层坐标
+                if (cellState >= CellStateEnum.Liquid)
+                {
+                    for (var i = -1; i <= 1; i++)
+                    for (var j = -1; j <= 1; j++)
+                    {
+                        if (i == 0 && j == 0) continue; // 跳过中心
+
+                        var pos = currentCoordinate;
+                        // X 轴为主方向
+                        if (primaryDirection.x != 0) pos += new int3(0, i, j);
+                        // Y 轴为主方向
+                        else if (primaryDirection.y != 0) pos += new int3(i, 0, j);
+                        // Z 轴为主方向
+                        else pos += new int3(i, j, 0);
+
+                        coordinates[index++] = pos;
+                    }
+                }
+
+                SortPositionsByDirection(coordinates, currentCoordinate, direction);
+                return coordinates;
             }
 
-            // 处理碰撞
+            private static void SortPositionsByDirection(NativeArray<int3> coordinates,
+                int3 currentCoordinate, float3 direction)
+            {
+                // 插入排序
+                for (var i = 1; i < coordinates.Length; i++)
+                {
+                    var key = coordinates[i];
+                    var keyDot = math.dot(math.normalize(key - currentCoordinate), direction);
+                    var j = i - 1;
+
+                    while (j >= 0)
+                    {
+                        var currentDot = math.dot(math.normalize(coordinates[j] - currentCoordinate), direction);
+                        if (currentDot >= keyDot) break;
+                        coordinates[j + 1] = coordinates[j];
+                        j--;
+                    }
+
+                    coordinates[j + 1] = key;
+                }
+            }
+
             private void HandleCollision(Entity self, int3 targetCoordinate, int3 currentPos)
             {
                 if (!CellMap.TryGetValue(targetCoordinate, out Entity targetEntity)) return;
@@ -262,6 +231,8 @@ namespace _Scripts.Systems
                 ImpulseBufferLookup[self].Add(new ImpulseBuffer { Value = currentImpulse });
                 ImpulseBufferLookup[targetEntity].Add(new ImpulseBuffer { Value = targetImpulse });
             }
+
+            #endregion
         }
 
         [BurstCompile]
@@ -276,6 +247,7 @@ namespace _Scripts.Systems
             {
                 // 计算总冲量
                 var totalImpulse = float3.zero;
+                // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impulse in ImpulseBufferLookup[cell]) totalImpulse += impulse.Value;
 
                 // 计算新速度

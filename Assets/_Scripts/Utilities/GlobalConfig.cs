@@ -49,49 +49,5 @@ namespace _Scripts.Utilities
         /// Cell 默认缩放比例
         /// </summary>
         public const float DefaultCellScale = 1f;
-
-        #region 物理流动参数
-        
-        /// <summary>
-        /// Powder 侧向移动速度门槛
-        /// </summary>
-        public const float PowderSideMovementThreshold = 2.0f;
-        
-        /// <summary>
-        /// Liquid 中层扩散速度门槛
-        /// </summary>
-        public const float LiquidMiddleLayerThreshold = 5.0f;
-        
-        /// <summary>
-        /// Powder 最大尝试位置数
-        /// </summary>
-        public const int MaxPowderAttempts = 4;
-        
-        /// <summary>
-        /// Liquid 底层最大尝试位置数
-        /// </summary>
-        public const int MaxLiquidBottomAttempts = 6;
-        
-        /// <summary>
-        /// Liquid 中层最大尝试位置数
-        /// </summary>
-        public const int MaxLiquidMiddleAttempts = 4;
-        
-        /// <summary>
-        /// 移动到底面中心的速度损耗系数
-        /// </summary>
-        public const float BottomCenterDamping = 0.95f;
-        
-        /// <summary>
-        /// 移动到底层的速度损耗系数
-        /// </summary>
-        public const float BottomLayerDamping = 0.85f;
-        
-        /// <summary>
-        /// 移动到中层的速度损耗系数
-        /// </summary>
-        public const float MiddleLayerDamping = 0.75f;
-        
-        #endregion
     }
 }

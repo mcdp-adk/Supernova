@@ -128,12 +128,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: mass
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: generateRange
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: generateDensity
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: explosionStrength
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: cellGenerationConfigs.Array.size
@@ -145,7 +153,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: cellGenerationConfigs.Array.data[1].weight
-      value: 1
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: cellGenerationConfigs.Array.data[2].weight

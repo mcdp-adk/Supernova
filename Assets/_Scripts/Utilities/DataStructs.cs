@@ -37,6 +37,8 @@ namespace _Scripts.Utilities
         public CellTypeEnum Type;
         public CellStateEnum State;
         public int Mass;
+        public float Fluidity;
+        public float Viscosity;
         public float TemperatureDefault;
         public float TemperatureMin;
         public float TemperatureMax;
