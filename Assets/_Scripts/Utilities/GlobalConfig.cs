@@ -21,14 +21,24 @@ namespace _Scripts.Utilities
         public const float PhysicsSpeedScale = 1f;
 
         /// <summary>
+        /// 碰撞时的冲量损失系数
+        /// </summary>
+        public const float ImpulseLossFactor = 0.8f;
+
+        /// <summary>
         /// 最大速度限制
         /// </summary>
         public const float MaxSpeed = 5f;
 
         /// <summary>
+        /// 最大 Cell 数量
+        /// </summary>
+        public const int MaxCellCount = 100000;
+
+        /// <summary>
         /// Cell Map 初始容量
         /// </summary>
-        public const int CellMapInitialCapacity = 4096;
+        public const int CellMapInitialCapacity = 65536;
 
         /// <summary>
         /// Cell 池大小
@@ -38,20 +48,6 @@ namespace _Scripts.Utilities
         /// <summary>
         /// Cell 默认缩放比例
         /// </summary>
-        public const float DefaultCellScale = 0.5f;
-
-        /// <summary>
-        /// 按 CellType 索引的固定属性配置
-        /// </summary>
-        public static class CellConfig
-        {
-            private static readonly CellStateEnum[] States = { CellStateEnum.Solid, CellStateEnum.Liquid };
-            private static readonly int[] Masses = { 1, 2 };
-            private static readonly float[] Energies = { 100f, 200f };
-
-            public static CellStateEnum GetState(CellTypeEnum type) => States[-(int)type - 1];
-            public static int GetMass(CellTypeEnum type) => Masses[-(int)type - 1];
-            public static float GetEnergy(CellTypeEnum type) => Energies[-(int)type - 1];
-        }
+        public const float DefaultCellScale = 1f;
     }
 }

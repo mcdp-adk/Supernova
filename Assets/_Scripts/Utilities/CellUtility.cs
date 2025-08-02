@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using _Scripts.Components;
 using Unity.Collections;
 using Unity.Entities;
@@ -37,9 +39,20 @@ namespace _Scripts.Utilities
 
             // Data
             manager.AddComponent<CellType>(prototype);
+        }
 
-            // Buffer
-            manager.AddBuffer<ImpulseBuffer>(prototype);
+        public static Entity CreateCellConfigEntity(string entityName, EntityManager manager,
+            List<CellConfig> cellConfigs)
+        {
+            var configEntity = manager.CreateEntity();
+            manager.SetName(configEntity, entityName);
+            manager.AddComponent<CellConfigTag>(configEntity);
+
+            var buffer = manager.AddBuffer<CellConfigBuffer>(configEntity);
+            foreach (var cellConfig in cellConfigs)
+                buffer.Add(new CellConfigBuffer { Data = cellConfig });
+
+            return configEntity;
         }
 
         public static void InstantiateFromPrototype(Entity prototype, EntityCommandBuffer ecb)
@@ -61,9 +74,9 @@ namespace _Scripts.Utilities
 
         #region Add Cell to World
 
-        public static bool TryAddCellToWorld(Entity cell, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap, CellTypeEnum cellType, int3 targetCoordinate,
-            float3 velocity, float temperature)
+        public static bool TryAddCellToWorld(Entity cell, EntityManager manager, EntityCommandBuffer ecb,
+            NativeHashMap<int3, Entity> cellMap, Entity configEntity,
+            CellTypeEnum cellType, int3 targetCoordinate, float3 initialImpulse)
         {
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
@@ -77,24 +90,15 @@ namespace _Scripts.Utilities
 
             SetCellType(cell, ecb, cellType);
 
-
-            // 设置固定属性
-            ecb.AddComponent<CellState>(cell);
-            ecb.SetComponent(cell, new CellState { Value = GlobalConfig.CellConfig.GetState(cellType) });
-
-            ecb.AddComponent<Mass>(cell);
-            ecb.SetComponent(cell, new Mass { Value = GlobalConfig.CellConfig.GetMass(cellType) });
-
-            ecb.AddComponent<Energy>(cell);
-            ecb.SetComponent(cell, new Energy { Value = GlobalConfig.CellConfig.GetEnergy(cellType) });
-
-
-            // 设置可变属性
-            ecb.AddComponent<Velocity>(cell);
-            ecb.SetComponent(cell, new Velocity { Value = velocity });
-
-            ecb.AddComponent<Temperature>(cell);
-            ecb.SetComponent(cell, new Temperature { Value = temperature });
+            var config = GetCellConfig(manager, configEntity, cellType);
+            ecb.AddComponent(cell, new CellState { Value = config.State });
+            ecb.AddComponent(cell, new Mass { Value = config.Mass });
+            ecb.AddComponent(cell, new Velocity { Value = float3.zero });
+            ecb.SetComponentEnabled<Velocity>(cell, false);
+            ecb.AddComponent(cell, new Temperature { Value = config.TemperatureDefault });
+            ecb.AddComponent(cell, new Moisture { Value = config.MoistureDefault });
+            ecb.AddComponent(cell, new Energy { Value = config.EnergyDefault });
+            ecb.AddBuffer<ImpulseBuffer>(cell).Add(new ImpulseBuffer { Value = initialImpulse });
 
             return true;
         }
@@ -102,6 +106,9 @@ namespace _Scripts.Utilities
         private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
         {
             ecb.SetComponentEnabled<IsAlive>(cell, targetCellType != CellTypeEnum.None);
+
+            // targetCellType = CellTypeEnum.None;
+
             ecb.SetComponent(cell, new CellType { Value = targetCellType });
             ecb.SetComponent(cell, new MaterialMeshInfo
             {
@@ -123,6 +130,18 @@ namespace _Scripts.Utilities
             localTransform.Scale = GlobalConfig.DefaultCellScale;
 
             return true;
+        }
+
+        public static CellConfig GetCellConfig(EntityManager manager, Entity configEntity, CellTypeEnum cellType)
+        {
+            var buffer = manager.GetBuffer<CellConfigBuffer>(configEntity);
+            foreach (var configBuffer in buffer)
+            {
+                if (configBuffer.Data.Type == cellType)
+                    return configBuffer.Data;
+            }
+
+            throw new System.InvalidOperationException($"未找到 CellType: {cellType} 的配置");
         }
     }
 }

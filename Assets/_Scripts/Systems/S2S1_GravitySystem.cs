@@ -9,7 +9,7 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaSlowSystemGroup))]
+    [UpdateInGroup(typeof(CaFastSystemGroup))]
     public partial struct GravitySystem : ISystem
     {
         private struct SupernovaData
@@ -21,7 +21,7 @@ namespace _Scripts.Systems
         public void OnUpdate(ref SystemState state)
         {
             // 获取超新星数据
-            var supernovaDataList = new NativeList<SupernovaData>(Allocator.TempJob);
+            using var supernovaDataList = new NativeList<SupernovaData>(Allocator.TempJob);
             foreach (var supernova in SystemAPI.Query<SupernovaAspect>())
                 supernovaDataList.Add(new SupernovaData
                 {
@@ -36,7 +36,6 @@ namespace _Scripts.Systems
 
             state.Dependency = gravityJob.Schedule(state.Dependency);
             state.Dependency.Complete();
-            supernovaDataList.Dispose();
         }
 
         [BurstCompile]

@@ -17,7 +17,7 @@ namespace _Scripts.Aspects
         private readonly RefRO<ExplosionAngleClamp> _explosionAngleClamp;
         private readonly RefRO<CellGenerateRange> _generateRange;
         private readonly RefRO<CellGenerateDensity> _generateDensity;
-        private readonly DynamicBuffer<CellConfigBuffer> _cellConfigs;
+        private readonly DynamicBuffer<CellGenerationConfigBuffer> _cellGenerationConfigs;
         
         // ========== 属性接口 ==========
 
@@ -40,8 +40,8 @@ namespace _Scripts.Aspects
         {
             // 计算总权重
             var totalWeight = 0;
-            for (var i = 0; i < _cellConfigs.Length; ++i)
-                totalWeight += _cellConfigs[i].Weight;
+            for (var i = 0; i < _cellGenerationConfigs.Length; ++i)
+                totalWeight += _cellGenerationConfigs[i].Weight;
 
             if (totalWeight <= 0)
                 return default;
@@ -49,11 +49,11 @@ namespace _Scripts.Aspects
             // 生成随机数并选择对应的 Cell 类型
             var randomValue = random.NextInt(totalWeight);
             var currentWeight = 0;
-            for (var i = 0; i < _cellConfigs.Length; ++i)
+            for (var i = 0; i < _cellGenerationConfigs.Length; ++i)
             {
-                currentWeight += _cellConfigs[i].Weight;
+                currentWeight += _cellGenerationConfigs[i].Weight;
                 if (randomValue < currentWeight)
-                    return _cellConfigs[i].CellType;
+                    return _cellGenerationConfigs[i].CellType;
             }
 
             return default;

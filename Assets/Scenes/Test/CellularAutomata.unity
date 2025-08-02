@@ -119,172 +119,109 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1167914565
-GameObject:
+--- !u!1001 &2035098176269937417
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1167914567}
-  - component: {fileID: 1167914566}
-  m_Layer: 0
-  m_Name: Supernova Core
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1167914566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167914565}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mass: 10000
-  explosionStrength: 7
-  explosionAngleClamp: 45
-  generateRange: 50
-  generateDensity: 0.29
-  cellConfigs:
-  - cellType: -1
-    weight: 1
-  - cellType: -2
-    weight: 3
---- !u!4 &1167914567
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167914565}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -130, y: 44, z: -101}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1874521003
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1874521004}
-  - component: {fileID: 1874521005}
-  m_Layer: 0
-  m_Name: Supernova Core
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1874521004
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1874521003}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1874521005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1874521003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mass: 20000
-  explosionStrength: 10
-  explosionAngleClamp: 90
-  generateRange: 100
-  generateDensity: 0.08
-  cellConfigs:
-  - cellType: -1
-    weight: 1
-  - cellType: -2
-    weight: 3
---- !u!1 &1963291540
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1963291542}
-  - component: {fileID: 1963291541}
-  m_Layer: 0
-  m_Name: Supernova Core
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1963291541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1963291540}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mass: 10000
-  explosionStrength: 5
-  explosionAngleClamp: 60
-  generateRange: 50
-  generateDensity: 0.29
-  cellConfigs:
-  - cellType: -1
-    weight: 1
-  - cellType: -2
-    weight: 3
---- !u!4 &1963291542
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1963291540}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -86, y: 57, z: -144}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: mass
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: generateRange
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: generateDensity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: explosionStrength
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[0].weight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[1].weight
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[2].weight
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[0].cellType
+      value: -6
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[1].cellType
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: cellGenerationConfigs.Array.data[2].cellType
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_Name
+      value: Supernova Core
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1874521004}
-  - {fileID: 1167914567}
-  - {fileID: 1963291542}
+  - {fileID: 2035098176269937417}

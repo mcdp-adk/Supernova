@@ -28,7 +28,6 @@ namespace _Scripts.Components
 
     // ========== Data ==========
 
-    // 基本属性
 
     public struct CellType : IComponentData
     {
@@ -40,14 +39,10 @@ namespace _Scripts.Components
         public CellStateEnum Value;
     }
 
-    // 物理 - 静态属性
-
     public struct Mass : IComponentData
     {
         public int Value;
     }
-
-    // 物理 - 动态属性
 
     public struct Velocity : IComponentData, IEnableableComponent
     {
@@ -59,29 +54,15 @@ namespace _Scripts.Components
         public float Value;
     }
 
-    // public struct Hardness : IComponentData
-    // {
-    //     public float Value;
-    // }
-
-    // 化学属性
-
-    // 化学 - 动态属性
+    public struct Moisture : IComponentData
+    {
+        public float Value;
+    }
 
     public struct Energy : IComponentData
     {
         public float Value;
     }
-
-    // public struct Wetness : IComponentData
-    // {
-    //     public float Value;
-    // }
-
-    // public struct Flammability : IComponentData
-    // {
-    //     public float Value;
-    // }
 
     // ========== Buffer ==========
 
