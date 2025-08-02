@@ -88,16 +88,21 @@ namespace _Scripts.Systems
 
                 // 1. 尝试移动到目标位置
                 var targetCoordinate = currentCoordinate + offset;
-                if (TryMoveCell(self, CellMap, targetCoordinate)) return;
+                if (TryMoveCell(self, targetCoordinate)) return;
 
                 // 2. 获取最接近速度方向的轴为主方向
                 var primaryDirection = GetPrimaryDirection(direction);
 
-                // 3. 获取 Cell 配置以获得 Fluidity
+                // 3. 尝试主方向移动，失败则尝试下沉交换
+                var primaryTargetCoordinate = currentCoordinate + primaryDirection;
+                if (TryMoveCell(self, primaryTargetCoordinate)) return;
+                if (TrySettlementSwap(self, primaryTargetCoordinate)) return;
+
+                // 4. 获取 Cell 配置以获得 Fluidity
                 var cellConfig = CellUtility.GetCellConfig(Manager, ConfigEntity, cellType.Value);
                 var fluidity = cellConfig.Fluidity;
 
-                // 4. 获取并根据 Fluidity 控制遍历的可用坐标
+                // 5. 获取并根据 Fluidity 控制遍历的可用坐标
                 var coordinates =
                     GetAvailableCoordinates(currentCoordinate, primaryDirection, direction, cellState.Value);
                 var tryRatio = fluidity * fluidity; // 平方关系，低端更陡峭
@@ -105,7 +110,7 @@ namespace _Scripts.Systems
 
                 for (var i = 0; i < maxTries; i++)
                 {
-                    if (!TryMoveCell(self, CellMap, coordinates[i])) continue;
+                    if (!TryMoveCell(self, coordinates[i])) continue;
 
                     // 移动成功后，应用 Viscosity 影响
                     var movementEfficiency = 1.0f - cellConfig.Viscosity;
@@ -114,24 +119,24 @@ namespace _Scripts.Systems
                     return;
                 }
 
-                // 5. 处理碰撞
+                // 6. 处理碰撞
                 HandleCollision(self, targetCoordinate, currentCoordinate);
             }
 
             #region 辅助方法
 
-            private bool TryMoveCell(Entity cell, NativeHashMap<int3, Entity> cellMap, int3 targetCoordinate)
+            private bool TryMoveCell(Entity cell, int3 targetCoordinate)
             {
-                if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
+                if (!CellMap.TryAdd(targetCoordinate, cell)) return false;
 
                 var localTransform = LocalTransformLookup[cell];
-                cellMap.Remove((int3)localTransform.Position);
+                CellMap.Remove((int3)localTransform.Position);
                 localTransform.Position = targetCoordinate;
                 LocalTransformLookup[cell] = localTransform;
                 return true;
             }
 
-            private bool TrySwapCell(Entity currentCell, Entity targetCell, NativeHashMap<int3, Entity> cellMap)
+            private bool TrySwapCell(Entity currentCell, Entity targetCell)
             {
                 var currentTransform = LocalTransformLookup[currentCell];
                 var targetTransform = LocalTransformLookup[targetCell];
@@ -140,12 +145,12 @@ namespace _Scripts.Systems
                 var targetCoordinate = (int3)targetTransform.Position;
 
                 // 移除旧映射
-                cellMap.Remove(currentCoordinate);
-                cellMap.Remove(targetCoordinate);
+                CellMap.Remove(currentCoordinate);
+                CellMap.Remove(targetCoordinate);
 
                 // 添加新映射
-                cellMap.TryAdd(targetCoordinate, currentCell);
-                cellMap.TryAdd(currentCoordinate, targetCell);
+                CellMap.TryAdd(targetCoordinate, currentCell);
+                CellMap.TryAdd(currentCoordinate, targetCell);
 
                 // 交换位置
                 currentTransform.Position = targetCoordinate;
@@ -155,6 +160,23 @@ namespace _Scripts.Systems
                 LocalTransformLookup[targetCell] = targetTransform;
 
                 return true;
+            }
+
+            private bool TrySettlementSwap(Entity self, int3 targetCoordinate)
+            {
+                // 检查目标位置是否有细胞
+                if (!CellMap.TryGetValue(targetCoordinate, out Entity targetEntity)) return false;
+
+                // 检查目标细胞是否为液体状态
+                var targetState = CellStateLookup[targetEntity];
+                if (targetState.Value != CellStateEnum.Liquid) return false;
+
+                // 检查当前细胞质量是否大于目标细胞（沉降条件）
+                var currentMass = MassLookup[self].Value;
+                var targetMass = MassLookup[targetEntity].Value;
+
+                // 如果当前细胞质量大于目标细胞，则尝试交换位置
+                return currentMass > targetMass && TrySwapCell(self, targetEntity);
             }
 
             private static int3 GetPrimaryDirection(float3 normalizedVelocity)
