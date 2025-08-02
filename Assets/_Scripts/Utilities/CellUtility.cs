@@ -126,8 +126,27 @@ namespace _Scripts.Utilities
 
             cellMap.Remove((int3)localTransform.Position);
             localTransform.Position = targetCoordinate;
-            localTransform.Rotation = quaternion.identity;
-            localTransform.Scale = GlobalConfig.DefaultCellScale;
+            return true;
+        }
+
+        public static bool TrySwapCell(Entity currentCell, Entity targetCell,
+            ref LocalTransform currentTransform, ref LocalTransform targetTransform,
+            NativeHashMap<int3, Entity> cellMap)
+        {
+            var currentCoordinate = (int3)currentTransform.Position;
+            var targetCoordinate = (int3)targetTransform.Position;
+
+            // 移除旧映射
+            cellMap.Remove(currentCoordinate);
+            cellMap.Remove(targetCoordinate);
+
+            // 添加新映射
+            cellMap.TryAdd(targetCoordinate, currentCell);
+            cellMap.TryAdd(currentCoordinate, targetCell);
+
+            // 交换位置
+            (currentTransform.Position, targetTransform.Position) =
+                (targetTransform.Position, currentTransform.Position);
 
             return true;
         }
