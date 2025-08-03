@@ -4,100 +4,144 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-这是一个基于 Unity ECS (Entity Component System) 架构的 Supernova 模拟项目，专注于细胞自动机和粒子系统模拟。项目使用 DOTS (Data-Oriented Tech Stack) 进行高性能计算，并通过 VFX Graph 实现视觉效果。
+这是一个基于 Unity DOTS/ECS 架构的 2D 细胞自动机物理模拟项目，模拟 Supernova 超新星的物质演化过程。项目使用 Unity 6000.0.49f1 版本，通过 ECS + VFX Graph 实现高性能的粒子系统模拟。
 
-## 技术架构
+## 技术栈
 
-### 核心框架
-- **Unity DOTS/ECS**: 使用 Entities 包进行数据导向设计
-- **Visual Effect Graph**: 基于 GPU 的粒子系统渲染
-- **Burst Compiler**: 通过 [BurstCompile] 特性优化性能
-- **Job System**: 并行计算框架
+- **Unity 版本**: 6000.0.49f1
+- **核心架构**: DOTS (Data-Oriented Tech Stack)
+- **ECS 版本**: Entities 1.3.14
+- **物理系统**: Unity Physics 1.3.14
+- **渲染管线**: URP 17.0.4 + VFX Graph 17.0.4
+- **Burst 编译器**: 启用 [BurstCompile] 优化
+- **热重载**: Hot Reload 支持实时调试
 
-### 代码结构
+## 架构概览
 
+### 系统分组架构
 ```
-Assets/_Scripts/
-├── Components/          # ECS 组件定义
-│   ├── CellComponents.cs    # 细胞相关组件
-│   └── ConfigComponents.cs  # 配置相关组件
-├── Systems/            # ECS 系统
-│   ├── CellVFXDataSystem.cs    # 细胞VFX数据传输系统
-│   ├── PhysicSystem.cs         # 物理系统
-│   └── S1S1_InstantiationFromSupernovaSystem.cs # 实例化系统
-├── Authorings/         # MonoBehaviour 到 ECS 的桥接
-│   ├── CellConfigCreator.cs    # 细胞配置创建器
-│   └── CellPrototypeCreator.cs # 细胞原型创建器
-├── Aspects/            # ECS 方面定义
-├── Utilities/          # 工具类和数据结构
-│   ├── GlobalConfig.cs       # 全局配置
-│   └── DataStructs.cs        # 数据结构定义
-└── Prefabs/            # 预制体
-    ├── Cell VFX.vfx         # 细胞视觉特效
-    └── Cell Config Creator.prefab
+SimulationSystemGroup
+├── GlobalDataSystem (初始化)
+├── CaSlowSystemGroup (500ms 更新)
+│   └── GravitySystem (重力计算)
+└── CaFastSystemGroup (20ms 更新)
+    └── PhysicSystem (碰撞与运动)
 ```
 
-### 主要系统流程
+### 数据流
+1. **配置加载**: CellConfigCreator 读取 CSV → 创建 CellConfigEntity
+2. **实体池**: GlobalDataSystem 预创建实体池 → CellPoolQueue
+3. **实例化**: SupernovaAuthoring → SCA_InstantiationFromSupernovaSystem
+4. **物理模拟**: PhysicSystem 处理细胞运动和碰撞
+5. **VFX 同步**: LS_CellVFXDataSystem 将 ECS 数据同步到 VFX Graph
 
-1. **初始化流程**: CellConfigCreator 从 CSV 文件读取配置 → 创建 CellConfigEntity
-2. **实例化流程**: SupernovaAuthoring 触发实例化 → S1S1_InstantiationFromSupernovaSystem 创建细胞实体
-3. **物理模拟**: PhysicSystem 处理细胞运动和交互
-4. **VFX 同步**: CellVFXDataSystem 将实体数据同步到 Visual Effect Graph
+## 核心数据模型：无状态物理系统
 
-## 开发命令
+### 设计哲学
+本系统**没有状态机**，所有行为由物理法则驱动。Cell 的"类型变化"只是物理属性达到阈值时的自然结果。
 
-### Unity 编辑器命令
+### 属性分类
+
+**动态属性**（每 tick 实时计算）：
+- `Temperature` - 热传导系统计算
+- `Moisture` - 湿度扩散系统计算  
+- `Energy` - 燃烧系统计算消耗
+- `Velocity` - 物理系统计算运动
+
+**静态基准**（CSV 物理常数）：
+- `Mass_Default` - 基础质量
+- `HeatConductivity` - 导热系数
+- `Fluidity/Viscosity` - 流体/摩擦系数
+- 相变阈值：`Temperature_Min/Max`, `IgnitionPoint`
+
+### 物质物理状态
+- **Solid** - 刚体，不可流动
+- **Liquid** - 可流动，密度分层
+- **Powder** - 颗粒，可堆叠
+
+### 无状态转换机制
+```
+温度变化 → 达到阈值 → 物质类型改变
+湿度变化 → 达到阈值 → 物质类型改变  
+能量消耗 → 燃尽阈值 → 物质类型改变
+```
+
+### 空间数据结构
+- **CellMap**: NativeHashMap<int3, Entity> - 3D 空间哈希
+- **实体池**: NativeQueue<Entity> - 预创建池
+- **最大容量**: 100,000 个 Cell
+
+## 关键配置文件
+
+### Cell 配置表 (Assets/Settings/CellConfigs.csv)
+包含 21 种物质类型，每种定义：
+- 基础属性: 质量、状态、流体性、粘度
+- 热力学: 温度范围、导热系数、燃点、爆点
+- 资源掉落: 金、银、铜、铁的掉落概率
+
+### 全局配置 (GlobalConfig.cs)
+```csharp
+MaxCellCount = 100000          // 最大实体数
+CellMapInitialCapacity = 65536 // 空间哈希容量
+MaxSpeed = 50f                // 最大速度限制
+PhysicsSpeedScale = 1f        // 物理倍率
+```
+
+## 开发工作流
+
+### 运行项目
 ```bash
-# 打开 Unity 项目
+# 直接打开 Unity 项目
 Unity -projectPath .
 
-# 运行测试场景
+# 打开特定场景
 Unity -projectPath . -executeMethod UnityEditor.SceneManagement.EditorSceneManager.OpenScene -scene Assets/Scenes/Test.unity
 ```
 
-### 构建命令
+### 构建项目
 ```bash
-# Windows 构建
+# Windows 64位构建
 Unity -quit -batchmode -projectPath . -executeMethod UnityEditor.BuildPipeline.BuildPlayer -scene Assets/Scenes/Test.unity -outputPath Build/Windows/Supernova.exe -targetPlatform StandaloneWindows64
 
 # Android 构建
 Unity -quit -batchmode -projectPath . -executeMethod UnityEditor.BuildPipeline.BuildPlayer -scene Assets/Scenes/Test.unity -outputPath Build/Android/Supernova.apk -targetPlatform Android
 ```
 
-### 调试和测试
+### 调试工具
 ```bash
-# 打开 Unity Profiler
+# 启用 Unity Profiler
 Unity -projectPath . -profiler-enable
 
-# 运行性能测试（如果存在）
+# 运行性能测试
 Unity -projectPath . -runTests -testPlatform EditMode -testResults TestResults.xml
 ```
-
-## 关键配置
-
-### CSV 配置格式
-位于 `Assets/Settings/CellConfigs.csv`：
-```csv
-ID,Type,State,Mass,...
-1,RedBloodCell,Active,10
-2,WhiteBloodCell,Inactive,15
-```
-
-### 全局配置
-在 `Assets/_Scripts/Utilities/GlobalConfig.cs` 中定义：
-- `MaxCellCount`: 最大细胞数量限制
-- 各种物理和渲染参数
 
 ## 重要文件路径
 
 - **主场景**: `Assets/Scenes/Test.unity`
+- **Cell 配置**: `Assets/Settings/CellConfigs.csv`
 - **VFX 资源**: `Assets/Prefabs/Cell VFX.vfx`
-- **配置文件**: `Assets/Settings/CellConfigs.csv`
 - **系统代码**: `Assets/_Scripts/Systems/`
+- **配置预制体**: `Assets/Prefabs/Cell Config Creator.prefab`
 
 ## 开发提示
 
-1. **ECS 调试**: 使用 Unity 的 Entity Debugger 窗口查看实体和组件状态
-2. **性能优化**: 标记为 [BurstCompile] 的 Job 会自动优化，确保使用 Burst Inspector 检查生成的代码
-3. **VFX 绑定**: CellVFXDataSystem 中定义的 Shader 属性名必须与 VFX Graph 中的属性名完全匹配
-4. **内存管理**: 使用 NativeArray/NativeList 时务必正确 Dispose，避免内存泄漏
+### ECS 调试
+- 使用 **Entity Debugger** 窗口查看实体和组件状态
+- 检查 **Systems** 标签页的更新频率和性能
+- 关注 **Memory** 面板中的 NativeContainer 使用情况
+
+### 性能优化
+- 所有核心系统启用 [BurstCompile] 和 [UpdateInGroup] 优化
+- 使用 NativeContainer 时务必在 OnDestroy 中 Dispose
+- CellMap 使用 int3 作为 key，避免浮点精度问题
+
+### VFX 绑定
+- LS_CellVFXDataSystem 负责 ECS → VFX Graph 数据同步
+- Shader 属性名必须与 VFX Graph 中的 Exposed Property 精确匹配
+- 支持属性: Position, Scale, Color, CellType
+
+### 内存管理
+- GlobalDataSystem 负责所有 NativeContainer 的生命周期
+- CellPoolQueue 预创建实体避免运行时实例化开销
+- 使用 EntityCommandBuffer 批量处理实体操作
