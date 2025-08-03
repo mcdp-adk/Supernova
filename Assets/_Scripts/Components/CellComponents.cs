@@ -25,11 +25,11 @@ namespace _Scripts.Components
     public struct IsAlive : IComponentData, IEnableableComponent
     {
     }
-    
+
     public struct IsBurning : IComponentData, IEnableableComponent
     {
     }
-    
+
     public struct ShouldExplosion : IComponentData, IEnableableComponent
     {
     }
@@ -78,8 +78,13 @@ namespace _Scripts.Components
     {
         public float3 Value;
     }
-    
+
     public struct HeatBuffer : IBufferElementData
+    {
+        public float Value;
+    }
+
+    public struct MoistureBuffer : IBufferElementData
     {
         public float Value;
     }

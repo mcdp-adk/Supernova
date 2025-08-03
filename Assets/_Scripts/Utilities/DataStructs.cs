@@ -45,10 +45,11 @@ namespace _Scripts.Utilities
         public float HeatConductivity;
         public float IgnitionPoint;
         public float ExplosionPoint;
-        public float EnergyDefault;
         public float MoistureDefault;
         public float MoistureMin;
         public float MoistureMax;
+        public float MoistureConductivity;
+        public float EnergyDefault;
         public float DropChanceGold;
         public float DropChanceSilver;
         public float DropChanceCopper;

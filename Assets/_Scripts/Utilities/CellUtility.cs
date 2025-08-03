@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using _Scripts.Components;
 using Unity.Collections;
 using Unity.Entities;
@@ -72,8 +71,6 @@ namespace _Scripts.Utilities
 
         #endregion
 
-        #region Add Cell to World
-
         public static bool TryAddCellToWorld(Entity cell, EntityManager manager, EntityCommandBuffer ecb,
             NativeHashMap<int3, Entity> cellMap, Entity configEntity,
             CellTypeEnum cellType, int3 targetCoordinate, float3 initialImpulse)
@@ -88,7 +85,14 @@ namespace _Scripts.Utilities
                 Scale = GlobalConfig.DefaultCellScale
             });
 
-            SetCellType(cell, ecb, cellType);
+            // 设置 Cell 外观
+            ecb.SetComponentEnabled<IsAlive>(cell, cellType != CellTypeEnum.None);
+            ecb.SetComponent(cell, new CellType { Value = cellType });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)cellType },
+                MeshID = new BatchMeshID { value = (uint)cellType }
+            });
 
             var config = GetCellConfig(manager, configEntity, cellType);
             ecb.AddComponent(cell, new CellState { Value = config.State });
@@ -102,22 +106,6 @@ namespace _Scripts.Utilities
 
             return true;
         }
-
-        private static void SetCellType(Entity cell, EntityCommandBuffer ecb, CellTypeEnum targetCellType)
-        {
-            ecb.SetComponentEnabled<IsAlive>(cell, targetCellType != CellTypeEnum.None);
-
-            // targetCellType = CellTypeEnum.None;
-
-            ecb.SetComponent(cell, new CellType { Value = targetCellType });
-            ecb.SetComponent(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)targetCellType },
-                MeshID = new BatchMeshID { value = (uint)targetCellType }
-            });
-        }
-
-        #endregion
 
         public static CellConfig GetCellConfig(EntityManager manager, Entity configEntity, CellTypeEnum cellType)
         {

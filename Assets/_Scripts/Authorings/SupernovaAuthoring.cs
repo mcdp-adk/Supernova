@@ -20,7 +20,7 @@ namespace _Scripts.Authorings
         [SerializeField] private int explosionAngleClamp = 30;
 
         [Header("Cell 生成设置")] [SerializeField] private int generateRange = 10;
-        [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
+        [Range(0, 100)] [SerializeField] private float generateDensity = 10f;
 
         [SerializeField] private CellGenerationConfig[] cellGenerationConfigs;
 
