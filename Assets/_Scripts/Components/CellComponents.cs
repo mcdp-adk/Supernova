@@ -26,6 +26,14 @@ namespace _Scripts.Components
     {
     }
 
+    public struct IsBurning : IComponentData, IEnableableComponent
+    {
+    }
+
+    public struct ShouldExplosion : IComponentData, IEnableableComponent
+    {
+    }
+
     // ========== Data ==========
 
 
@@ -47,6 +55,7 @@ namespace _Scripts.Components
     public struct Velocity : IComponentData, IEnableableComponent
     {
         public float3 Value;
+        public float3 MovementDebt;
     }
 
     public struct Temperature : IComponentData
@@ -69,5 +78,15 @@ namespace _Scripts.Components
     public struct ImpulseBuffer : IBufferElementData
     {
         public float3 Value;
+    }
+
+    public struct HeatBuffer : IBufferElementData
+    {
+        public float Value;
+    }
+
+    public struct MoistureBuffer : IBufferElementData
+    {
+        public float Value;
     }
 }

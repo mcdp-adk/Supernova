@@ -1,4 +1,3 @@
-using System;
 using _Scripts.Components;
 using _Scripts.Utilities;
 using Unity.Entities;
@@ -6,33 +5,19 @@ using UnityEngine;
 
 namespace _Scripts.Authorings
 {
-    [Serializable]
-    public struct CellGenerationConfig
-    {
-        public CellTypeEnum cellType;
-        public int weight;
-    }
-
     public class SupernovaAuthoring : MonoBehaviour
     {
         [Header("超新星设置")] [SerializeField] private int mass = 100;
-        [SerializeField] private int explosionStrength = 10;
-        [SerializeField] private int explosionAngleClamp = 30;
 
-        [Header("Cell 生成设置")] [SerializeField] private int generateRange = 10;
-        [Range(0, 20)] [SerializeField] private float generateDensity = 10f;
-
-        [SerializeField] private CellGenerationConfig[] cellGenerationConfigs;
+        [Header("Cell 分层生成设置")] [SerializeField]
+        private LayerGenerationConfig[] layerConfigs;
 
         private class CenterAuthoringBaker : Baker<SupernovaAuthoring>
         {
             public override void Bake(SupernovaAuthoring authoring)
             {
-                // 设置 Transform 依赖
-                // 当 Transform 发生变化时触发 Bake
                 DependsOn(authoring.transform);
 
-                // 确保位置四舍五入为最接近的整数
                 authoring.transform.position = new Vector3(
                     Mathf.RoundToInt(authoring.transform.position.x),
                     Mathf.RoundToInt(authoring.transform.position.y),
@@ -43,30 +28,49 @@ namespace _Scripts.Authorings
 
                 AddComponent<SupernovaTag>(entity);
                 AddComponent<ShouldInitializeCell>(entity);
-
-                // 超新星设置
                 AddComponent(entity, new Mass { Value = authoring.mass });
-                AddComponent(entity, new ExplosionStrength { Value = authoring.explosionStrength });
-                AddComponent(entity, new ExplosionAngleClamp { Value = authoring.explosionAngleClamp });
 
-                // Cell 生成设置
-                AddComponent(entity, new CellGenerateRange { Value = authoring.generateRange });
-                AddComponent(entity, new CellGenerateDensity { Value = authoring.generateDensity });
+                var layerBuffer = AddBuffer<LayerGenerationConfigBuffer>(entity);
+                var cellConfigBuffer = AddBuffer<LayerCellGenerationConfigBuffer>(entity);
 
-                // 设置不同类型的 Cell 的生成权重
-                var buffer = AddBuffer<CellGenerationConfigBuffer>(entity);
-                foreach (var config in authoring.cellGenerationConfigs)
+                if (authoring.layerConfigs == null) return;
+                for (var layerIndex = 0; layerIndex < authoring.layerConfigs.Length; layerIndex++)
                 {
-                    buffer.Add(new CellGenerationConfigBuffer { CellType = config.cellType, Weight = config.weight });
+                    var layer = authoring.layerConfigs[layerIndex];
+
+                    layerBuffer.Add(new LayerGenerationConfigBuffer
+                    {
+                        Radius = layer.radius,
+                        Density = layer.density,
+                        ExplosionStrength = layer.explosionStrength,
+                        ExplosionAngleClamp = layer.explosionAngleClamp
+                    });
+
+                    if (layer.cellConfigs == null) continue;
+                    foreach (var cellConfig in layer.cellConfigs)
+                    {
+                        cellConfigBuffer.Add(new LayerCellGenerationConfigBuffer
+                        {
+                            CellType = cellConfig.cellType,
+                            Weight = cellConfig.weight,
+                            LayerIndex = layerIndex
+                        });
+                    }
                 }
             }
         }
 
         private void OnDrawGizmos()
         {
-            // 绘制生成
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, generateRange);
+            if (layerConfigs == null) return;
+
+            Color[] colors = { Color.red, Color.yellow, Color.green, Color.blue, Color.magenta, Color.cyan };
+
+            for (var i = 0; i < layerConfigs.Length; i++)
+            {
+                Gizmos.color = colors[i % colors.Length];
+                Gizmos.DrawWireSphere(transform.position, layerConfigs[i].radius);
+            }
         }
     }
 }

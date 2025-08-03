@@ -127,50 +127,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: mass
-      value: 300
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: generateRange
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: generateDensity
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: explosionStrength
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[0].weight
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[1].weight
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[2].weight
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[0].cellType
-      value: -6
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[1].cellType
-      value: -2
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[2].cellType
-      value: -1
-      objectReference: {fileID: 0}
     - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_Name
       value: Supernova Core

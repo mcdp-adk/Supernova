@@ -59,14 +59,15 @@ namespace _Scripts.Authorings
                     HeatConductivity = float.TryParse(values[9], out var heatCond) ? heatCond : 0.5f,
                     IgnitionPoint = float.TryParse(values[10], out var ignition) ? ignition : 99999f,
                     ExplosionPoint = float.TryParse(values[11], out var explosion) ? explosion : 99999f,
-                    EnergyDefault = float.TryParse(values[12], out var energy) ? energy : 0f,
-                    MoistureDefault = float.TryParse(values[13], out var moistDefault) ? moistDefault : 0f,
-                    MoistureMin = float.TryParse(values[14], out var moistMin) ? moistMin : 0f,
-                    MoistureMax = float.TryParse(values[15], out var moistMax) ? moistMax : 1f,
-                    DropChanceGold = float.TryParse(values[16], out var gold) ? gold : 0f,
-                    DropChanceSilver = float.TryParse(values[17], out var silver) ? silver : 0f,
-                    DropChanceCopper = float.TryParse(values[18], out var copper) ? copper : 0f,
-                    DropChanceIron = float.TryParse(values[19], out var iron) ? iron : 0f
+                    MoistureDefault = float.TryParse(values[12], out var moistDefault) ? moistDefault : 0f,
+                    MoistureMin = float.TryParse(values[13], out var moistMin) ? moistMin : 0f,
+                    MoistureMax = float.TryParse(values[14], out var moistMax) ? moistMax : 1f,
+                    MoistureConductivity = float.TryParse(values[15], out var moistCond) ? moistCond : 0.5f,
+                    EnergyDefault = float.TryParse(values[16], out var energy) ? energy : 0f,
+                    DropChanceGold = float.TryParse(values[17], out var gold) ? gold : 0f,
+                    DropChanceSilver = float.TryParse(values[18], out var silver) ? silver : 0f,
+                    DropChanceCopper = float.TryParse(values[19], out var copper) ? copper : 0f,
+                    DropChanceIron = float.TryParse(values[20], out var iron) ? iron : 0f
                 };
 
                 configs.Add(config);
