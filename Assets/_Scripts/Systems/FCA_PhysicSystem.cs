@@ -54,7 +54,8 @@ namespace _Scripts.Systems
                 {
                     MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
                     VelocityLookup = SystemAPI.GetComponentLookup<Velocity>(),
-                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>()
+                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>(),
+                    MaxStep = maxStep
                 }.Schedule(state.Dependency);
                 state.Dependency.Complete();
 
@@ -116,10 +117,10 @@ namespace _Scripts.Systems
                     // 移动成功后，应用 Viscosity 影响
                     var movementEfficiency = 1.0f - cellConfig.Viscosity;
                     var currentVelocity = VelocityLookup[self];
-                    var newVelocity = new Velocity 
-                    { 
+                    var newVelocity = new Velocity
+                    {
                         Value = currentVelocity.Value * movementEfficiency,
-                        MovementDebt = currentVelocity.MovementDebt 
+                        MovementDebt = currentVelocity.MovementDebt
                     };
                     VelocityLookup[self] = newVelocity;
                     return;
@@ -136,9 +137,13 @@ namespace _Scripts.Systems
                 if (!CellMap.TryAdd(targetCoordinate, cell)) return false;
 
                 var localTransform = LocalTransformLookup[cell];
+                var actualMovement = targetCoordinate - (int3)localTransform.Position;
                 CellMap.Remove((int3)localTransform.Position);
                 localTransform.Position = targetCoordinate;
                 LocalTransformLookup[cell] = localTransform;
+
+                // 减少移动债务
+                ReduceMovementDebt(cell, actualMovement);
                 return true;
             }
 
@@ -149,6 +154,7 @@ namespace _Scripts.Systems
 
                 var currentCoordinate = (int3)currentTransform.Position;
                 var targetCoordinate = (int3)targetTransform.Position;
+                var actualMovement = targetCoordinate - currentCoordinate;
 
                 // 移除旧映射
                 CellMap.Remove(currentCoordinate);
@@ -165,7 +171,16 @@ namespace _Scripts.Systems
                 LocalTransformLookup[currentCell] = currentTransform;
                 LocalTransformLookup[targetCell] = targetTransform;
 
+                // 减少移动债务
+                ReduceMovementDebt(currentCell, actualMovement);
                 return true;
+            }
+
+            private void ReduceMovementDebt(Entity cell, int3 actualMovement)
+            {
+                var velocity = VelocityLookup[cell];
+                velocity.MovementDebt -= actualMovement;
+                VelocityLookup[cell] = velocity;
             }
 
             private bool TrySettlementSwap(Entity self, int3 targetCoordinate)
@@ -311,6 +326,7 @@ namespace _Scripts.Systems
             [ReadOnly] public ComponentLookup<Mass> MassLookup;
             public ComponentLookup<Velocity> VelocityLookup;
             public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
+            [ReadOnly] public int MaxStep;
 
             private void Execute(Entity cell)
             {
@@ -319,24 +335,25 @@ namespace _Scripts.Systems
                 // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impulse in ImpulseBufferLookup[cell]) totalImpulse += impulse.Value;
 
-                // 计算新速度
-                var newVelocity = VelocityLookup[cell].Value + totalImpulse / MassLookup[cell].Value;
-
-                // 限制最大速度
+                // 计算并限制新速度
+                var velocity = VelocityLookup[cell];
+                var newVelocity = velocity.Value + totalImpulse / MassLookup[cell].Value;
                 var speedSq = math.lengthsq(newVelocity);
                 if (speedSq > GlobalConfig.MaxSpeed * GlobalConfig.MaxSpeed)
                     newVelocity = math.normalize(newVelocity) * GlobalConfig.MaxSpeed;
 
-                // 更新速度，保持 MovementDebt
-                var currentVelocityComponent = VelocityLookup[cell];
-                VelocityLookup[cell] = new Velocity 
-                { 
-                    Value = newVelocity,
-                    MovementDebt = currentVelocityComponent.MovementDebt 
-                };
+                // 计算并限制 MovementDebt
+                var newDebt = velocity.MovementDebt +
+                              newVelocity * ((GlobalConfig.FastUpdateRateInMS / 1000.0f) / MaxStep);
+                var debtSq = math.lengthsq(newDebt);
+                if (debtSq > GlobalConfig.MaxSpeed * GlobalConfig.MaxSpeed)
+                    newDebt = math.normalize(newDebt) * GlobalConfig.MaxSpeed;
 
-                // 根据速度模长，启用/禁用 Velocity 组件
-                VelocityLookup.SetComponentEnabled(cell, math.lengthsq(newVelocity) >= 1f);
+                // 更新 Velocity 组件
+                VelocityLookup[cell] = new Velocity { Value = newVelocity, MovementDebt = newDebt };
+
+                // 根据 MovementDebt 模长，启用/禁用 Velocity 组件
+                VelocityLookup.SetComponentEnabled(cell, math.lengthsq(newDebt) >= 1f);
 
                 // 清空冲量缓冲区
                 ImpulseBufferLookup[cell].Clear();

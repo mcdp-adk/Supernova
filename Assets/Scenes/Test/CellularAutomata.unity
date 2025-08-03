@@ -128,24 +128,60 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: mass
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.size
-      value: 3
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].radius
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].radius
-      value: 10
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].radius
       value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].density
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].density
-      value: 10
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].density
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].explosionStrength
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[1].explosionStrength
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[2].explosionStrength
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].explosionAngleClamp
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[1].explosionAngleClamp
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[2].explosionAngleClamp
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.size
@@ -153,7 +189,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.data[0].weight
@@ -166,6 +202,10 @@ PrefabInstance:
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[1].weight
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].cellConfigs.Array.data[0].cellType
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.data[0].cellType

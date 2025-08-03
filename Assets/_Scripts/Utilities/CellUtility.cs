@@ -75,6 +75,7 @@ namespace _Scripts.Utilities
             NativeHashMap<int3, Entity> cellMap, Entity configEntity,
             CellTypeEnum cellType, int3 targetCoordinate, float3 initialImpulse)
         {
+            if (cellType == CellTypeEnum.None) return true;
             if (!cellMap.TryAdd(targetCoordinate, cell)) return false;
 
             ecb.AddComponent<LocalTransform>(cell);
@@ -86,7 +87,7 @@ namespace _Scripts.Utilities
             });
 
             // 设置 Cell 外观
-            ecb.SetComponentEnabled<IsAlive>(cell, cellType != CellTypeEnum.None);
+            ecb.SetComponentEnabled<IsAlive>(cell, true);
             ecb.SetComponent(cell, new CellType { Value = cellType });
             ecb.SetComponent(cell, new MaterialMeshInfo
             {
