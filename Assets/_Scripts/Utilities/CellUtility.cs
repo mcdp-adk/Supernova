@@ -104,6 +104,8 @@ namespace _Scripts.Utilities
             ecb.AddComponent(cell, new Moisture { Value = config.MoistureDefault });
             ecb.AddComponent(cell, new Energy { Value = config.EnergyDefault });
             ecb.AddBuffer<ImpulseBuffer>(cell).Add(new ImpulseBuffer { Value = initialImpulse });
+            ecb.AddBuffer<HeatBuffer>(cell);
+            ecb.AddBuffer<MoistureBuffer>(cell);
 
             return true;
         }

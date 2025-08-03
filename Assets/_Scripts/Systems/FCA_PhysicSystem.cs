@@ -83,8 +83,8 @@ namespace _Scripts.Systems
             private void Execute(Entity self, in CellType cellType)
             {
                 var cellState = CellStateLookup[self];
-                var velocity = VelocityLookup[self].Value;
-                var direction = math.normalize(velocity);
+                var movementDebt = VelocityLookup[self].MovementDebt;
+                var direction = math.normalize(movementDebt);
                 var offset = (int3)math.round(direction);
                 var currentCoordinate = (int3)LocalTransformLookup[self].Position;
 

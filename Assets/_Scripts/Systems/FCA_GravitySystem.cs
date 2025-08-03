@@ -50,13 +50,14 @@ namespace _Scripts.Systems
                 var cellPosition = (int3)localTransform.ValueRO.Position;
                 var cellMass = mass.ValueRO.Value;
 
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var supernova in SupernovaDataArray)
                 {
                     var direction = supernova.Coordinate - cellPosition;
                     var distanceSquared = math.lengthsq(direction);
 
                     // 如果距离过近则跳过，避免除以零或过大冲量
-                    if (!(distanceSquared > 0.1f)) continue;
+                    if (!(distanceSquared > 16f)) continue;
                     var impulseMagnitude = supernova.Mass * cellMass / distanceSquared;
                     var impulse = math.normalize(direction) * impulseMagnitude;
                     impulseBuffer.Add(new ImpulseBuffer { Value = impulse });
