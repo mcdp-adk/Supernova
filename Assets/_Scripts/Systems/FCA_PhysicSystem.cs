@@ -115,8 +115,13 @@ namespace _Scripts.Systems
 
                     // 移动成功后，应用 Viscosity 影响
                     var movementEfficiency = 1.0f - cellConfig.Viscosity;
-                    var currentVelocity = VelocityLookup[self].Value;
-                    VelocityLookup[self] = new Velocity { Value = currentVelocity * movementEfficiency };
+                    var currentVelocity = VelocityLookup[self];
+                    var newVelocity = new Velocity 
+                    { 
+                        Value = currentVelocity.Value * movementEfficiency,
+                        MovementDebt = currentVelocity.MovementDebt 
+                    };
+                    VelocityLookup[self] = newVelocity;
                     return;
                 }
 
@@ -322,8 +327,13 @@ namespace _Scripts.Systems
                 if (speedSq > GlobalConfig.MaxSpeed * GlobalConfig.MaxSpeed)
                     newVelocity = math.normalize(newVelocity) * GlobalConfig.MaxSpeed;
 
-                // 更新速度
-                VelocityLookup[cell] = new Velocity { Value = newVelocity };
+                // 更新速度，保持 MovementDebt
+                var currentVelocityComponent = VelocityLookup[cell];
+                VelocityLookup[cell] = new Velocity 
+                { 
+                    Value = newVelocity,
+                    MovementDebt = currentVelocityComponent.MovementDebt 
+                };
 
                 // 根据速度模长，启用/禁用 Velocity 组件
                 VelocityLookup.SetComponentEnabled(cell, math.lengthsq(newVelocity) >= 1f);

@@ -97,7 +97,7 @@ namespace _Scripts.Utilities
             var config = GetCellConfig(manager, configEntity, cellType);
             ecb.AddComponent(cell, new CellState { Value = config.State });
             ecb.AddComponent(cell, new Mass { Value = config.Mass });
-            ecb.AddComponent(cell, new Velocity { Value = float3.zero });
+            ecb.AddComponent(cell, new Velocity { Value = float3.zero, MovementDebt = float3.zero });
             ecb.SetComponentEnabled<Velocity>(cell, false);
             ecb.AddComponent(cell, new Temperature { Value = config.TemperatureDefault });
             ecb.AddComponent(cell, new Moisture { Value = config.MoistureDefault });

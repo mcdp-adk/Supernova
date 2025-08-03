@@ -55,6 +55,7 @@ namespace _Scripts.Components
     public struct Velocity : IComponentData, IEnableableComponent
     {
         public float3 Value;
+        public float3 MovementDebt;
     }
 
     public struct Temperature : IComponentData
