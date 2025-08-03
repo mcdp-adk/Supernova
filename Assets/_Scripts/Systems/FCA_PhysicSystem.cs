@@ -11,6 +11,7 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(CaFastSystemGroup))]
     public partial struct PhysicSystem : ISystem
     {
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<CellConfigTag>();

@@ -44,43 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 10000
-  explosionStrength: 100
-  explosionAngleClamp: 90
-  generateRange: 100
-  generateDensity: 0.08
-  cellGenerationConfigs:
-  - cellType: -1
-    weight: 1
-  - cellType: -2
-    weight: 1
-  - cellType: -3
-    weight: 1
-  - cellType: -4
-    weight: 1
-  - cellType: -5
-    weight: 1
-  - cellType: -6
-    weight: 1
-  - cellType: -7
-    weight: 1
-  - cellType: -8
-    weight: 1
-  - cellType: -9
-    weight: 1
-  - cellType: -10
-    weight: 1
-  - cellType: -11
-    weight: 1
-  - cellType: -11
-    weight: 1
-  - cellType: -12
-    weight: 1
-  - cellType: -13
-    weight: 1
-  - cellType: -12
-    weight: 1
-  - cellType: -12
-    weight: 1
-  - cellType: -12
-    weight: 1
+  mass: 300
+  layerConfigs:
+  - radius: 5
+    density: 100
+    explosionStrength: 0
+    explosionAngleClamp: 0
+    cellConfigs:
+    - cellType: -19
+      weight: 1

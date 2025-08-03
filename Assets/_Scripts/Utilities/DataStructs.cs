@@ -1,3 +1,4 @@
+using System;
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum
@@ -31,7 +32,7 @@ namespace _Scripts.Utilities
         Powder = 2,
         Liquid = 3
     }
-    
+
     public struct CellConfig
     {
         public CellTypeEnum Type;
@@ -54,5 +55,22 @@ namespace _Scripts.Utilities
         public float DropChanceSilver;
         public float DropChanceCopper;
         public float DropChanceIron;
+    }
+
+    [Serializable]
+    public struct LayerCellGenerationConfig
+    {
+        public CellTypeEnum cellType;
+        public int weight;
+    }
+
+    [Serializable]
+    public struct LayerGenerationConfig
+    {
+        public int radius;
+        public float density;
+        public int explosionStrength;
+        public int explosionAngleClamp;
+        public LayerCellGenerationConfig[] cellConfigs;
     }
 }

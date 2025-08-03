@@ -128,48 +128,56 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: mass
-      value: 300
+      propertyPath: layerConfigs.Array.size
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: generateRange
-      value: 50
+      propertyPath: layerConfigs.Array.data[1].radius
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: generateDensity
+      propertyPath: layerConfigs.Array.data[2].radius
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[1].density
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[2].density
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: explosionStrength
-      value: 30
+      propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.size
-      value: 2
+      propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.data[0].weight
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[0].weight
-      value: 10
+      propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[0].weight
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[1].weight
-      value: 6
+      propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[1].weight
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[2].weight
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[0].cellType
+      propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.data[0].cellType
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[1].cellType
-      value: -2
+      propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[0].cellType
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
-      propertyPath: cellGenerationConfigs.Array.data[2].cellType
-      value: -1
+      propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[1].cellType
+      value: -19
       objectReference: {fileID: 0}
     - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_Name

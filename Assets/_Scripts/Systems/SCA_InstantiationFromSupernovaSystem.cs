@@ -71,40 +71,34 @@ namespace _Scripts.Systems
                 EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
             {
                 var center = supernova.Coordinate;
-                var range = supernova.GenerateRange;
-                var rangeSquared = range * range;
-                var density = supernova.GenerateDensity;
-                var explosionStrength = supernova.ExplosionStrength;
-                var explosionAngleClamp = supernova.ExplosionAngleClamp;
                 var random = new Random(math.hash(center));
+                var maxRadius = supernova.MaxRadius;
 
-                // 在生成范围内随机生成cell
-                for (var x = -range; x <= range; x++)
-                for (var y = -range; y <= range; y++)
-                for (var z = -range; z <= range; z++)
+                for (var x = -maxRadius; x <= maxRadius; x++)
+                for (var y = -maxRadius; y <= maxRadius; y++)
+                for (var z = -maxRadius; z <= maxRadius; z++)
                 {
                     var offset = new int3(x, y, z);
+                    var distance = math.length(offset);
+                    
+                    var (layerIndex, layerConfig) = supernova.GetLayerForDistance(distance);
+                    if (layerIndex < 0) continue;
+
+                    if (random.NextFloat(0f, 100f) > layerConfig.Density) continue;
+
                     var targetCoordinate = center + offset;
 
-                    // 根据密度随机决定是否生成 Cell
-                    if (random.NextFloat(0f, 100f) > density) continue;
-
-                    // 检查是否在球形范围内
-                    if (math.lengthsq(offset) > rangeSquared) continue;
-
-                    // 计算爆发冲量
                     var direction = math.normalizesafe(offset);
-                    var angle = random.NextFloat(-explosionAngleClamp, explosionAngleClamp);
+                    var angle = random.NextFloat(-layerConfig.ExplosionAngleClamp, layerConfig.ExplosionAngleClamp);
                     var rotation = quaternion.AxisAngle(math.up(), math.radians(angle));
                     var finalDirection = math.mul(rotation, direction);
-                    var initialImpulse = finalDirection * explosionStrength;
+                    var initialImpulse = finalDirection * layerConfig.ExplosionStrength;
 
-                    // 尝试从 Cell 池中获取 Cell 并添加到世界
                     if (CellPoolQueue.TryDequeue(out var cell))
                     {
                         CellUtility.TryAddCellToWorld(
                             cell, Manager, ECB, CellMap, ConfigEntity,
-                            supernova.GetRandomCellType(random), targetCoordinate, initialImpulse);
+                            supernova.GetRandomCellType(random, layerIndex), targetCoordinate, initialImpulse);
                     }
                     else return;
                 }

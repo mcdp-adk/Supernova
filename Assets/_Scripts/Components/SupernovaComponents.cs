@@ -13,33 +13,20 @@ namespace _Scripts.Components
     {
     }
 
-    // ========== Data ==========
-
-    public struct ExplosionStrength : IComponentData
-    {
-        public int Value;
-    }
-
-    public struct ExplosionAngleClamp : IComponentData
-    {
-        public int Value;
-    }
-
-    public struct CellGenerateRange : IComponentData
-    {
-        public int Value;
-    }
-
-    public struct CellGenerateDensity : IComponentData
-    {
-        public float Value;
-    }
-
     // ========== Buffer ==========
-
-    public struct CellGenerationConfigBuffer : IBufferElementData
+    
+    public struct LayerGenerationConfigBuffer : IBufferElementData
+    {
+        public int Radius;
+        public float Density;
+        public int ExplosionStrength;
+        public int ExplosionAngleClamp;
+    }
+    
+    public struct LayerCellGenerationConfigBuffer : IBufferElementData
     {
         public CellTypeEnum CellType;
         public int Weight;
+        public int LayerIndex;
     }
 }
