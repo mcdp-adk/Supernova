@@ -5,7 +5,7 @@ using Unity.Entities;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(CaSlowSystemGroup))]
-    [UpdateAfter(typeof(MoistureDiffusionSystem))]
+    [UpdateAfter(typeof(EvaporationSystem))]
     public partial struct CombustionSystem : ISystem
     {
         [BurstCompile]
