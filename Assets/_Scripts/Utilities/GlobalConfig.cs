@@ -59,5 +59,15 @@ namespace _Scripts.Utilities
         /// 水分扩散系数
         /// </summary>
         public const float MoistureDiffusionCoefficient = 0.15f;
+
+        /// <summary>
+        /// 蒸发系数（温度每超过沸点 1 度的蒸发速率）
+        /// </summary>
+        public const float EvaporationCoefficient = 0.02f;
+
+        /// <summary>
+        /// 水的汽化潜热（单位：J）
+        /// </summary>
+        public const float WaterLatentHeat = 500f;
     }
 }
