@@ -8,8 +8,11 @@ namespace _Scripts.Utilities
     [WithAll(typeof(IsAlive))]
     public partial struct TemperatureUpdateJob : IJobEntity
     {
-        private void Execute()
+        private static void Execute(ref Temperature temperature, DynamicBuffer<HeatBuffer> heatBuffer)
         {
+            for (var i = 0; i < heatBuffer.Length; i++)
+                temperature.Value += heatBuffer[i].Value;
+            heatBuffer.Clear();
         }
     }
 

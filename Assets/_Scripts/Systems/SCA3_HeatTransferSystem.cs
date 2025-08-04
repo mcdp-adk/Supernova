@@ -29,7 +29,7 @@ namespace _Scripts.Systems
                 _cellConfigs = globalDataSystem.CellConfigs;
             }
 
-            var ecb = new EntityCommandBuffer(state.WorldUpdateAllocator);
+            using var ecb = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new HeatTransferJob
             {
                 ECB = ecb.AsParallelWriter(),
@@ -38,13 +38,11 @@ namespace _Scripts.Systems
                 TypeLookup = SystemAPI.GetComponentLookup<CellType>(true),
                 TemperatureLookup = SystemAPI.GetComponentLookup<Temperature>(true)
             }.ScheduleParallel(state.Dependency);
-
-            state.Dependency = new TemperatureUpdateJob
-            {
-            }.ScheduleParallel(state.Dependency);
-
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
+
+            state.Dependency = new TemperatureUpdateJob().ScheduleParallel(state.Dependency);
+            state.Dependency.Complete();
         }
 
         [BurstCompile]
