@@ -8,7 +8,7 @@ using UnityEngine;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(SimulationSystemGroup))]
-    public partial class GlobalDataSystem : SystemBase
+    public partial class GlobalDataInitSystem : SystemBase
     {
         // ========== 数据容器 ==========
 

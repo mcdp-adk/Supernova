@@ -11,30 +11,28 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(CaSlowSystemGroup))]
     public partial struct InstantiationFromSupernovaSystem : ISystem
     {
+        private NativeHashMap<int3, Entity> _cellMap;
+        private NativeQueue<Entity> _cellPoolQueue;
+        
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<CellConfigTag>();
         }
 
-        // ========== 全局数据引用 ==========
-        private NativeHashMap<int3, Entity> _cellMap;
-        private NativeQueue<Entity> _cellPoolQueue;
-
-        // ========== 系统生命周期 ==========
         public void OnUpdate(ref SystemState state)
         {
             // 初始化 CellMap
             if (!_cellMap.IsCreated)
             {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
                 _cellMap = globalDataSystem.CellMap;
             }
 
             // 初始化 CellPoolQueue
             if (!_cellPoolQueue.IsCreated)
             {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
                 _cellPoolQueue = globalDataSystem.CellPoolQueue;
             }
 
@@ -54,9 +52,7 @@ namespace _Scripts.Systems
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
         }
-
-        // ========== 实例化 Cell 作业 ==========
-
+        
         [BurstCompile]
         [WithAll(typeof(ShouldInitializeCell))]
         private partial struct InstantiateCellJob : IJobEntity

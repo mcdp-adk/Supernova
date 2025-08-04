@@ -24,7 +24,7 @@ namespace _Scripts.Systems
             // 获取全局数据容器引用
             if (!_cellMap.IsCreated)
             {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataSystem>();
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
                 _cellMap = globalDataSystem.CellMap;
             }
 

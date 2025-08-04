@@ -110,9 +110,23 @@ namespace _Scripts.Utilities
             return true;
         }
 
+        private static void ReturnCellToPool(Entity cell, EntityCommandBuffer ecb,
+            NativeHashMap<int3, Entity> cellMap, NativeQueue<Entity> cellPoolQueue)
+        {
+        }
+
+        public static void SetCellType(Entity cell, EntityCommandBuffer ecb,
+            NativeHashMap<int3, Entity> cellMap, NativeQueue<Entity> cellPoolQueue, CellTypeEnum targetCellType)
+        {
+            if (targetCellType == CellTypeEnum.None)
+            {
+            }
+        }
+
         public static CellConfig GetCellConfig(EntityManager manager, Entity configEntity, CellTypeEnum cellType)
         {
             var buffer = manager.GetBuffer<CellConfigBuffer>(configEntity);
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var configBuffer in buffer)
             {
                 if (configBuffer.Data.Type == cellType)
