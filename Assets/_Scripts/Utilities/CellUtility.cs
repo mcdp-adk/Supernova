@@ -35,6 +35,10 @@ namespace _Scripts.Utilities
             manager.SetComponentEnabled<PendingDequeue>(prototype, false);
             manager.AddComponent<IsAlive>(prototype);
             manager.SetComponentEnabled<IsAlive>(prototype, false);
+            manager.AddComponent<IsBurning>(prototype);
+            manager.SetComponentEnabled<IsBurning>(prototype, false);
+            manager.AddComponent<ShouldExplosion>(prototype);
+            manager.SetComponentEnabled<ShouldExplosion>(prototype, false);
 
             // Data Components
             manager.AddComponent<CellType>(prototype);

@@ -41,7 +41,10 @@ namespace _Scripts.Systems
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
 
-            state.Dependency = new TemperatureUpdateJob().ScheduleParallel(state.Dependency);
+            state.Dependency = new TemperatureUpdateJob
+            {
+                CellConfigs = _cellConfigs
+            }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
         }
 
