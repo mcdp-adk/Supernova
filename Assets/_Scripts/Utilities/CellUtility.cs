@@ -28,7 +28,7 @@ namespace _Scripts.Utilities
                 MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0)
             );
 
-            // Tag
+            // Tag Components
             manager.AddComponent<CellPrototypeTag>(prototype);
             manager.AddComponent<CellTag>(prototype);
             manager.AddComponent<PendingDequeue>(prototype);
@@ -36,8 +36,20 @@ namespace _Scripts.Utilities
             manager.AddComponent<IsAlive>(prototype);
             manager.SetComponentEnabled<IsAlive>(prototype, false);
 
-            // Data
+            // Data Components
             manager.AddComponent<CellType>(prototype);
+            manager.AddComponent<CellState>(prototype);
+            manager.AddComponent<Mass>(prototype);
+            manager.AddComponent<Velocity>(prototype);
+            manager.SetComponentEnabled<Velocity>(prototype, false);
+            manager.AddComponent<Temperature>(prototype);
+            manager.AddComponent<Moisture>(prototype);
+            manager.AddComponent<Energy>(prototype);
+
+            // Buffer Components
+            manager.AddBuffer<ImpulseBuffer>(prototype);
+            manager.AddBuffer<HeatBuffer>(prototype);
+            manager.AddBuffer<MoistureBuffer>(prototype);
         }
 
         public static Entity CreateCellConfigEntity(string entityName, EntityManager manager,
@@ -61,12 +73,6 @@ namespace _Scripts.Utilities
             ecb.SetName(cell, "");
             ecb.RemoveComponent<CellPrototypeTag>(cell);
             ecb.SetComponentEnabled<PendingDequeue>(cell, true);
-        }
-
-        public static void EnqueueCellIntoPool(Entity cell, EntityCommandBuffer ecb, NativeQueue<Entity> queue)
-        {
-            queue.Enqueue(cell);
-            ecb.SetComponentEnabled<PendingDequeue>(cell, false);
         }
 
         #endregion
@@ -95,45 +101,54 @@ namespace _Scripts.Utilities
                 MeshID = new BatchMeshID { value = (uint)cellType }
             });
 
-            var config = GetCellConfig(manager, configEntity, cellType);
-            ecb.AddComponent(cell, new CellState { Value = config.State });
-            ecb.AddComponent(cell, new Mass { Value = config.Mass });
-            ecb.AddComponent(cell, new Velocity { Value = float3.zero, MovementDebt = float3.zero });
-            ecb.SetComponentEnabled<Velocity>(cell, false);
-            ecb.AddComponent(cell, new Temperature { Value = config.TemperatureDefault });
-            ecb.AddComponent(cell, new Moisture { Value = config.MoistureDefault });
-            ecb.AddComponent(cell, new Energy { Value = config.EnergyDefault });
-            ecb.AddBuffer<ImpulseBuffer>(cell).Add(new ImpulseBuffer { Value = initialImpulse });
-            ecb.AddBuffer<HeatBuffer>(cell);
-            ecb.AddBuffer<MoistureBuffer>(cell);
-
-            return true;
-        }
-
-        private static void ReturnCellToPool(Entity cell, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap, NativeQueue<Entity> cellPoolQueue)
-        {
-        }
-
-        public static void SetCellType(Entity cell, EntityCommandBuffer ecb,
-            NativeHashMap<int3, Entity> cellMap, NativeQueue<Entity> cellPoolQueue, CellTypeEnum targetCellType)
-        {
-            if (targetCellType == CellTypeEnum.None)
-            {
-            }
-        }
-
-        public static CellConfig GetCellConfig(EntityManager manager, Entity configEntity, CellTypeEnum cellType)
-        {
+            var config = new CellConfig();
             var buffer = manager.GetBuffer<CellConfigBuffer>(configEntity);
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var configBuffer in buffer)
             {
-                if (configBuffer.Data.Type == cellType)
-                    return configBuffer.Data;
+                if (configBuffer.Data.Type == cellType) config = configBuffer.Data;
             }
 
-            throw new System.InvalidOperationException($"未找到 CellType: {cellType} 的配置");
+            ecb.SetComponent(cell, new CellState { Value = config.State });
+            ecb.SetComponent(cell, new Mass { Value = config.Mass });
+            ecb.SetComponent(cell, new Velocity { Value = float3.zero, MovementDebt = float3.zero });
+            ecb.SetComponent(cell, new Temperature { Value = config.TemperatureDefault });
+            ecb.SetComponent(cell, new Moisture { Value = config.MoistureDefault });
+            ecb.SetComponent(cell, new Energy { Value = config.EnergyDefault });
+
+            // 设置 Buffer
+            var impulseBuffer = ecb.SetBuffer<ImpulseBuffer>(cell);
+            impulseBuffer.Clear();
+            impulseBuffer.Add(new ImpulseBuffer { Value = initialImpulse });
+            ecb.SetBuffer<HeatBuffer>(cell).Clear();
+            ecb.SetBuffer<MoistureBuffer>(cell).Clear();
+
+            return true;
+        }
+
+        public static void SetCellType(Entity cell, EntityCommandBuffer ecb, NativeHashMap<int3, Entity> cellMap,
+            int3 currentCoordinate, CellTypeEnum targetCellType)
+        {
+            if (targetCellType == CellTypeEnum.None)
+            {
+                cellMap.Remove(currentCoordinate);
+                ecb.SetComponentEnabled<IsAlive>(cell, false);
+                ecb.SetComponentEnabled<PendingDequeue>(cell, true);
+            }
+            else
+            {
+            }
+        }
+
+        public static CellConfig GetCellConfig(this NativeArray<CellConfig> cellConfigs, CellTypeEnum cellType)
+        {
+            for (var i = 0; i < cellConfigs.Length; i++)
+            {
+                if (cellConfigs[i].Type == cellType)
+                    return cellConfigs[i];
+            }
+
+            return default;
         }
     }
 }

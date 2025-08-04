@@ -1,26 +1,39 @@
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using _Scripts.Components;
 
 namespace _Scripts.Systems
 {
-    public partial struct CellPoolQueueSystem : ISystem
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [UpdateAfter(typeof(GlobalDataInitSystem))]
+    public partial class CellPoolQueueSystem : SystemBase
     {
         private NativeQueue<Entity> _cellPoolQueue;
 
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
+        protected override void OnCreate()
         {
+            RequireForUpdate<CellTag>();
+            RequireForUpdate<PendingDequeue>();
         }
 
-        public void OnUpdate(ref SystemState state)
+        protected override void OnUpdate()
         {
-            // 初始化 CellPoolQueue
             if (!_cellPoolQueue.IsCreated)
             {
-                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
+                var globalDataSystem = World.GetExistingSystemManaged<GlobalDataInitSystem>();
                 _cellPoolQueue = globalDataSystem.CellPoolQueue;
             }
+
+            var ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            foreach (var (_, entity) in SystemAPI.Query<RefRO<CellTag>>()
+                         .WithAll<PendingDequeue>()
+                         .WithEntityAccess())
+            {
+                _cellPoolQueue.Enqueue(entity);
+                ecb.SetComponentEnabled<PendingDequeue>(entity, false);
+            }
+
+            ecb.Playback(EntityManager);
         }
     }
 }

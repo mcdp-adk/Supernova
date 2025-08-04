@@ -10,14 +10,9 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class GlobalDataInitSystem : SystemBase
     {
-        // ========== 数据容器 ==========
-
         public NativeHashMap<int3, Entity> CellMap { get; private set; }
         public NativeQueue<Entity> CellPoolQueue { get; private set; }
-
-        private EntityCommandBuffer _ecb;
-
-        // ========== 生命周期 ==========
+        public NativeArray<CellConfig> CellConfigs;
 
         protected override void OnCreate()
         {
@@ -27,60 +22,39 @@ namespace _Scripts.Systems
 
         protected override void OnUpdate()
         {
-            if (!InstantiateCell()) return;
-            AddCellToQueue();
+            // 初始化 CellConfigs
+            var buffer = SystemAPI.GetSingletonBuffer<CellConfigBuffer>();
+            CellConfigs = new NativeArray<CellConfig>(buffer.Length, Allocator.Persistent);
+            for (var i = 0; i < buffer.Length; i++)
+                CellConfigs[i] = buffer[i].Data;
 
+            // 直接获取原型并创建实体池
+            var prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
+            var ecb = new EntityCommandBuffer(WorldUpdateAllocator);
+            
+            for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
+                CellUtility.InstantiateFromPrototype(prototype, ecb);
+                
+            ecb.Playback(EntityManager);
+
+            // 启用其他系统
             var caSlowSystemGroup = World.GetExistingSystemManaged<CaSlowSystemGroup>();
             var caFastSystemGroup = World.GetExistingSystemManaged<CaFastSystemGroup>();
-            if (caSlowSystemGroup == null || caFastSystemGroup == null) return;
-            Enabled = false;
-            caSlowSystemGroup.Enabled = true;
-            caFastSystemGroup.Enabled = true;
-            Debug.Log("[GlobalDataSystem] 初始化完成，Cellular Automata 系统更新已启用。");
+            if (caSlowSystemGroup != null && caFastSystemGroup != null)
+            {
+                caSlowSystemGroup.Enabled = true;
+                caFastSystemGroup.Enabled = true;
+            }
+            
+            Debug.Log("[GlobalDataInitSystem] 初始化完成，Cellular Automata 系统更新已启用。");
+            Enabled = false; // 完成后自禁用
         }
 
         protected override void OnDestroy()
         {
-            // 清理原生容器以避免内存泄漏
             if (CellMap.IsCreated) CellMap.Dispose();
             if (CellPoolQueue.IsCreated) CellPoolQueue.Dispose();
-        }
-
-        // ========== 私有方法 ==========
-
-        private bool InstantiateCell()
-        {
-            Entity prototype;
-
-            // 获取 Cell 原型实体（如果报错则跳过更新）
-            try
-            {
-                prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"[GlobalDataSystem] 获取 CellPrototypeTag 失败: {ex.Message}");
-                return false; // 没有原型实体，跳过本帧更新
-            }
-
-            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
-            for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
-                CellUtility.InstantiateFromPrototype(prototype, _ecb);
-            _ecb.Playback(EntityManager);
-
-            return true;
-        }
-
-        private void AddCellToQueue()
-        {
-            _ecb = new EntityCommandBuffer(WorldUpdateAllocator);
-            foreach (var (_, cell) in SystemAPI.Query<RefRO<CellTag>>().WithAll<PendingDequeue>()
-                         .WithEntityAccess())
-            {
-                CellUtility.EnqueueCellIntoPool(cell, _ecb, CellPoolQueue);
-            }
-
-            _ecb.Playback(EntityManager);
+            if (CellConfigs.IsCreated) CellConfigs.Dispose();
         }
     }
 }

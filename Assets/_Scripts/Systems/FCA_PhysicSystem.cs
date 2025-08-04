@@ -11,21 +11,27 @@ namespace _Scripts.Systems
     [UpdateInGroup(typeof(CaFastSystemGroup))]
     public partial struct PhysicSystem : ISystem
     {
+        private NativeHashMap<int3, Entity> _cellMap;
+        private NativeArray<CellConfig> _cellConfigs;
+
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<CellConfigTag>();
         }
 
-        private NativeHashMap<int3, Entity> _cellMap;
-
         public void OnUpdate(ref SystemState state)
         {
-            // 获取全局数据容器引用
             if (!_cellMap.IsCreated)
             {
                 var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
                 _cellMap = globalDataSystem.CellMap;
+            }
+
+            if (!_cellConfigs.IsCreated)
+            {
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
+                _cellConfigs = globalDataSystem.CellConfigs;
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
@@ -38,9 +44,8 @@ namespace _Scripts.Systems
                 // 1. 移动与碰撞
                 state.Dependency = new TryMoveCellJob
                 {
-                    Manager = state.EntityManager,
                     CellMap = _cellMap,
-                    ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>(),
+                    CellConfigs = _cellConfigs,
                     CellStateLookup = SystemAPI.GetComponentLookup<CellState>(true),
                     MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
                     LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(),
@@ -71,9 +76,8 @@ namespace _Scripts.Systems
         [WithAll(typeof(IsAlive), typeof(Velocity))]
         private partial struct TryMoveCellJob : IJobEntity
         {
-            public EntityManager Manager;
             public NativeHashMap<int3, Entity> CellMap;
-            [ReadOnly] public Entity ConfigEntity;
+            [ReadOnly] public NativeArray<CellConfig> CellConfigs;
             [ReadOnly] public ComponentLookup<CellState> CellStateLookup;
             [ReadOnly] public ComponentLookup<Mass> MassLookup;
             public ComponentLookup<LocalTransform> LocalTransformLookup;
@@ -101,7 +105,7 @@ namespace _Scripts.Systems
                 if (TrySettlementSwap(self, primaryTargetCoordinate)) return;
 
                 // 4. 获取 Cell 配置以获得 Fluidity
-                var cellConfig = CellUtility.GetCellConfig(Manager, ConfigEntity, cellType.Value);
+                var cellConfig = CellConfigs.GetCellConfig(cellType.Value);
                 var fluidity = cellConfig.Fluidity;
 
                 // 5. 获取并根据 Fluidity 控制遍历的可用坐标
