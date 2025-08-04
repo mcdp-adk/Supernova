@@ -55,13 +55,4 @@ namespace _Scripts.Utilities
             moistureBuffer.Clear();
         }
     }
-
-    [BurstCompile]
-    [WithAll(typeof(IsAlive))]
-    public partial struct EnergyUpdateJob : IJobEntity
-    {
-        private void Execute()
-        {
-        }
-    }
 }
