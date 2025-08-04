@@ -54,5 +54,10 @@ namespace _Scripts.Utilities
         /// 热传导系数
         /// </summary>
         public const float HeatTransferCoefficient = 0.1f;
+
+        /// <summary>
+        /// 水分扩散系数
+        /// </summary>
+        public const float MoistureDiffusionCoefficient = 0.15f;
     }
 }

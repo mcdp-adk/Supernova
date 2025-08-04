@@ -1,6 +1,7 @@
 using _Scripts.Components;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace _Scripts.Utilities
 {
@@ -20,8 +21,11 @@ namespace _Scripts.Utilities
     [WithAll(typeof(IsAlive))]
     public partial struct MoistureUpdateJob : IJobEntity
     {
-        private void Execute()
+        private static void Execute(ref Moisture moisture, DynamicBuffer<MoistureBuffer> moistureBuffer)
         {
+            for (var i = 0; i < moistureBuffer.Length; i++)
+                moisture.Value = math.clamp(moisture.Value + moistureBuffer[i].Value, 0f, 1f);
+            moistureBuffer.Clear();
         }
     }
 
