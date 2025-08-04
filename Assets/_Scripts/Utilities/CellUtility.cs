@@ -92,15 +92,6 @@ namespace _Scripts.Utilities
                 Scale = GlobalConfig.DefaultCellScale
             });
 
-            // 设置 Cell 外观
-            ecb.SetComponentEnabled<IsAlive>(cell, true);
-            ecb.SetComponent(cell, new CellType { Value = cellType });
-            ecb.SetComponent(cell, new MaterialMeshInfo
-            {
-                MaterialID = new BatchMaterialID { value = (uint)cellType },
-                MeshID = new BatchMeshID { value = (uint)cellType }
-            });
-
             var config = new CellConfig();
             var buffer = manager.GetBuffer<CellConfigBuffer>(configEntity);
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
@@ -109,12 +100,19 @@ namespace _Scripts.Utilities
                 if (configBuffer.Data.Type == cellType) config = configBuffer.Data;
             }
 
+            ecb.SetComponentEnabled<IsAlive>(cell, true);
+            ecb.SetComponent(cell, new CellType { Value = cellType });
             ecb.SetComponent(cell, new CellState { Value = config.State });
             ecb.SetComponent(cell, new Mass { Value = config.Mass });
             ecb.SetComponent(cell, new Velocity { Value = float3.zero, MovementDebt = float3.zero });
             ecb.SetComponent(cell, new Temperature { Value = config.TemperatureDefault });
             ecb.SetComponent(cell, new Moisture { Value = config.MoistureDefault });
             ecb.SetComponent(cell, new Energy { Value = config.EnergyDefault });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)cellType },
+                MeshID = new BatchMeshID { value = (uint)cellType }
+            });
 
             // 设置 Buffer
             var impulseBuffer = ecb.SetBuffer<ImpulseBuffer>(cell);
@@ -127,7 +125,7 @@ namespace _Scripts.Utilities
         }
 
         public static void SetCellType(Entity cell, EntityCommandBuffer ecb, NativeHashMap<int3, Entity> cellMap,
-            int3 currentCoordinate, CellTypeEnum targetCellType)
+            CellConfig config, int3 currentCoordinate, CellTypeEnum targetCellType)
         {
             if (targetCellType == CellTypeEnum.None)
             {
@@ -137,6 +135,14 @@ namespace _Scripts.Utilities
             }
             else
             {
+                ecb.SetComponent(cell, new CellType { Value = targetCellType });
+                ecb.SetComponent(cell, new CellState { Value = config.State });
+                ecb.SetComponent(cell, new Mass { Value = config.Mass });
+                ecb.SetComponent(cell, new MaterialMeshInfo
+                {
+                    MaterialID = new BatchMaterialID { value = (uint)targetCellType },
+                    MeshID = new BatchMeshID { value = (uint)targetCellType }
+                });
             }
         }
 

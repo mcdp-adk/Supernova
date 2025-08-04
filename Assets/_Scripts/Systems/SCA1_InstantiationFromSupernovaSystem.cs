@@ -8,7 +8,7 @@ using Unity.Mathematics;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaSlowSystemGroup))]
+    [UpdateInGroup(typeof(CaSlowSystemGroup), OrderFirst = true)]
     public partial struct InstantiationFromSupernovaSystem : ISystem
     {
         private NativeHashMap<int3, Entity> _cellMap;

@@ -51,6 +51,7 @@ namespace _Scripts.Systems
                 in Temperature temperature, in Moisture moisture)
             {
                 var targetType = CellTypeEnum.None;
+                var targetConfig = new CellConfig();
                 foreach (var config in CellConfigs)
                 {
                     if (!(temperature.Value >= config.TemperatureMin) ||
@@ -58,10 +59,11 @@ namespace _Scripts.Systems
                         !(moisture.Value >= config.MoistureMin) ||
                         !(moisture.Value <= config.MoistureMax)) continue;
                     targetType = config.Type;
+                    targetConfig = config;
                     break;
                 }
 
-                CellUtility.SetCellType(cell, ECB, CellMap, (int3)transform.Position, targetType);
+                CellUtility.SetCellType(cell, ECB, CellMap, targetConfig, (int3)transform.Position, targetType);
             }
         }
     }
