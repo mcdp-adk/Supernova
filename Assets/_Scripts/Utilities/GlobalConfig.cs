@@ -8,7 +8,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 慢系统更新频率（毫秒）
         /// </summary>
-        public const uint SlowUpdateRateInMS = 500u;
+        public const uint SlowUpdateRateInMS = 1000u;
 
         /// <summary>
         /// 快系统更新频率（毫秒）
