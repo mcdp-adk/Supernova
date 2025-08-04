@@ -21,11 +21,6 @@ namespace _Scripts.Utilities
         public const float PhysicsSpeedScale = 1f;
 
         /// <summary>
-        /// 碰撞时的冲量损失系数
-        /// </summary>
-        public const float ImpulseLossFactor = 0.8f;
-
-        /// <summary>
         /// 最大速度限制
         /// </summary>
         public const float MaxSpeed = 50f;
@@ -49,5 +44,15 @@ namespace _Scripts.Utilities
         /// Cell 默认缩放比例
         /// </summary>
         public const float DefaultCellScale = 1f;
+
+        /// <summary>
+        /// 碰撞时的冲量损失系数
+        /// </summary>
+        public const float ImpulseLossFactor = 0.8f;
+
+        /// <summary>
+        /// 热传导系数
+        /// </summary>
+        public const float HeatTransferCoefficient = 0.1f;
     }
 }
