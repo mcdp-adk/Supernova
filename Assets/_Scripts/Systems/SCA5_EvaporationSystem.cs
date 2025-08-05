@@ -24,9 +24,7 @@ namespace _Scripts.Systems
             using var ecb = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new EvaporationJob
             {
-                ECB = ecb.AsParallelWriter(),
-                TemperatureLookup = SystemAPI.GetComponentLookup<Temperature>(true),
-                MoistureLookup = SystemAPI.GetComponentLookup<Moisture>(true)
+                ECB = ecb.AsParallelWriter()
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
@@ -48,14 +46,10 @@ namespace _Scripts.Systems
         private partial struct EvaporationJob : IJobEntity
         {
             public EntityCommandBuffer.ParallelWriter ECB;
-            [ReadOnly] public ComponentLookup<Temperature> TemperatureLookup;
-            [ReadOnly] public ComponentLookup<Moisture> MoistureLookup;
 
-            private void Execute([EntityIndexInQuery] int index, Entity selfEntity)
+            private void Execute([EntityIndexInQuery] int index, Entity entity,
+                in Temperature temperature, in Moisture moisture)
             {
-                var temperature = TemperatureLookup[selfEntity];
-                var moisture = MoistureLookup[selfEntity];
-
                 // 只有当温度超过沸点且含有水分时才蒸发
                 if (temperature.Value <= 100f || moisture.Value <= 0f)
                     return;
@@ -72,8 +66,8 @@ namespace _Scripts.Systems
                 var heatLoss = evaporationAmount * GlobalConfig.WaterLatentHeat;
 
                 // 写入缓冲器
-                ECB.AppendToBuffer(index, selfEntity, new MoistureBuffer { Value = -evaporationAmount });
-                ECB.AppendToBuffer(index, selfEntity, new HeatBuffer { Value = -heatLoss });
+                ECB.AppendToBuffer(index, entity, new MoistureBuffer { Value = -evaporationAmount });
+                ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = -heatLoss });
             }
         }
     }

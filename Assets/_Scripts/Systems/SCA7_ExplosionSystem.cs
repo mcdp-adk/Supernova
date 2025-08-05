@@ -33,8 +33,7 @@ namespace _Scripts.Systems
             state.Dependency = new ExplosionJob
             {
                 ECB = ecb1.AsParallelWriter(),
-                CellMap = _cellMap,
-                EnergyLookup = SystemAPI.GetComponentLookup<Energy>(true),
+                CellMap = _cellMap
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
             ecb1.Playback(state.EntityManager);
@@ -55,11 +54,10 @@ namespace _Scripts.Systems
         {
             public EntityCommandBuffer.ParallelWriter ECB;
             [ReadOnly] public NativeHashMap<int3, Entity> CellMap;
-            public ComponentLookup<Energy> EnergyLookup;
 
-            private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform)
+            private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform,
+                ref Energy energy)
             {
-                var energy = EnergyLookup[entity];
                 var coordinate = (int3)transform.Position;
 
                 // 爆炸消耗所有能量
@@ -73,7 +71,7 @@ namespace _Scripts.Systems
                 var explosionRange = (int)math.ceil(math.sqrt(totalEnergy));
 
                 // 设置自身能量为 0
-                ECB.SetComponent(index, entity, new Energy { Value = 0f });
+                energy.Value = 0f;
 
                 // 添加热量到 HeatBuffer
                 ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = heatReleased });

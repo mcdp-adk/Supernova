@@ -32,9 +32,7 @@ namespace _Scripts.Systems
             using var ecb1 = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new CombustionJob
             {
-                ECB = ecb1.AsParallelWriter(),
-                TemperatureLookup = SystemAPI.GetComponentLookup<Temperature>(true),
-                EnergyLookup = SystemAPI.GetComponentLookup<Energy>(true)
+                ECB = ecb1.AsParallelWriter()
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
             ecb1.Playback(state.EntityManager);
@@ -54,14 +52,10 @@ namespace _Scripts.Systems
         private partial struct CombustionJob : IJobEntity
         {
             public EntityCommandBuffer.ParallelWriter ECB;
-            [ReadOnly] public ComponentLookup<Temperature> TemperatureLookup;
-            [ReadOnly] public ComponentLookup<Energy> EnergyLookup;
 
-            private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform)
+            private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform, 
+                in Temperature temperature, ref Energy energy)
             {
-                var temperature = TemperatureLookup[entity];
-                var energy = EnergyLookup[entity];
-
                 // 计算燃烧速率：基础速率 * (1 + 温度系数 * 温度)
                 var combustionRate = GlobalConfig.CombustionBaseRate *
                                      (1f + GlobalConfig.CombustionTemperatureFactor * temperature.Value);
@@ -76,7 +70,7 @@ namespace _Scripts.Systems
                 var remainingEnergy = energy.Value - actualConsumption;
 
                 // 更新能量值
-                ECB.SetComponent(index, entity, new Energy { Value = remainingEnergy });
+                energy.Value = remainingEnergy;
 
                 // 添加热量到 HeatBuffer
                 ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = heatReleased });
