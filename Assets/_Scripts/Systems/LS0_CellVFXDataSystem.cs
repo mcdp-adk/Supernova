@@ -48,6 +48,9 @@ namespace _Scripts.Systems
 
         protected override void OnUpdate()
         {
+            // 检查 VisualEffect 是否已找到
+            if (_cellVFX == null) return;
+
             using var positionList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
             using var velocityList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
 

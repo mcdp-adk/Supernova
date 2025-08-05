@@ -18,6 +18,10 @@ namespace _Scripts.Systems
         {
             CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
             CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
+            
+            // 确保存在所需的实体
+            RequireForUpdate<CellConfigBuffer>();
+            RequireForUpdate<CellPrototypeTag>();
         }
 
         protected override void OnUpdate()
