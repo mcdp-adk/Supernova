@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].radius
@@ -145,7 +145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].radius
-      value: 30
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[3].radius
@@ -161,7 +161,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].density
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[3].density
@@ -177,7 +177,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionStrength
-      value: 300
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[3].explosionStrength
@@ -193,7 +193,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionAngleClamp
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].cellConfigs.Array.size
@@ -233,7 +233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].cellConfigs.Array.data[0].cellType
-      value: -1
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.data[0].cellType
@@ -241,7 +241,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[0].cellType
-      value: -11
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].cellConfigs.Array.data[1].cellType

@@ -23,7 +23,7 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 最大速度限制
         /// </summary>
-        public const float MaxSpeed = 50f;
+        public const float MaxSpeed = 10f;
 
         /// <summary>
         /// 最大 Cell 数量
