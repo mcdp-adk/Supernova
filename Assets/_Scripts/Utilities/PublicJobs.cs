@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace _Scripts.Utilities
 {
@@ -60,8 +61,15 @@ namespace _Scripts.Utilities
     [WithAll(typeof(IsAlive))]
     public partial struct EnergyCheckJob : IJobEntity
     {
-        private void Execute()
+        public EntityCommandBuffer ECB;
+        public NativeHashMap<int3, Entity> CellMap;
+
+        private void Execute(Entity entity, in Energy energy, in LocalTransform transform)
         {
+            if (energy.Value > 0f) return;
+
+            var coordinate = (int3)transform.Position;
+            CellUtility.SetCellTypeToNone(entity, ECB, CellMap, coordinate);
         }
     }
 }

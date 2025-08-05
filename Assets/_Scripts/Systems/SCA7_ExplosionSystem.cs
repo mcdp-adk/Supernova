@@ -29,15 +29,24 @@ namespace _Scripts.Systems
                 _cellMap = globalDataSystem.CellMap;
             }
 
-            using var ecb = new EntityCommandBuffer(Allocator.TempJob);
+            using var ecb1 = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new ExplosionJob
             {
-                ECB = ecb.AsParallelWriter(),
+                ECB = ecb1.AsParallelWriter(),
                 CellMap = _cellMap,
-                EnergyLookup = SystemAPI.GetComponentLookup<Energy>(),
+                EnergyLookup = SystemAPI.GetComponentLookup<Energy>(true),
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
-            ecb.Playback(state.EntityManager);
+            ecb1.Playback(state.EntityManager);
+
+            using var ecb2 = new EntityCommandBuffer(Allocator.TempJob);
+            state.Dependency = new EnergyCheckJob
+            {
+                ECB = ecb2,
+                CellMap = _cellMap,
+            }.Schedule(state.Dependency);
+            state.Dependency.Complete();
+            ecb2.Playback(state.EntityManager);
         }
 
         [BurstCompile]
@@ -45,7 +54,7 @@ namespace _Scripts.Systems
         private partial struct ExplosionJob : IJobEntity
         {
             public EntityCommandBuffer.ParallelWriter ECB;
-            public NativeHashMap<int3, Entity> CellMap;
+            [ReadOnly] public NativeHashMap<int3, Entity> CellMap;
             public ComponentLookup<Energy> EnergyLookup;
 
             private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform)
@@ -102,10 +111,6 @@ namespace _Scripts.Systems
                     var heatToTarget = heatReleased * distanceFactor * 0.1f; // 减少传递的热量
                     ECB.AppendToBuffer(index, targetEntity, new HeatBuffer { Value = heatToTarget });
                 }
-
-
-                // 爆炸后转换为 None 类型
-                CellUtility.SetCellTypeToNone(index, entity, ECB, CellMap, coordinate);
             }
         }
     }

@@ -29,16 +29,24 @@ namespace _Scripts.Systems
                 _cellMap = globalDataSystem.CellMap;
             }
 
-            using var ecb = new EntityCommandBuffer(Allocator.TempJob);
+            using var ecb1 = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new CombustionJob
             {
-                ECB = ecb.AsParallelWriter(),
-                CellMap = _cellMap,
+                ECB = ecb1.AsParallelWriter(),
                 TemperatureLookup = SystemAPI.GetComponentLookup<Temperature>(true),
                 EnergyLookup = SystemAPI.GetComponentLookup<Energy>(true)
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
-            ecb.Playback(state.EntityManager);
+            ecb1.Playback(state.EntityManager);
+
+            using var ecb2 = new EntityCommandBuffer(Allocator.TempJob);
+            state.Dependency = new EnergyCheckJob
+            {
+                ECB = ecb2,
+                CellMap = _cellMap,
+            }.Schedule(state.Dependency);
+            state.Dependency.Complete();
+            ecb2.Playback(state.EntityManager);
         }
 
         [BurstCompile]
@@ -46,7 +54,6 @@ namespace _Scripts.Systems
         private partial struct CombustionJob : IJobEntity
         {
             public EntityCommandBuffer.ParallelWriter ECB;
-            [ReadOnly] public NativeHashMap<int3, Entity> CellMap;
             [ReadOnly] public ComponentLookup<Temperature> TemperatureLookup;
             [ReadOnly] public ComponentLookup<Energy> EnergyLookup;
 
@@ -73,11 +80,6 @@ namespace _Scripts.Systems
 
                 // 添加热量到 HeatBuffer
                 ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = heatReleased });
-
-                // 如果能量耗尽，转换为 None 类型
-                if (!(remainingEnergy <= 0f)) return;
-                var coordinate = (int3)transform.Position;
-                CellUtility.SetCellTypeToNone(index, entity, ECB, CellMap, coordinate);
             }
         }
     }
