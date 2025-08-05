@@ -55,4 +55,13 @@ namespace _Scripts.Utilities
             moistureBuffer.Clear();
         }
     }
+
+    [BurstCompile]
+    [WithAll(typeof(IsAlive))]
+    public partial struct EnergyCheckJob : IJobEntity
+    {
+        private void Execute()
+        {
+        }
+    }
 }

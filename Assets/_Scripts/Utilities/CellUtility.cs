@@ -150,6 +150,14 @@ namespace _Scripts.Utilities
             }
         }
 
+        public static void SetCellTypeToNone(int sortKey, Entity cell, EntityCommandBuffer.ParallelWriter ecb,
+            NativeHashMap<int3, Entity> cellMap, int3 currentCoordinate)
+        {
+            cellMap.Remove(currentCoordinate);
+            ecb.SetComponentEnabled<IsAlive>(sortKey, cell, false);
+            ecb.SetComponentEnabled<PendingDequeue>(sortKey, cell, true);
+        }
+
         public static CellConfig GetCellConfig(this NativeArray<CellConfig> cellConfigs, CellTypeEnum cellType)
         {
             for (var i = 0; i < cellConfigs.Length; i++)

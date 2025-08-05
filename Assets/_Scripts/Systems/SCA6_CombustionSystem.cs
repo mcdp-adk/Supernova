@@ -3,6 +3,8 @@ using _Scripts.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
@@ -11,6 +13,7 @@ namespace _Scripts.Systems
     public partial struct CombustionSystem : ISystem
     {
         private NativeArray<CellConfig> _cellConfigs;
+        private NativeHashMap<int3, Entity> _cellMap;
 
         public void OnUpdate(ref SystemState state)
         {
@@ -20,9 +23,19 @@ namespace _Scripts.Systems
                 _cellConfigs = globalDataSystem.CellConfigs;
             }
 
+            if (!_cellMap.IsCreated)
+            {
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
+                _cellMap = globalDataSystem.CellMap;
+            }
+
             using var ecb = new EntityCommandBuffer(Allocator.TempJob);
             state.Dependency = new CombustionJob
             {
+                ECB = ecb.AsParallelWriter(),
+                CellMap = _cellMap,
+                TemperatureLookup = SystemAPI.GetComponentLookup<Temperature>(true),
+                EnergyLookup = SystemAPI.GetComponentLookup<Energy>(true)
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
@@ -32,8 +45,39 @@ namespace _Scripts.Systems
         [WithAll(typeof(IsAlive), typeof(IsBurning))]
         private partial struct CombustionJob : IJobEntity
         {
-            private void Execute()
+            public EntityCommandBuffer.ParallelWriter ECB;
+            [ReadOnly] public NativeHashMap<int3, Entity> CellMap;
+            [ReadOnly] public ComponentLookup<Temperature> TemperatureLookup;
+            [ReadOnly] public ComponentLookup<Energy> EnergyLookup;
+
+            private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform)
             {
+                var temperature = TemperatureLookup[entity];
+                var energy = EnergyLookup[entity];
+
+                // 计算燃烧速率：基础速率 * (1 + 温度系数 * 温度)
+                var combustionRate = GlobalConfig.CombustionBaseRate *
+                                     (1f + GlobalConfig.CombustionTemperatureFactor * temperature.Value);
+
+                // 实际燃烧能量消耗
+                var actualConsumption = math.min(energy.Value, combustionRate);
+
+                // 计算释放的热量
+                var heatReleased = actualConsumption * GlobalConfig.CombustionHeatCoefficient;
+
+                // 剩余能量
+                var remainingEnergy = energy.Value - actualConsumption;
+
+                // 更新能量值
+                ECB.SetComponent(index, entity, new Energy { Value = remainingEnergy });
+
+                // 添加热量到 HeatBuffer
+                ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = heatReleased });
+
+                // 如果能量耗尽，转换为 None 类型
+                if (!(remainingEnergy <= 0f)) return;
+                var coordinate = (int3)transform.Position;
+                CellUtility.SetCellTypeToNone(index, entity, ECB, CellMap, coordinate);
             }
         }
     }
