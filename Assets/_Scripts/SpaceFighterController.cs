@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 namespace _Scripts
 {
@@ -12,6 +13,9 @@ namespace _Scripts
         [SerializeField] private float inertialDamping = 2f;
 
         [Header("旋转设置")] [SerializeField] private float maxTurnRate = 90f; // 每秒度数
+
+        [Header("摄像头设置")] [SerializeField] private CinemachineCamera freelookCamera; // Cinemachine 3 的摄像头组件
+        [SerializeField] private float cameraResetSpeed = 2f; // 摄像头重置速度
 
         // 输入状态
         private Vector2 _inputPitchYaw;
@@ -110,6 +114,24 @@ namespace _Scripts
 
         #endregion
 
+        #region 摄像头控制
+
+        private void ResetCamera()
+        {
+            if (freelookCamera == null) return;
+
+            // 获取 Orbital Follow 组件
+            var orbitalFollow = freelookCamera.GetComponent<CinemachineOrbitalFollow>();
+            if (orbitalFollow != null)
+            {
+                // 重置轨道角度到默认值
+                orbitalFollow.HorizontalAxis.Value = 0f;
+                orbitalFollow.VerticalAxis.Value = 17.5f;
+            }
+        }
+
+        #endregion
+
         #region Input System
 
         public void OnPitchYaw(InputAction.CallbackContext context)
@@ -158,6 +180,12 @@ namespace _Scripts
 
         public void OnTool(InputAction.CallbackContext context)
         {
+        }
+
+        public void OnResetCamera(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+                ResetCamera();
         }
 
         #endregion
