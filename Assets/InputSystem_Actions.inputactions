@@ -16,67 +16,13 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
+                    "name": "Elevation",
                     "type": "Value",
-                    "id": "6b0a5a0c-f13c-4119-80dc-48ce8d89a326",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Roll",
-                    "type": "Value",
-                    "id": "2312a292-8378-44f2-911f-6f4e784527b4",
+                    "id": "55f9457f-2ce5-46a4-80a7-31a288a7eac6",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "ResetCamera",
-                    "type": "Button",
-                    "id": "65d839b6-ccdd-4d87-8eb0-4a058e7ff5d2",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Accelerate",
-                    "type": "Button",
-                    "id": "b70a4799-061d-4846-8e96-6da2f3ee6bfe",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Decelerate",
-                    "type": "Button",
-                    "id": "52c9f10e-3c64-4dd9-b011-6d59355c156c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Next",
-                    "type": "Button",
-                    "id": "1bd61dd3-732a-4bb1-9c39-f87c5ce04cd0",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "Hold",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Previous",
-                    "type": "Button",
-                    "id": "8a0953de-e859-4520-8be8-057e3a7eb507",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "Hold",
-                    "initialStateCheck": false
                 },
                 {
                     "name": "Laser",
@@ -106,6 +52,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Next",
+                    "type": "Button",
+                    "id": "1bd61dd3-732a-4bb1-9c39-f87c5ce04cd0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Previous",
+                    "type": "Button",
+                    "id": "8a0953de-e859-4520-8be8-057e3a7eb507",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Menu",
                     "type": "Button",
                     "id": "8af1c8b0-6ba9-4ba1-98ff-bd9bf0c71334",
@@ -125,17 +89,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "2e6b6893-2b2d-4348-af22-8b41f6bc6dae",
-                    "path": "<Gamepad>/leftStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "WASD",
                     "id": "43c9647e-cce1-4bb3-a8d5-5b937e8295d3",
@@ -237,22 +190,11 @@
                 },
                 {
                     "name": "",
-                    "id": "d2da9b4b-5d38-4cf0-9952-2b9f3fe438bc",
-                    "path": "<XRController>/{Primary2DAxis}",
+                    "id": "2e6b6893-2b2d-4348-af22-8b41f6bc6dae",
+                    "path": "<Gamepad>/leftStick",
                     "interactions": "",
                     "processors": "",
-                    "groups": "XR",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3cb1a872-fe03-45fc-ae28-d628c88885ee",
-                    "path": "<Joystick>/stick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Joystick",
+                    "groups": ";Gamepad",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -391,50 +333,6 @@
                 },
                 {
                     "name": "",
-                    "id": "24633fac-cce3-4ef1-92fd-0756a41fc8ec",
-                    "path": "<Keyboard>/leftShift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Accelerate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "864106a8-65a9-4273-bfb7-5c293dbf723b",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Accelerate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bed316f8-fc8b-4ca9-9bc7-a3e11d7e85ec",
-                    "path": "<Keyboard>/leftCtrl",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Decelerate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "cd7be17e-ea2f-48e4-aba3-db9afd7689fa",
-                    "path": "<Gamepad>/buttonEast",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Decelerate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "1d9b7104-2726-4da8-88ab-da4a64a23351",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
@@ -478,114 +376,70 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "QE",
-                    "id": "a6f6dd76-e508-4bda-a3e4-31d754fb2f9d",
+                    "name": "Keyboard",
+                    "id": "3482a4cb-943e-4c60-8744-f6e92299e176",
                     "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "negative",
-                    "id": "0147fa69-083f-43eb-8cc7-a36f231dea95",
+                    "id": "9d62df65-2c7f-4b1b-8abf-2f50e8c42fc9",
                     "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "positive",
-                    "id": "5f23d1bc-7154-4ae4-9a17-538883209ec2",
+                    "id": "7d835390-8290-4cbc-a2a4-1222d948abda",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "Shoulders",
-                    "id": "5b88d5bc-1ad9-4377-93d8-f948a5e1e990",
+                    "name": "Gamepad",
+                    "id": "9b0add59-d4f7-4e0e-9c7f-81788f96e569",
                     "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "negative",
-                    "id": "6f073ad6-3048-4f33-b8e6-2cc877b485a1",
+                    "id": "f12cebd2-6124-4458-8b9a-c26367525c28",
                     "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
                     "name": "positive",
-                    "id": "775e4a5f-4d86-4b22-abe4-9ff60bdbfc0e",
+                    "id": "38b9ff18-b28b-4f07-b062-802ec4a794a1",
                     "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Roll",
+                    "action": "Elevation",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
-                {
-                    "name": "",
-                    "id": "3fad3d75-08d9-42d3-ad18-26eac4a55b37",
-                    "path": "<Mouse>/middleButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ResetCamera",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4a99e366-ee97-4bd5-9604-8a5c05d46119",
-                    "path": "<Gamepad>/rightStickPress",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ResetCamera",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a983a18e-e0f3-4930-bd5d-64974d872b30",
-                    "path": "<Pointer>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1a7425a8-43b0-4b51-ac5b-6d0a1501473b",
-                    "path": "<Gamepad>/rightStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
                 }
             ]
         },
