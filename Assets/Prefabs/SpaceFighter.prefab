@@ -154,7 +154,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -183,6 +183,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 853097bb4eaa4a7785ed32a1c7c9692f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  acceleration: 20
+  maxForwardSpeed: 50
+  maxBackwardSpeed: 25
+  inertialDamping: 2
+  maxTurnRate: 90
 --- !u!1 &6175254589653385790
 GameObject:
   m_ObjectHideFlags: 0
