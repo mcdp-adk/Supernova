@@ -15,9 +15,12 @@ namespace _Scripts
         [Header("旋转设置")] [SerializeField] private float maxTurnRate = 90f; // 每秒最大角度
 
         [Header("摄像头设置")] [SerializeField] private CinemachineCamera freelookCamera;
-        [SerializeField] private float autoRecenterDelay = 3f; // 自动回中延迟时间（秒）
+        [SerializeField] private float autoRecenterDelay = 1f; // 自动回中延迟时间（秒）
         [SerializeField] private float recenterThreshold = 10f; // 摄像头偏移多少度才触发自动回中
-        [SerializeField] private float cameraResetSpeed = 20f; // 摄像头重置速度
+        [SerializeField] private float cameraResetSpeed = 30f; // 摄像头重置速度
+
+        [Header("鼠标设置")] [SerializeField] private bool lockCursorOnStart = true; // 开始时是否锁定鼠标
+
         private CinemachineOrbitalFollow _orbitalFollow;
         private float _lastLookInputTime; // 摄像头自动回中状态
 
@@ -45,6 +48,9 @@ namespace _Scripts
 
             if (freelookCamera != null)
                 _orbitalFollow = freelookCamera.GetComponent<CinemachineOrbitalFollow>();
+
+            if (lockCursorOnStart)
+                Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void OnEnable()
@@ -75,7 +81,7 @@ namespace _Scripts
             if (_inputPitchYaw.sqrMagnitude > 0.01f || Mathf.Abs(_inputRoll) > 0.01f)
             {
                 // 基于输入的即时旋转
-                var inputPitch = _inputPitchYaw.y;
+                var inputPitch = -_inputPitchYaw.y;
                 var inputYaw = _inputPitchYaw.x;
                 var inputRoll = -_inputRoll;
 
@@ -160,6 +166,20 @@ namespace _Scripts
 
         #endregion
 
+        private static void ToggleCursorLock()
+        {
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
+
         #region Input System
 
         public void OnLook(InputAction.CallbackContext context)
@@ -214,6 +234,10 @@ namespace _Scripts
 
         public void OnMenu(InputAction.CallbackContext context)
         {
+            if (context.performed)
+            {
+                ToggleCursorLock();
+            }
         }
 
         public void OnTool(InputAction.CallbackContext context)

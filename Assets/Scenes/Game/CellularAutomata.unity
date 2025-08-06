@@ -141,11 +141,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].radius
-      value: 10
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].radius
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[3].radius
@@ -157,11 +157,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].density
-      value: 5
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].density
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[3].density
