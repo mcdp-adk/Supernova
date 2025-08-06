@@ -93,6 +93,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             ""id"": ""e3b3f8ae-e7c8-4935-942d-a0dd6c5feec8"",
             ""actions"": [
                 {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""6b0a5a0c-f13c-4119-80dc-48ce8d89a326"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Pitch&Yaw"",
                     ""type"": ""Value"",
                     ""id"": ""d5b1a74d-fd06-4277-9217-9ffc7279b78b"",
@@ -111,18 +120,45 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Previous"",
+                    ""name"": ""ResetCamera"",
                     ""type"": ""Button"",
-                    ""id"": ""8a0953de-e859-4520-8be8-057e3a7eb507"",
+                    ""id"": ""65d839b6-ccdd-4d87-8eb0-4a058e7ff5d2"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Accelerate"",
+                    ""type"": ""Button"",
+                    ""id"": ""b70a4799-061d-4846-8e96-6da2f3ee6bfe"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Decelerate"",
+                    ""type"": ""Button"",
+                    ""id"": ""52c9f10e-3c64-4dd9-b011-6d59355c156c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Next"",
                     ""type"": ""Button"",
                     ""id"": ""1bd61dd3-732a-4bb1-9c39-f87c5ce04cd0"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Previous"",
+                    ""type"": ""Button"",
+                    ""id"": ""8a0953de-e859-4520-8be8-057e3a7eb507"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": ""Hold"",
@@ -156,24 +192,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Accelerate"",
-                    ""type"": ""Button"",
-                    ""id"": ""b70a4799-061d-4846-8e96-6da2f3ee6bfe"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Decelerate"",
-                    ""type"": ""Button"",
-                    ""id"": ""52c9f10e-3c64-4dd9-b011-6d59355c156c"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Menu"",
                     ""type"": ""Button"",
                     ""id"": ""8af1c8b0-6ba9-4ba1-98ff-bd9bf0c71334"",
@@ -186,15 +204,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""name"": ""Tool"",
                     ""type"": ""Button"",
                     ""id"": ""a59269d8-a188-45ad-add4-3464129fad0f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""ResetCamera"",
-                    ""type"": ""Button"",
-                    ""id"": ""65d839b6-ccdd-4d87-8eb0-4a058e7ff5d2"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -639,6 +648,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""ResetCamera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a983a18e-e0f3-4930-bd5d-64974d872b30"",
+                    ""path"": ""<Pointer>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1a7425a8-43b0-4b51-ac5b-6d0a1501473b"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1193,18 +1224,19 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
+        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_PitchYaw = m_Player.FindAction("Pitch&Yaw", throwIfNotFound: true);
         m_Player_Roll = m_Player.FindAction("Roll", throwIfNotFound: true);
-        m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
+        m_Player_ResetCamera = m_Player.FindAction("ResetCamera", throwIfNotFound: true);
+        m_Player_Accelerate = m_Player.FindAction("Accelerate", throwIfNotFound: true);
+        m_Player_Decelerate = m_Player.FindAction("Decelerate", throwIfNotFound: true);
         m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
+        m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
         m_Player_Laser = m_Player.FindAction("Laser", throwIfNotFound: true);
         m_Player_Projectile = m_Player.FindAction("Projectile", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
-        m_Player_Accelerate = m_Player.FindAction("Accelerate", throwIfNotFound: true);
-        m_Player_Decelerate = m_Player.FindAction("Decelerate", throwIfNotFound: true);
         m_Player_Menu = m_Player.FindAction("Menu", throwIfNotFound: true);
         m_Player_Tool = m_Player.FindAction("Tool", throwIfNotFound: true);
-        m_Player_ResetCamera = m_Player.FindAction("ResetCamera", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1298,18 +1330,19 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     // Player
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
+    private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_PitchYaw;
     private readonly InputAction m_Player_Roll;
-    private readonly InputAction m_Player_Previous;
+    private readonly InputAction m_Player_ResetCamera;
+    private readonly InputAction m_Player_Accelerate;
+    private readonly InputAction m_Player_Decelerate;
     private readonly InputAction m_Player_Next;
+    private readonly InputAction m_Player_Previous;
     private readonly InputAction m_Player_Laser;
     private readonly InputAction m_Player_Projectile;
     private readonly InputAction m_Player_Interact;
-    private readonly InputAction m_Player_Accelerate;
-    private readonly InputAction m_Player_Decelerate;
     private readonly InputAction m_Player_Menu;
     private readonly InputAction m_Player_Tool;
-    private readonly InputAction m_Player_ResetCamera;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1322,6 +1355,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public PlayerActions(@InputSystem_Actions wrapper) { m_Wrapper = wrapper; }
         /// <summary>
+        /// Provides access to the underlying input action "Player/Look".
+        /// </summary>
+        public InputAction @Look => m_Wrapper.m_Player_Look;
+        /// <summary>
         /// Provides access to the underlying input action "Player/PitchYaw".
         /// </summary>
         public InputAction @PitchYaw => m_Wrapper.m_Player_PitchYaw;
@@ -1330,13 +1367,25 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Roll => m_Wrapper.m_Player_Roll;
         /// <summary>
-        /// Provides access to the underlying input action "Player/Previous".
+        /// Provides access to the underlying input action "Player/ResetCamera".
         /// </summary>
-        public InputAction @Previous => m_Wrapper.m_Player_Previous;
+        public InputAction @ResetCamera => m_Wrapper.m_Player_ResetCamera;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Accelerate".
+        /// </summary>
+        public InputAction @Accelerate => m_Wrapper.m_Player_Accelerate;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Decelerate".
+        /// </summary>
+        public InputAction @Decelerate => m_Wrapper.m_Player_Decelerate;
         /// <summary>
         /// Provides access to the underlying input action "Player/Next".
         /// </summary>
         public InputAction @Next => m_Wrapper.m_Player_Next;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Previous".
+        /// </summary>
+        public InputAction @Previous => m_Wrapper.m_Player_Previous;
         /// <summary>
         /// Provides access to the underlying input action "Player/Laser".
         /// </summary>
@@ -1350,14 +1399,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         /// <summary>
-        /// Provides access to the underlying input action "Player/Accelerate".
-        /// </summary>
-        public InputAction @Accelerate => m_Wrapper.m_Player_Accelerate;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/Decelerate".
-        /// </summary>
-        public InputAction @Decelerate => m_Wrapper.m_Player_Decelerate;
-        /// <summary>
         /// Provides access to the underlying input action "Player/Menu".
         /// </summary>
         public InputAction @Menu => m_Wrapper.m_Player_Menu;
@@ -1365,10 +1406,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Tool".
         /// </summary>
         public InputAction @Tool => m_Wrapper.m_Player_Tool;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/ResetCamera".
-        /// </summary>
-        public InputAction @ResetCamera => m_Wrapper.m_Player_ResetCamera;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1395,18 +1432,30 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
             @PitchYaw.started += instance.OnPitchYaw;
             @PitchYaw.performed += instance.OnPitchYaw;
             @PitchYaw.canceled += instance.OnPitchYaw;
             @Roll.started += instance.OnRoll;
             @Roll.performed += instance.OnRoll;
             @Roll.canceled += instance.OnRoll;
-            @Previous.started += instance.OnPrevious;
-            @Previous.performed += instance.OnPrevious;
-            @Previous.canceled += instance.OnPrevious;
+            @ResetCamera.started += instance.OnResetCamera;
+            @ResetCamera.performed += instance.OnResetCamera;
+            @ResetCamera.canceled += instance.OnResetCamera;
+            @Accelerate.started += instance.OnAccelerate;
+            @Accelerate.performed += instance.OnAccelerate;
+            @Accelerate.canceled += instance.OnAccelerate;
+            @Decelerate.started += instance.OnDecelerate;
+            @Decelerate.performed += instance.OnDecelerate;
+            @Decelerate.canceled += instance.OnDecelerate;
             @Next.started += instance.OnNext;
             @Next.performed += instance.OnNext;
             @Next.canceled += instance.OnNext;
+            @Previous.started += instance.OnPrevious;
+            @Previous.performed += instance.OnPrevious;
+            @Previous.canceled += instance.OnPrevious;
             @Laser.started += instance.OnLaser;
             @Laser.performed += instance.OnLaser;
             @Laser.canceled += instance.OnLaser;
@@ -1416,21 +1465,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
-            @Accelerate.started += instance.OnAccelerate;
-            @Accelerate.performed += instance.OnAccelerate;
-            @Accelerate.canceled += instance.OnAccelerate;
-            @Decelerate.started += instance.OnDecelerate;
-            @Decelerate.performed += instance.OnDecelerate;
-            @Decelerate.canceled += instance.OnDecelerate;
             @Menu.started += instance.OnMenu;
             @Menu.performed += instance.OnMenu;
             @Menu.canceled += instance.OnMenu;
             @Tool.started += instance.OnTool;
             @Tool.performed += instance.OnTool;
             @Tool.canceled += instance.OnTool;
-            @ResetCamera.started += instance.OnResetCamera;
-            @ResetCamera.performed += instance.OnResetCamera;
-            @ResetCamera.canceled += instance.OnResetCamera;
         }
 
         /// <summary>
@@ -1442,18 +1482,30 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="PlayerActions" />
         private void UnregisterCallbacks(IPlayerActions instance)
         {
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
             @PitchYaw.started -= instance.OnPitchYaw;
             @PitchYaw.performed -= instance.OnPitchYaw;
             @PitchYaw.canceled -= instance.OnPitchYaw;
             @Roll.started -= instance.OnRoll;
             @Roll.performed -= instance.OnRoll;
             @Roll.canceled -= instance.OnRoll;
-            @Previous.started -= instance.OnPrevious;
-            @Previous.performed -= instance.OnPrevious;
-            @Previous.canceled -= instance.OnPrevious;
+            @ResetCamera.started -= instance.OnResetCamera;
+            @ResetCamera.performed -= instance.OnResetCamera;
+            @ResetCamera.canceled -= instance.OnResetCamera;
+            @Accelerate.started -= instance.OnAccelerate;
+            @Accelerate.performed -= instance.OnAccelerate;
+            @Accelerate.canceled -= instance.OnAccelerate;
+            @Decelerate.started -= instance.OnDecelerate;
+            @Decelerate.performed -= instance.OnDecelerate;
+            @Decelerate.canceled -= instance.OnDecelerate;
             @Next.started -= instance.OnNext;
             @Next.performed -= instance.OnNext;
             @Next.canceled -= instance.OnNext;
+            @Previous.started -= instance.OnPrevious;
+            @Previous.performed -= instance.OnPrevious;
+            @Previous.canceled -= instance.OnPrevious;
             @Laser.started -= instance.OnLaser;
             @Laser.performed -= instance.OnLaser;
             @Laser.canceled -= instance.OnLaser;
@@ -1463,21 +1515,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
-            @Accelerate.started -= instance.OnAccelerate;
-            @Accelerate.performed -= instance.OnAccelerate;
-            @Accelerate.canceled -= instance.OnAccelerate;
-            @Decelerate.started -= instance.OnDecelerate;
-            @Decelerate.performed -= instance.OnDecelerate;
-            @Decelerate.canceled -= instance.OnDecelerate;
             @Menu.started -= instance.OnMenu;
             @Menu.performed -= instance.OnMenu;
             @Menu.canceled -= instance.OnMenu;
             @Tool.started -= instance.OnTool;
             @Tool.performed -= instance.OnTool;
             @Tool.canceled -= instance.OnTool;
-            @ResetCamera.started -= instance.OnResetCamera;
-            @ResetCamera.performed -= instance.OnResetCamera;
-            @ResetCamera.canceled -= instance.OnResetCamera;
         }
 
         /// <summary>
@@ -1740,6 +1783,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     public interface IPlayerActions
     {
         /// <summary>
+        /// Method invoked when associated input action "Look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLook(InputAction.CallbackContext context);
+        /// <summary>
         /// Method invoked when associated input action "Pitch&Yaw" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1754,12 +1804,26 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRoll(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Previous" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ResetCamera" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnPrevious(InputAction.CallbackContext context);
+        void OnResetCamera(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Accelerate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAccelerate(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decelerate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecelerate(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Next" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
@@ -1767,6 +1831,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNext(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Previous" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPrevious(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Laser" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
@@ -1789,20 +1860,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteract(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Accelerate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnAccelerate(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "Decelerate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnDecelerate(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Menu" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1816,13 +1873,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTool(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "ResetCamera" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnResetCamera(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

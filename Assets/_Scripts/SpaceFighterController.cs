@@ -12,10 +12,14 @@ namespace _Scripts
         [SerializeField] private float maxBackwardSpeed = 25f;
         [SerializeField] private float inertialDamping = 2f;
 
-        [Header("旋转设置")] [SerializeField] private float maxTurnRate = 90f; // 每秒度数
+        [Header("旋转设置")] [SerializeField] private float maxTurnRate = 90f; // 每秒最大角度
 
-        [Header("摄像头设置")] [SerializeField] private CinemachineCamera freelookCamera; // Cinemachine 3 的摄像头组件
-        [SerializeField] private float cameraResetSpeed = 2f; // 摄像头重置速度
+        [Header("摄像头设置")] [SerializeField] private CinemachineCamera freelookCamera;
+        [SerializeField] private float autoRecenterDelay = 3f; // 自动回中延迟时间（秒）
+        [SerializeField] private float recenterThreshold = 10f; // 摄像头偏移多少度才触发自动回中
+        [SerializeField] private float cameraResetSpeed = 20f; // 摄像头重置速度
+        private CinemachineOrbitalFollow _orbitalFollow;
+        private float _lastLookInputTime; // 摄像头自动回中状态
 
         // 输入状态
         private Vector2 _inputPitchYaw;
@@ -38,6 +42,9 @@ namespace _Scripts
             // 确保禁用 Unity 内置的阻尼
             _rigidbody.linearDamping = 0f;
             _rigidbody.angularDamping = 0f;
+
+            if (freelookCamera != null)
+                _orbitalFollow = freelookCamera.GetComponent<CinemachineOrbitalFollow>();
         }
 
         private void OnEnable()
@@ -48,6 +55,11 @@ namespace _Scripts
         private void OnDisable()
         {
             _actions.Player.Disable();
+        }
+
+        private void Update()
+        {
+            HandleCameraRecenter();
         }
 
         private void FixedUpdate()
@@ -116,23 +128,44 @@ namespace _Scripts
 
         #region 摄像头控制
 
+        private void HandleCameraRecenter()
+        {
+            if (!_orbitalFollow) return;
+
+            // 检查是否超过延迟时间
+            if (Time.time - _lastLookInputTime < autoRecenterDelay) return;
+
+            var currentYaw = _orbitalFollow.HorizontalAxis.Value;
+            var currentPitch = _orbitalFollow.VerticalAxis.Value;
+
+            // 检查是否需要回中（任一轴超过阈值就执行回中）
+            if (!(Mathf.Abs(currentYaw) > recenterThreshold) &&
+                !(Mathf.Abs(currentPitch - 17.5f) > recenterThreshold)) return;
+            // 逐渐回中
+            var targetYaw = Mathf.MoveTowards(currentYaw, 0, cameraResetSpeed * Time.deltaTime);
+            var targetPitch = Mathf.MoveTowards(currentPitch, 17.5f, cameraResetSpeed * Time.deltaTime);
+
+            _orbitalFollow.HorizontalAxis.Value = targetYaw;
+            _orbitalFollow.VerticalAxis.Value = targetPitch;
+        }
+
         private void ResetCamera()
         {
-            if (freelookCamera == null) return;
+            if (!_orbitalFollow) return;
 
-            // 获取 Orbital Follow 组件
-            var orbitalFollow = freelookCamera.GetComponent<CinemachineOrbitalFollow>();
-            if (orbitalFollow != null)
-            {
-                // 重置轨道角度到默认值
-                orbitalFollow.HorizontalAxis.Value = 0f;
-                orbitalFollow.VerticalAxis.Value = 17.5f;
-            }
+            // 重置轨道角度到默认值
+            _orbitalFollow.HorizontalAxis.Value = 0f;
+            _orbitalFollow.VerticalAxis.Value = 17.5f;
         }
 
         #endregion
 
         #region Input System
+
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            if (context.performed) _lastLookInputTime = Time.time;
+        }
 
         public void OnPitchYaw(InputAction.CallbackContext context)
         {
@@ -144,11 +177,26 @@ namespace _Scripts
             _inputRoll = context.ReadValue<float>();
         }
 
-        public void OnPrevious(InputAction.CallbackContext context)
+        public void OnResetCamera(InputAction.CallbackContext context)
         {
+            if (context.performed) ResetCamera();
+        }
+
+        public void OnAccelerate(InputAction.CallbackContext context)
+        {
+            _inputThrust = context.ReadValueAsButton() ? 1 : 0;
+        }
+
+        public void OnDecelerate(InputAction.CallbackContext context)
+        {
+            _inputThrust = context.ReadValueAsButton() ? -1 : 0;
         }
 
         public void OnNext(InputAction.CallbackContext context)
+        {
+        }
+
+        public void OnPrevious(InputAction.CallbackContext context)
         {
         }
 
@@ -164,28 +212,12 @@ namespace _Scripts
         {
         }
 
-        public void OnAccelerate(InputAction.CallbackContext context)
-        {
-            _inputThrust = context.ReadValueAsButton() ? 1 : 0;
-        }
-
-        public void OnDecelerate(InputAction.CallbackContext context)
-        {
-            _inputThrust = context.ReadValueAsButton() ? -1 : 0;
-        }
-
         public void OnMenu(InputAction.CallbackContext context)
         {
         }
 
         public void OnTool(InputAction.CallbackContext context)
         {
-        }
-
-        public void OnResetCamera(InputAction.CallbackContext context)
-        {
-            if (context.performed)
-                ResetCamera();
         }
 
         #endregion
