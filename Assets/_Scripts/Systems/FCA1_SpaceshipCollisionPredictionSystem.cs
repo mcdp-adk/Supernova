@@ -5,7 +5,7 @@ using Unity.Entities;
 namespace _Scripts.Systems
 {
     [UpdateInGroup(typeof(CaFastSystemGroup))]
-    [UpdateAfter(typeof(SpaceshipBoundingUpdateSystem))]
+    [UpdateAfter(typeof(SpaceshipVoxelizationSystem))]
     public partial struct SpaceshipCollisionPredictionSystem : ISystem
     {
         [BurstCompile]
