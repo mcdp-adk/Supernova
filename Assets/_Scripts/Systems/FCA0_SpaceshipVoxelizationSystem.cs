@@ -36,7 +36,7 @@ namespace _Scripts.Systems
 
             // 清理 TempCell
             foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<SpaceshipTempCellTag>())
-                _cellMap.Remove((int3)math.round(transform.ValueRO.Position));
+                _cellMap.Remove((int3)math.floor(transform.ValueRO.Position));
             state.EntityManager.DestroyEntity(_tempCellQuery);
 
             // 结构性变更后必须重新获取组件
@@ -53,7 +53,7 @@ namespace _Scripts.Systems
             // 更新 CellMap
             foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>()
                          .WithAll<SpaceshipTempCellTag>().WithEntityAccess())
-                _cellMap.TryAdd((int3)math.round(transform.ValueRO.Position), entity);
+                _cellMap.TryAdd((int3)math.floor(transform.ValueRO.Position), entity);
         }
 
         #region CreateVoxelsForCollider
@@ -105,7 +105,7 @@ namespace _Scripts.Systems
         [BurstCompile]
         private bool IsIntersecting(int3 cellPos, SpaceshipColliderBuffer collider)
         {
-            var cellCenter = new float3(cellPos);
+            var cellCenter = new float3(cellPos) + new float3(0.5f, 0.5f, 0.5f);
 
             // 将网格单元中心转换到碰撞体本地空间
             var localCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
@@ -123,7 +123,7 @@ namespace _Scripts.Systems
 
             // 添加基础组件
             ecb.AddComponent<SpaceshipTempCellTag>(entity);
-            ecb.AddComponent(entity, LocalTransform.FromPosition(new float3(cellPos)));
+            ecb.AddComponent(entity, LocalTransform.FromPosition(new float3(cellPos) + new float3(0.5f, 0.5f, 0.5f)));
 
             // 添加物理系统需要的组件
             ecb.AddComponent(entity, new Mass { Value = _spaceshipMassValue });

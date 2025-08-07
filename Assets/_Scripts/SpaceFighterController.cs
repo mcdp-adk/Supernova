@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 
 namespace _Scripts
@@ -238,34 +239,6 @@ namespace _Scripts
 
         public void OnTool(InputAction.CallbackContext context)
         {
-        }
-
-        #endregion
-
-        #region 调试可视化
-
-        private void OnDrawGizmos()
-        {
-            if (!Application.isPlaying) return;
-
-            var world = World.DefaultGameObjectInjectionWorld;
-            if (world == null) return;
-
-            var entityManager = world.EntityManager;
-
-            // 查询所有临时飞船单元格
-            using var query = entityManager.CreateEntityQuery(ComponentType.ReadOnly<SpaceshipTempCellTag>(),
-                ComponentType.ReadOnly<LocalTransform>());
-            var entities = query.ToEntityArray(Allocator.Temp);
-
-            Gizmos.color = Color.cyan;
-            foreach (var entity in entities)
-            {
-                var localTransform = entityManager.GetComponentData<LocalTransform>(entity);
-                Gizmos.DrawCube(localTransform.Position, Vector3.one);
-            }
-
-            entities.Dispose();
         }
 
         #endregion
