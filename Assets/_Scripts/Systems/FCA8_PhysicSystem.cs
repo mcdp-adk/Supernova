@@ -14,10 +14,12 @@ namespace _Scripts.Systems
     {
         private NativeHashMap<int3, Entity> _cellMap;
         private NativeArray<CellConfig> _cellConfigs;
+        private EntityQuery _cellQuery;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            _cellQuery = SystemAPI.QueryBuilder().WithAll<IsAlive, Velocity>().Build();
             state.RequireForUpdate<CellConfigTag>();
         }
 
@@ -48,9 +50,9 @@ namespace _Scripts.Systems
                     MaxStep = maxStep
                 }.ScheduleParallel(state.Dependency);
                 state.Dependency.Complete();
-                
+
                 // 2. 检查是否还有可移动 Cell
-                if (SystemAPI.QueryBuilder().WithAll<IsAlive, Velocity>().Build().CalculateEntityCount() == 0) break;
+                if (_cellQuery.CalculateEntityCount() == 0) break;
 
                 // 3. 移动与碰撞
                 state.Dependency = new TryMoveCellJob

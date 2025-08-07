@@ -14,12 +14,14 @@ namespace _Scripts.Systems
         private NativeHashMap<int3, Entity> _cellMap;
         private EntityQuery _tempCellQuery;
         private DynamicBuffer<SpaceshipColliderBuffer> _colliderBuffer;
+        private int _spaceshipMassValue;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             _tempCellQuery = SystemAPI.QueryBuilder().WithAll<SpaceshipTempCellTag>().Build();
             state.RequireForUpdate<SpaceshipProxyTag>();
+            state.RequireForUpdate<SpaceshipMass>();
         }
 
         public void OnUpdate(ref SystemState state)
@@ -30,17 +32,25 @@ namespace _Scripts.Systems
                 _cellMap = globalDataSystem.CellMap;
             }
 
-            // 销毁所有旧的临时单元格
+            // 清理 TempCell
+            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<SpaceshipTempCellTag>())
+                _cellMap.Remove((int3)math.round(transform.ValueRO.Position));
             state.EntityManager.DestroyEntity(_tempCellQuery);
 
-            // 结构性变更后必须重新获取 buffer
+            // 结构性变更后必须重新获取组件
             _colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
+            _spaceshipMassValue = SystemAPI.GetSingleton<SpaceshipMass>().Value;
 
             // 使用 Entity Command Buffer 进行批量创建
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var collider in _colliderBuffer)
                 CreateVoxelsForCollider(collider, ecb);
             ecb.Playback(state.EntityManager);
+
+            // 更新 CellMap
+            foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>()
+                         .WithAll<SpaceshipTempCellTag>().WithEntityAccess())
+                _cellMap.TryAdd((int3)math.round(transform.ValueRO.Position), entity);
         }
 
         #region CreateVoxelsForCollider
@@ -68,8 +78,8 @@ namespace _Scripts.Systems
         private (int3 min, int3 max) GetRotatedBounds(SpaceshipColliderBuffer collider)
         {
             var halfSize = collider.Size * 0.5f;
-            var min = new float3(float.MaxValue);
-            var max = new float3(float.MinValue);
+            var minFloat = new float3(float.MaxValue);
+            var maxFloat = new float3(float.MinValue);
 
             // 计算角点并找出边界
             for (var i = 0; i < 8; i++)
@@ -81,41 +91,41 @@ namespace _Scripts.Systems
                 );
 
                 var worldPoint = math.mul(collider.Rotation, corner) + collider.Center;
-                min = math.min(min, worldPoint);
-                max = math.max(max, worldPoint);
+                minFloat = math.min(minFloat, worldPoint);
+                maxFloat = math.max(maxFloat, worldPoint);
             }
 
-            // 分别对每个分量进行 floor 和 ceil 操作
-            return (
-                new int3(
-                    (int)math.floor(min.x),
-                    (int)math.floor(min.y),
-                    (int)math.floor(min.z)
-                ),
-                new int3(
-                    (int)math.ceil(max.x),
-                    (int)math.ceil(max.y),
-                    (int)math.ceil(max.z)
-                )
-            );
+            return ((int3)math.floor(minFloat), (int3)math.ceil(maxFloat));
         }
 
         [BurstCompile]
         private bool IsIntersecting(int3 cellPos, SpaceshipColliderBuffer collider)
         {
-            var cellCenter = new float3(cellPos) + 0.5f;
-            var localCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
-            var halfSize = collider.Size * 0.5f + 0.5f; // 加上单元格半径
+            var cellCenter = new float3(cellPos);
 
-            return math.all(math.abs(localCenter) <= halfSize);
+            // 将网格单元中心转换到碰撞体本地空间
+            var localCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
+            var halfColliderSize = collider.Size * 0.5f;
+            var halfCellSize = new float3(0.5f);
+
+            // 在本地空间检查 AABB 相交
+            return math.all(math.abs(localCenter) <= halfColliderSize + halfCellSize);
         }
 
         [BurstCompile]
-        private void CreateVoxelEntity(int3 cellPos, EntityCommandBuffer ecb)
+        private Entity CreateVoxelEntity(int3 cellPos, EntityCommandBuffer ecb)
         {
             var entity = ecb.CreateEntity();
+
+            // 添加基础组件
             ecb.AddComponent<SpaceshipTempCellTag>(entity);
-            ecb.AddComponent(entity, LocalTransform.FromPosition(new float3(cellPos) + 0.5f));
+            ecb.AddComponent(entity, LocalTransform.FromPosition(new float3(cellPos)));
+
+            // 添加物理系统需要的组件
+            ecb.AddComponent(entity, new Mass { Value = _spaceshipMassValue });
+            ecb.AddBuffer<ImpulseBuffer>(entity);
+
+            return entity;
         }
 
         #endregion
