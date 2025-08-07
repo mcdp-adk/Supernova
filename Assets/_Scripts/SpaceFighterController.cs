@@ -75,6 +75,7 @@ namespace _Scripts
 
         private void FixedUpdate()
         {
+            ApplyForceFeedback();
             HandleRotation();
             HandleMovement();
             SyncSpaceshipDataToEcs();
@@ -98,6 +99,18 @@ namespace _Scripts
 
             // 用于数据读取
             _entityManager.AddComponent<SpaceshipForceFeedback>(_spaceshipProxyEntity);
+        }
+
+        private void ApplyForceFeedback()
+        {
+            if (!_entityManager.Exists(_spaceshipProxyEntity)) return;
+            if (!_entityManager.HasComponent<SpaceshipForceFeedback>(_spaceshipProxyEntity)) return;
+
+            var forceFeedback = _entityManager.GetComponentData<SpaceshipForceFeedback>(_spaceshipProxyEntity);
+            _rigidbody.AddForce(forceFeedback.Value, ForceMode.Impulse);
+
+            // 清零力反馈，避免重复应用
+            _entityManager.SetComponentData(_spaceshipProxyEntity, new SpaceshipForceFeedback { Value = float3.zero });
         }
 
         private void SyncSpaceshipDataToEcs()
@@ -140,15 +153,13 @@ namespace _Scripts
         private void HandleRotation()
         {
             if (!_mainCamera) return;
-
-            // 获取摄像头的完整前向方向（包括上下角度）
             var cameraForward = _mainCamera.transform.forward;
 
             // 计算目标旋转
             if (cameraForward == Vector3.zero) return;
             var targetRotation = Quaternion.LookRotation(cameraForward);
 
-            // 使用转向速度平滑旋转到目标朝向
+            // 使用转向速度平滑旋���到目标朝向
             var rotationSpeed = turnRate * Time.fixedDeltaTime;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed);
         }
@@ -177,7 +188,7 @@ namespace _Scripts
             if (Mathf.Abs(_elevationInput) > 0.01f)
                 force += _elevationInput * elevationSpeed * transform.up;
 
-            // 如果没有输入，施加惯性阻尼
+            // ��果没有输入，施加���性阻尼
             if (Mathf.Abs(_thrustInput) < 0.01f && Mathf.Abs(_strafeInput) < 0.01f &&
                 Mathf.Abs(_elevationInput) < 0.01f)
                 force = -_rigidbody.linearVelocity * inertialDamping;
