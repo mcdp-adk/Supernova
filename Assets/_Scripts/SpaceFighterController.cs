@@ -62,24 +62,6 @@ namespace _Scripts
             InitializeSpaceshipProxyEntity();
         }
 
-        private void InitializeSpaceshipProxyEntity()
-        {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            _spaceshipProxyEntity = _entityManager.CreateEntity();
-
-            // 设置实体名称（用于调试）
-            _entityManager.SetName(_spaceshipProxyEntity, "Spaceship_Proxy");
-
-            // 添加组件
-            _entityManager.AddComponent<SpaceshipProxyTag>(_spaceshipProxyEntity);
-            _entityManager.AddComponent<SpaceshipMass>(_spaceshipProxyEntity);
-            _entityManager.AddComponent<SpaceshipVelocity>(_spaceshipProxyEntity);
-            _entityManager.AddBuffer<SpaceshipColliderBuffer>(_spaceshipProxyEntity);
-
-            // 用于数据读取
-            _entityManager.AddComponent<SpaceshipForceFeedback>(_spaceshipProxyEntity);
-        }
-
         private void OnEnable()
         {
             _actions.Player.Enable();
@@ -98,6 +80,24 @@ namespace _Scripts
         }
 
         #region ECS
+
+        private void InitializeSpaceshipProxyEntity()
+        {
+            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _spaceshipProxyEntity = _entityManager.CreateEntity();
+
+            // 设置实体名称（用于调试）
+            _entityManager.SetName(_spaceshipProxyEntity, "Spaceship_Proxy");
+
+            // 添加组件
+            _entityManager.AddComponent<SpaceshipProxyTag>(_spaceshipProxyEntity);
+            _entityManager.AddComponent<SpaceshipMass>(_spaceshipProxyEntity);
+            _entityManager.AddComponent<SpaceshipVelocity>(_spaceshipProxyEntity);
+            _entityManager.AddBuffer<SpaceshipColliderBuffer>(_spaceshipProxyEntity);
+
+            // 用于数据读取
+            _entityManager.AddComponent<SpaceshipForceFeedback>(_spaceshipProxyEntity);
+        }
 
         private void SyncSpaceshipDataToEcs()
         {
@@ -122,7 +122,7 @@ namespace _Scripts
                 // 计算考虑缩放的实际大小
                 var localScale = boxCollider.transform.lossyScale;
                 var scaledSize = Vector3.Scale(boxCollider.size, localScale);
-                
+
                 colliderBuffer.Add(new SpaceshipColliderBuffer
                 {
                     Center = boxCollider.transform.TransformPoint(boxCollider.center),

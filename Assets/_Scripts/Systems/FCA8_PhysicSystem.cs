@@ -72,7 +72,6 @@ namespace _Scripts.Systems
 
         [BurstCompile]
         [WithAll(typeof(IsAlive), typeof(Velocity))]
-        [WithNone(typeof(SpaceshipTempCellTag))]
         private partial struct TryMoveCellJob : IJobEntity
         {
             public NativeHashMap<int3, Entity> CellMap;
@@ -324,7 +323,6 @@ namespace _Scripts.Systems
 
         [BurstCompile]
         [WithAll(typeof(IsAlive))]
-        [WithNone(typeof(SpaceshipTempCellTag))]
         [WithPresent(typeof(Velocity))]
         private partial struct VelocityUpdateJob : IJobEntity
         {

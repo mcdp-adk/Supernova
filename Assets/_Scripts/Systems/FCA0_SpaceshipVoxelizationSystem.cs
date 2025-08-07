@@ -8,18 +8,12 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    // 自定义AABB结构
-    public struct AABB
-    {
-        public float3 Min;
-        public float3 Max;
-    }
-
     [UpdateInGroup(typeof(CaFastSystemGroup), OrderFirst = true)]
     public partial struct SpaceshipVoxelizationSystem : ISystem
     {
+        private NativeHashMap<int3, Entity> _cellMap;
         private EntityQuery _tempCellQuery;
-        private Entity _spaceshipProxyEntity;
+        private DynamicBuffer<SpaceshipColliderBuffer> _colliderBuffer;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -28,147 +22,102 @@ namespace _Scripts.Systems
             state.RequireForUpdate<SpaceshipProxyTag>();
         }
 
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            // 销毁所有具有 SpaceshipTempCellTag 的实体
+            if (!_cellMap.IsCreated)
+            {
+                var globalDataSystem = state.World.GetExistingSystemManaged<GlobalDataInitSystem>();
+                _cellMap = globalDataSystem.CellMap;
+            }
+
+            // 销毁所有旧的临时单元格
             state.EntityManager.DestroyEntity(_tempCellQuery);
 
-            _spaceshipProxyEntity = SystemAPI.GetSingletonEntity<SpaceshipProxyTag>();
+            // 结构性变更后必须重新获取 buffer
+            _colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
 
-            // 先获取碰撞体数据到本地数组，避免结构性变更后的访问问题
-            var colliderBuffer = SystemAPI.GetBuffer<SpaceshipColliderBuffer>(_spaceshipProxyEntity);
-            var colliderArray = colliderBuffer.ToNativeArray(Allocator.Temp);
-
-            // 遍历每个碰撞体，创建包裹它的临时单元格
-            foreach (var collider in colliderArray)
-            {
-                CreateSurfaceCellsForCollider(ref state, collider);
-            }
-
-            colliderArray.Dispose();
+            // 使用 Entity Command Buffer 进行批量创建
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            foreach (var collider in _colliderBuffer)
+                CreateVoxelsForCollider(collider, ecb);
+            ecb.Playback(state.EntityManager);
         }
 
+        #region CreateVoxelsForCollider
+
         [BurstCompile]
-        private void CreateSurfaceCellsForCollider(ref SystemState state, SpaceshipColliderBuffer collider)
+        private void CreateVoxelsForCollider(SpaceshipColliderBuffer collider, EntityCommandBuffer ecb)
         {
-            // 计算旋转后碰撞体的轴对齐包围盒(AABB)
-            var aabb = CalculateRotatedAABB(collider);
+            // 计算旋转后的 AABB 边界
+            var bounds = GetRotatedBounds(collider);
 
-            // 计算需要创建的单元格范围（基于int3坐标）
-            var minBounds = new int3(
-                (int)math.floor(aabb.Min.x),
-                (int)math.floor(aabb.Min.y),
-                (int)math.floor(aabb.Min.z)
-            );
-
-            var maxBounds = new int3(
-                (int)math.ceil(aabb.Max.x),
-                (int)math.ceil(aabb.Max.y),
-                (int)math.ceil(aabb.Max.z)
-            );
-
-            // 创建完全覆盖碰撞体的单元格（实心填充）
-            for (var x = minBounds.x; x <= maxBounds.x; x++)
-            for (var y = minBounds.y; y <= maxBounds.y; y++)
-            for (var z = minBounds.z; z <= maxBounds.z; z++)
+            // 遍历边界内的所有整数坐标
+            for (var x = bounds.min.x; x <= bounds.max.x; x++)
+            for (var y = bounds.min.y; y <= bounds.max.y; y++)
+            for (var z = bounds.min.z; z <= bounds.max.z; z++)
             {
-                var cellPosition = new int3(x, y, z);
+                var cellPos = new int3(x, y, z);
 
-                // 检查单元格是否与旋转后的碰撞体相交
-                if (IsCellIntersectingRotatedCollider(cellPosition, collider))
-                {
-                    CreateTempCellEntity(ref state, cellPosition);
-                }
+                // 检查单元格是否与碰撞体相交
+                if (IsIntersecting(cellPos, collider))
+                    CreateVoxelEntity(cellPos, ecb);
             }
         }
 
         [BurstCompile]
-        private AABB CalculateRotatedAABB(SpaceshipColliderBuffer collider)
+        private (int3 min, int3 max) GetRotatedBounds(SpaceshipColliderBuffer collider)
         {
-            // 获取碰撞体的8个角点（本地空间）
             var halfSize = collider.Size * 0.5f;
+            var min = new float3(float.MaxValue);
+            var max = new float3(float.MinValue);
 
-            // 直接计算8个角点，避免创建托管数组
-            var minPoint = new float3(float.MaxValue);
-            var maxPoint = new float3(float.MinValue);
+            // 计算角点并找出边界
+            for (var i = 0; i < 8; i++)
+            {
+                var corner = new float3(
+                    (i & 1) == 0 ? -halfSize.x : halfSize.x,
+                    (i & 2) == 0 ? -halfSize.y : halfSize.y,
+                    (i & 4) == 0 ? -halfSize.z : halfSize.z
+                );
 
-            // 手动展开8个角点的计算，避免数组分配
-            var corner0 = new float3(-halfSize.x, -halfSize.y, -halfSize.z);
-            var corner1 = new float3(+halfSize.x, -halfSize.y, -halfSize.z);
-            var corner2 = new float3(-halfSize.x, +halfSize.y, -halfSize.z);
-            var corner3 = new float3(+halfSize.x, +halfSize.y, -halfSize.z);
-            var corner4 = new float3(-halfSize.x, -halfSize.y, +halfSize.z);
-            var corner5 = new float3(+halfSize.x, -halfSize.y, +halfSize.z);
-            var corner6 = new float3(-halfSize.x, +halfSize.y, +halfSize.z);
-            var corner7 = new float3(+halfSize.x, +halfSize.y, +halfSize.z);
+                var worldPoint = math.mul(collider.Rotation, corner) + collider.Center;
+                min = math.min(min, worldPoint);
+                max = math.max(max, worldPoint);
+            }
 
-            // 转换每个角点到世界空间并更新边界
-            var worldPoint0 = math.mul(collider.Rotation, corner0) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint0);
-            maxPoint = math.max(maxPoint, worldPoint0);
-
-            var worldPoint1 = math.mul(collider.Rotation, corner1) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint1);
-            maxPoint = math.max(maxPoint, worldPoint1);
-
-            var worldPoint2 = math.mul(collider.Rotation, corner2) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint2);
-            maxPoint = math.max(maxPoint, worldPoint2);
-
-            var worldPoint3 = math.mul(collider.Rotation, corner3) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint3);
-            maxPoint = math.max(maxPoint, worldPoint3);
-
-            var worldPoint4 = math.mul(collider.Rotation, corner4) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint4);
-            maxPoint = math.max(maxPoint, worldPoint4);
-
-            var worldPoint5 = math.mul(collider.Rotation, corner5) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint5);
-            maxPoint = math.max(maxPoint, worldPoint5);
-
-            var worldPoint6 = math.mul(collider.Rotation, corner6) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint6);
-            maxPoint = math.max(maxPoint, worldPoint6);
-
-            var worldPoint7 = math.mul(collider.Rotation, corner7) + collider.Center;
-            minPoint = math.min(minPoint, worldPoint7);
-            maxPoint = math.max(maxPoint, worldPoint7);
-
-            return new AABB { Min = minPoint, Max = maxPoint };
+            // 分别对每个分量进行 floor 和 ceil 操作
+            return (
+                new int3(
+                    (int)math.floor(min.x),
+                    (int)math.floor(min.y),
+                    (int)math.floor(min.z)
+                ),
+                new int3(
+                    (int)math.ceil(max.x),
+                    (int)math.ceil(max.y),
+                    (int)math.ceil(max.z)
+                )
+            );
         }
 
         [BurstCompile]
-        private bool IsCellIntersectingRotatedCollider(int3 cellPosition, SpaceshipColliderBuffer collider)
+        private bool IsIntersecting(int3 cellPos, SpaceshipColliderBuffer collider)
         {
-            // 单元格的世界坐标（大小为1的立方体）
-            var cellCenter = new float3(cellPosition) + 0.5f;
+            var cellCenter = new float3(cellPos) + 0.5f;
+            var localCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
+            var halfSize = collider.Size * 0.5f + 0.5f; // 加上单元格半径
 
-            // 将单元格中心转换到碰撞体的本地空间
-            var localCellCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
-
-            // 在本地空间中进行AABB检测
-            var halfSize = collider.Size * 0.5f;
-            var halfCellSize = new float3(0.5f); // 单元格半径
-
-            // 检查本地空间中的相交
-            return math.all(math.abs(localCellCenter) <= halfSize + halfCellSize);
+            return math.all(math.abs(localCenter) <= halfSize);
         }
 
         [BurstCompile]
-        private void CreateTempCellEntity(ref SystemState state, int3 cellPosition)
+        private void CreateVoxelEntity(int3 cellPos, EntityCommandBuffer ecb)
         {
-            // 创建新的临时单元格实体
-            var tempCellEntity = state.EntityManager.CreateEntity();
-
-            // 添加临时单元格标签
-            state.EntityManager.AddComponent<SpaceshipTempCellTag>(tempCellEntity);
-
-            // 添加位置组件
-            state.EntityManager.AddComponent<LocalTransform>(tempCellEntity);
-            state.EntityManager.SetComponentData(tempCellEntity,
-                LocalTransform.FromPosition(new float3(cellPosition) + 0.5f));
+            var entity = ecb.CreateEntity();
+            ecb.AddComponent<SpaceshipTempCellTag>(entity);
+            ecb.AddComponent(entity, LocalTransform.FromPosition(new float3(cellPos) + 0.5f));
         }
+
+        #endregion
     }
 }
