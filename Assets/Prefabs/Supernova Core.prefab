@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b43a34fc3b4342b73fe9a10422e55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mass: 500
+  mass: 100
   layerConfigs:
   - radius: 5
     density: 100
@@ -62,8 +62,8 @@ MonoBehaviour:
       weight: 1
   - radius: 30
     density: 1
-    explosionStrength: 0
-    explosionAngleClamp: 0
+    explosionStrength: 10000
+    explosionAngleClamp: 90
     cellConfigs:
     - cellType: -1
       weight: 1

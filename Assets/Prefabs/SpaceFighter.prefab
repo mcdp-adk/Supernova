@@ -154,7 +154,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 399465779751219600}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 100
   m_Drag: 0
   m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -193,7 +193,7 @@ MonoBehaviour:
   inertialDamping: 2
   turnRate: 45
   followCamera: {fileID: 0}
-  lockCursorOnStart: 1
+  lockCursorOnStart: 0
 --- !u!1 &406109165727066179
 GameObject:
   m_ObjectHideFlags: 0
