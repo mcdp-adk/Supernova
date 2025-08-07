@@ -16,7 +16,7 @@ namespace _Scripts.Components
         public int Value;
     }
 
-    public struct SpaceshipVelocity : IComponentData, IEnableableComponent
+    public struct SpaceshipVelocity : IComponentData
     {
         public float3 Value;
     }

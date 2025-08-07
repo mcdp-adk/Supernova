@@ -70,6 +70,9 @@ namespace _Scripts.Systems
 
             private void Execute([EntityIndexInQuery] int index, Entity selfEntity, in LocalTransform transform)
             {
+                // 检查实体是否存在且组件有效
+                if (!TypeLookup.HasComponent(selfEntity) || !TemperatureLookup.HasComponent(selfEntity)) return;
+
                 var selfCoordinate = (int3)transform.Position;
                 var selfType = TypeLookup[selfEntity];
                 var selfTemperature = TemperatureLookup[selfEntity];
@@ -81,6 +84,10 @@ namespace _Scripts.Systems
                 {
                     var neighborCoordinate = selfCoordinate + offset;
                     if (!CellMap.TryGetValue(neighborCoordinate, out var neighborEntity)) continue;
+
+                    // 检查邻居实体是否存在且组件有效
+                    if (!TypeLookup.HasComponent(neighborEntity) || !TemperatureLookup.HasComponent(neighborEntity)) continue;
+
                     var neighborType = TypeLookup[neighborEntity];
                     var neighborTemperature = TemperatureLookup[neighborEntity];
 

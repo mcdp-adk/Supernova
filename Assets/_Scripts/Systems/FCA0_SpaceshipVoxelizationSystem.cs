@@ -15,6 +15,7 @@ namespace _Scripts.Systems
         private EntityQuery _tempCellQuery;
         private DynamicBuffer<SpaceshipColliderBuffer> _colliderBuffer;
         private int _spaceshipMassValue;
+        private float3 _spaceshipVelocityValue;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -22,6 +23,7 @@ namespace _Scripts.Systems
             _tempCellQuery = SystemAPI.QueryBuilder().WithAll<SpaceshipTempCellTag>().Build();
             state.RequireForUpdate<SpaceshipProxyTag>();
             state.RequireForUpdate<SpaceshipMass>();
+            state.RequireForUpdate<SpaceshipVelocity>();
         }
 
         public void OnUpdate(ref SystemState state)
@@ -40,6 +42,7 @@ namespace _Scripts.Systems
             // 结构性变更后必须重新获取组件
             _colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
             _spaceshipMassValue = SystemAPI.GetSingleton<SpaceshipMass>().Value;
+            _spaceshipVelocityValue = SystemAPI.GetSingleton<SpaceshipVelocity>().Value;
 
             // 使用 Entity Command Buffer 进行批量创建
             var ecb = new EntityCommandBuffer(Allocator.Temp);
@@ -69,7 +72,8 @@ namespace _Scripts.Systems
                 var cellPos = new int3(x, y, z);
 
                 // 检查单元格是否与碰撞体相交
-                if (IsIntersecting(cellPos, collider))
+                if (!IsIntersecting(cellPos, collider)) continue;
+                if (!_cellMap.ContainsKey(cellPos))
                     CreateVoxelEntity(cellPos, ecb);
             }
         }
@@ -123,6 +127,7 @@ namespace _Scripts.Systems
 
             // 添加物理系统需要的组件
             ecb.AddComponent(entity, new Mass { Value = _spaceshipMassValue });
+            ecb.AddComponent(entity, new Velocity { Value = _spaceshipVelocityValue });
             ecb.AddBuffer<ImpulseBuffer>(entity);
 
             return entity;

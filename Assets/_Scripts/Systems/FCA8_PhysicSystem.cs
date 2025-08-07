@@ -190,7 +190,10 @@ namespace _Scripts.Systems
             private bool TrySettlementSwap(Entity self, int3 targetCoordinate)
             {
                 // 检查目标位置是否有细胞
-                if (!CellMap.TryGetValue(targetCoordinate, out Entity targetEntity)) return false;
+                if (!CellMap.TryGetValue(targetCoordinate, out var targetEntity)) return false;
+
+                // 检查实体是否存在且组件有效
+                if (!CellStateLookup.HasComponent(targetEntity) || !MassLookup.HasComponent(targetEntity)) return false;
 
                 // 检查目标细胞是否为液体状态
                 var targetState = CellStateLookup[targetEntity];
@@ -298,16 +301,16 @@ namespace _Scripts.Systems
                 }
             }
 
-            private void HandleCollision(Entity self, int3 targetCoordinate, int3 currentPos)
+            private void HandleCollision(Entity self, int3 targetCoordinate, int3 currentCoordinate)
             {
-                if (!CellMap.TryGetValue(targetCoordinate, out Entity targetEntity)) return;
+                if (!CellMap.TryGetValue(targetCoordinate, out var targetEntity)) return;
 
                 var currentVelocity = VelocityLookup[self].Value;
                 var currentMass = MassLookup[self].Value;
                 var targetVelocity = VelocityLookup[targetEntity].Value;
                 var targetMass = MassLookup[targetEntity].Value;
 
-                var collisionNormal = math.normalize(targetCoordinate - currentPos);
+                var collisionNormal = math.normalize(targetCoordinate - currentCoordinate);
                 var relativeSpeed = math.dot(currentVelocity - targetVelocity, collisionNormal);
                 var impulseMagnitude = (2 * relativeSpeed) / (currentMass + targetMass);
 
