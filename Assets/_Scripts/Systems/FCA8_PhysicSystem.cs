@@ -8,7 +8,8 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaFastSystemGroup), OrderLast = true)]
+    [UpdateInGroup(typeof(CaFastSystemGroup))]
+    [UpdateBefore(typeof(SpaceshipFinalizationUpdateSystem))]
     public partial struct PhysicSystem : ISystem
     {
         private NativeHashMap<int3, Entity> _cellMap;
