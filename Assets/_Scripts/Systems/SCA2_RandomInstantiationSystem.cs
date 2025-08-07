@@ -1,11 +1,12 @@
-﻿using _Scripts.Utilities;
+using _Scripts.Utilities;
 using Unity.Burst;
 using Unity.Entities;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaSlowSystemGroup), OrderLast = true)]
-    public partial struct CellTypeUpdateSystem : ISystem
+    [UpdateInGroup(typeof(CaSlowSystemGroup))]
+    [UpdateAfter(typeof(SupernovaInstantiationSystem))]
+    public partial struct RandomInstantiationSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)

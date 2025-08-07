@@ -9,7 +9,7 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaFastSystemGroup))]
+    [UpdateInGroup(typeof(CaFastSystemGroup),OrderFirst = true)]
     public partial struct GravitySystem : ISystem
     {
         private struct SupernovaData
