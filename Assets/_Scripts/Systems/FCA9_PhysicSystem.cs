@@ -8,7 +8,7 @@ using Unity.Transforms;
 
 namespace _Scripts.Systems
 {
-    [UpdateInGroup(typeof(CaFastSystemGroup),OrderLast = true)]
+    [UpdateInGroup(typeof(CaFastSystemGroup), OrderLast = true)]
     public partial struct PhysicSystem : ISystem
     {
         private NativeHashMap<int3, Entity> _cellMap;
@@ -41,7 +41,17 @@ namespace _Scripts.Systems
             var step = maxStep;
             while (step > 0)
             {
-                // 1. 移动与碰撞
+                // 1. 冲量整合与速度更新
+                state.Dependency = new VelocityUpdateJob
+                {
+                    MaxStep = maxStep
+                }.ScheduleParallel(state.Dependency);
+                state.Dependency.Complete();
+                
+                // 2. 检查是否还有可移动 Cell
+                if (SystemAPI.QueryBuilder().WithAll<IsAlive, Velocity>().Build().CalculateEntityCount() == 0) break;
+
+                // 3. 移动与碰撞
                 state.Dependency = new TryMoveCellJob
                 {
                     CellMap = _cellMap,
@@ -53,19 +63,6 @@ namespace _Scripts.Systems
                     ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>(),
                 }.Schedule(state.Dependency);
                 state.Dependency.Complete();
-
-                // 2. 冲量整合与速度更新
-                state.Dependency = new VelocityUpdateJob
-                {
-                    MassLookup = SystemAPI.GetComponentLookup<Mass>(true),
-                    VelocityLookup = SystemAPI.GetComponentLookup<Velocity>(),
-                    ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>(),
-                    MaxStep = maxStep
-                }.Schedule(state.Dependency);
-                state.Dependency.Complete();
-
-                // 3. 检查是否还有可移动 Cell
-                if (SystemAPI.QueryBuilder().WithAll<IsAlive, Velocity>().Build().CalculateEntityCount() == 0) break;
 
                 // 4. 更新计数
                 step--;
@@ -325,23 +322,21 @@ namespace _Scripts.Systems
 
         [BurstCompile]
         [WithAll(typeof(IsAlive))]
+        [WithPresent(typeof(Velocity))]
         private partial struct VelocityUpdateJob : IJobEntity
         {
-            [ReadOnly] public ComponentLookup<Mass> MassLookup;
-            public ComponentLookup<Velocity> VelocityLookup;
-            public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
             [ReadOnly] public int MaxStep;
 
-            private void Execute(Entity cell)
+            private void Execute(in Mass mass, ref Velocity velocity, EnabledRefRW<Velocity> velocityEnabled,
+                DynamicBuffer<ImpulseBuffer> impulseBuffer)
             {
                 // 计算总冲量
                 var totalImpulse = float3.zero;
                 // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-                foreach (var impulse in ImpulseBufferLookup[cell]) totalImpulse += impulse.Value;
+                foreach (var impulse in impulseBuffer) totalImpulse += impulse.Value;
 
                 // 计算并限制新速度
-                var velocity = VelocityLookup[cell];
-                var newVelocity = velocity.Value + totalImpulse / MassLookup[cell].Value;
+                var newVelocity = velocity.Value + totalImpulse / mass.Value;
                 var speedSq = math.lengthsq(newVelocity);
                 if (speedSq > GlobalConfig.MaxSpeed * GlobalConfig.MaxSpeed)
                     newVelocity = math.normalize(newVelocity) * GlobalConfig.MaxSpeed;
@@ -354,13 +349,13 @@ namespace _Scripts.Systems
                     newDebt = math.normalize(newDebt) * GlobalConfig.MaxSpeed;
 
                 // 更新 Velocity 组件
-                VelocityLookup[cell] = new Velocity { Value = newVelocity, MovementDebt = newDebt };
+                velocity = new Velocity { Value = newVelocity, MovementDebt = newDebt };
 
                 // 根据 MovementDebt 模长，启用/禁用 Velocity 组件
-                VelocityLookup.SetComponentEnabled(cell, math.lengthsq(newDebt) >= 1f);
+                velocityEnabled.ValueRW = math.lengthsq(newDebt) >= 1f;
 
                 // 清空冲量缓冲区
-                ImpulseBufferLookup[cell].Clear();
+                impulseBuffer.Clear();
             }
         }
     }
