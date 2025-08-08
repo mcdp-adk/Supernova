@@ -39,7 +39,7 @@ namespace _Scripts.Systems
                 _cellMap.Remove((int3)math.floor(transform.ValueRO.Position));
             state.EntityManager.DestroyEntity(_tempCellQuery);
 
-            // 结构性变更后必须重新获取组件
+            // 获取飞船数据
             _colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
             _spaceshipMassValue = SystemAPI.GetSingleton<SpaceshipMass>().Value;
             _spaceshipVelocityValue = SystemAPI.GetSingleton<SpaceshipVelocity>().Value;

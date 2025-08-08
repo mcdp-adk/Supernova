@@ -17,6 +17,7 @@ namespace _Scripts.Systems
         {
             _bufferQuery = SystemAPI.QueryBuilder().WithAll<SpaceshipTempCellTag, ImpulseBuffer>().Build();
             state.RequireForUpdate<SpaceshipProxyTag>();
+            state.RequireForUpdate<SpaceshipForceFeedback>();
         }
 
         [BurstCompile]
@@ -40,8 +41,11 @@ namespace _Scripts.Systems
                 impulseBuffer.Clear();
             }
 
-            // 将总 Impulse 写入 SpaceshipForceFeedback
-            SystemAPI.SetSingleton(new SpaceshipForceFeedback { Value = totalImpulse });
+            // 将总 Impulse 累加到 SpaceshipForceFeedback
+            if (!math.any(totalImpulse != float3.zero)) return;
+            var existingForce = SystemAPI.GetSingleton<SpaceshipForceFeedback>();
+            existingForce.Value += totalImpulse;
+            SystemAPI.SetSingleton(existingForce);
         }
     }
 }
