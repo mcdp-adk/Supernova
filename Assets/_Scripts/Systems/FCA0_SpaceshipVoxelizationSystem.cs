@@ -39,16 +39,20 @@ namespace _Scripts.Systems
                 _cellMap.Remove((int3)math.floor(transform.ValueRO.Position));
             state.EntityManager.DestroyEntity(_tempCellQuery);
 
-            // 获取飞船数据
+            // 结构性变更后必须重新获取组件
             _colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
             _spaceshipMassValue = SystemAPI.GetSingleton<SpaceshipMass>().Value;
             _spaceshipVelocityValue = SystemAPI.GetSingleton<SpaceshipVelocity>().Value;
 
             // 使用 Entity Command Buffer 进行批量创建
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var pendingCells = new NativeHashSet<int3>(64, Allocator.Temp); // 跟踪即将创建 TempCell 的位置
+            
             foreach (var collider in _colliderBuffer)
-                CreateVoxelsForCollider(collider, ecb);
+                CreateVoxelsForCollider(collider, ecb, pendingCells);
+            
             ecb.Playback(state.EntityManager);
+            pendingCells.Dispose();
 
             // 更新 CellMap
             foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>()
@@ -59,7 +63,7 @@ namespace _Scripts.Systems
         #region CreateVoxelsForCollider
 
         [BurstCompile]
-        private void CreateVoxelsForCollider(SpaceshipColliderBuffer collider, EntityCommandBuffer ecb)
+        private void CreateVoxelsForCollider(SpaceshipColliderBuffer collider, EntityCommandBuffer ecb, NativeHashSet<int3> pendingCells)
         {
             // 计算旋转后的 AABB 边界
             var bounds = GetRotatedBounds(collider);
@@ -72,9 +76,10 @@ namespace _Scripts.Systems
                 var cellPos = new int3(x, y, z);
 
                 // 检查单元格是否与碰撞体相交
+                if (_cellMap.ContainsKey(cellPos) || pendingCells.Contains(cellPos)) continue;
                 if (!IsIntersecting(cellPos, collider)) continue;
-                if (!_cellMap.ContainsKey(cellPos))
-                    CreateVoxelEntity(cellPos, ecb);
+                CreateVoxelEntity(cellPos, ecb);
+                pendingCells.Add(cellPos);
             }
         }
 
