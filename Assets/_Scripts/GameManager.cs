@@ -17,6 +17,7 @@ namespace _Scripts
         public static GameManager Instance { get; private set; }
 
         public bool IsGameStarted { get; private set; } = false;
+        public bool IsMenuOpened { get; private set; } = false;
 
         private void Awake()
         {
@@ -42,7 +43,8 @@ namespace _Scripts
             Cursor.visible = false;
 
             SetWorldUpdateEnabled(true);
-            SpawnPlayer(); }
+            SpawnPlayer();
+        }
 
         public void OnGameExit()
         {
@@ -52,26 +54,50 @@ namespace _Scripts
 
         public void OnGamePause()
         {
-            SetWorldUpdateEnabled(false);
-            inGameUI.SetActive(false);
-            startUI.SetActive(true);
-            settingUI.SetActive(false);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            IsMenuOpened = true;
 
-            SetWorldUpdateEnabled(false);
+            if (IsGameStarted)
+            {
+                inGameUI.SetActive(false);
+                startUI.SetActive(false);
+                settingUI.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+
+                SetWorldUpdateEnabled(false);
+            }
+            else
+            {
+                inGameUI.SetActive(false);
+                startUI.SetActive(false);
+                settingUI.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
         }
 
         public void OnGameResume()
         {
-            SetWorldUpdateEnabled(true);
-            inGameUI.SetActive(true);
-            startUI.SetActive(false);
-            settingUI.SetActive(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            IsMenuOpened = false;
 
-            SetWorldUpdateEnabled(true);
+            if (IsGameStarted)
+            {
+                inGameUI.SetActive(true);
+                startUI.SetActive(false);
+                settingUI.SetActive(false);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+
+                SetWorldUpdateEnabled(true);
+            }
+            else
+            {
+                inGameUI.SetActive(false);
+                startUI.SetActive(true);
+                settingUI.SetActive(false);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
         }
 
         public static void SetWorldUpdateEnabled(bool shouldEnable)

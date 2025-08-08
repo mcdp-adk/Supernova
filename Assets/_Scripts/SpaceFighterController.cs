@@ -19,7 +19,7 @@ namespace _Scripts
         [SerializeField] private float inertialDamping = 200f;
 
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
-        
+
         // 输入状态
         private float _thrustInput;
         private float _strafeInput;
@@ -105,8 +105,7 @@ namespace _Scripts
 
         private void SyncSpaceshipDataToEcs()
         {
-            if (!_entityManager.Exists(_spaceshipProxyEntity))
-                return;
+            if (!_entityManager.Exists(_spaceshipProxyEntity)) return;
 
             // 更新质量
             _entityManager.SetComponentData(_spaceshipProxyEntity, new SpaceshipMass { Value = (int)_rigidbody.mass });
@@ -226,16 +225,10 @@ namespace _Scripts
         {
             if (!context.performed) return;
 
-            if (Cursor.lockState == CursorLockMode.Locked)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
+            if (GameManager.Instance.IsMenuOpened)
+                GameManager.Instance.OnGameResume();
             else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
+                GameManager.Instance.OnGamePause();
         }
 
         public void OnTool(InputAction.CallbackContext context)
@@ -270,13 +263,13 @@ namespace _Scripts
             {
                 var localTransform = transforms[i];
                 var position = localTransform.Position;
-                
+
                 // 计算网格坐标（与 CellMap 中的键一致）
                 var gridPos = (int3)math.floor(position);
-                
+
                 // 网格单元的实际占用区域
                 var cellCenter = new float3(gridPos) + new float3(0.5f);
-                
+
                 // 绘制网格单元的实际占用区域
                 Gizmos.DrawWireCube(cellCenter, Vector3.one);
             }
