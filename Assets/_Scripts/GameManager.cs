@@ -13,6 +13,8 @@ namespace _Scripts
         [SerializeField] private GameObject startUI;
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
+        
+        private bool _isGameStarted = false;
 
         private static GameManager Instance { get; set; }
 
@@ -27,17 +29,53 @@ namespace _Scripts
             Instance = this;
         }
 
+        #region 公共方法
+
         public void OnGameStart()
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            
             startUI.SetActive(false);
             inGameUI.SetActive(true);
+            settingUI.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-            EnableSystemsUpdate();
+            SetWorldUpdateEnabled(true);
             SpawnPlayer();
         }
+
+        public void OnGameExit()
+        {
+            Application.Quit();
+            Debug.Log("[GameManager] 游戏已退出");
+        }
+
+        public void OnGamePause()
+        {
+            SetWorldUpdateEnabled(false);
+            inGameUI.SetActive(false);
+            startUI.SetActive(true);
+            settingUI.SetActive(false);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            SetWorldUpdateEnabled(false);
+        }
+
+        public void OnGameResume()
+        {
+            SetWorldUpdateEnabled(true);
+            inGameUI.SetActive(true);
+            startUI.SetActive(false);
+            settingUI.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            SetWorldUpdateEnabled(true);
+        }
+
+        #endregion
+
+        #region 辅助方法
 
         private void SpawnPlayer()
         {
@@ -51,18 +89,26 @@ namespace _Scripts
             }
         }
 
-        private static void EnableSystemsUpdate()
+        private static void SetWorldUpdateEnabled(bool shouldEnable)
         {
             var world = World.DefaultGameObjectInjectionWorld;
             var caSlowSystemGroup = world.GetExistingSystemManaged<CaSlowSystemGroup>();
             var caFastSystemGroup = world.GetExistingSystemManaged<CaFastSystemGroup>();
-            if (caSlowSystemGroup != null && caFastSystemGroup != null)
+            if (caSlowSystemGroup == null || caFastSystemGroup == null)
             {
-                caSlowSystemGroup.Enabled = true;
-                caFastSystemGroup.Enabled = true;
+                Debug.LogError("[GameManager] Cellular Automata 系统组未找到，请确保它们已正确添加到世界中。");
+                return;
             }
 
-            Debug.Log("[GameManager] Cellular Automata 系统更新已启用。");
+            caSlowSystemGroup.Enabled = shouldEnable;
+            caFastSystemGroup.Enabled = shouldEnable;
+
+            Time.timeScale = shouldEnable ? 1f : 0f;
+
+            Debug.Log("[GameManager] Cellular Automata 系统组已 " + (shouldEnable ? "启用" : "禁用") +
+                      "，游戏时间已 " + (shouldEnable ? "继续" : "暂停"));
         }
+
+        #endregion
     }
 }

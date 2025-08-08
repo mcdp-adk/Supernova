@@ -41,7 +41,7 @@ namespace _Scripts.Systems
                 
             ecb.Playback(EntityManager);
             
-            Debug.Log("[GlobalDataInitSystem] 数据初始化完成。");
+            Debug.Log("[GlobalDataInitSystem] 数据初始化完成");
             Enabled = false; // 完成后自禁用
         }
 

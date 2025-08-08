@@ -49,7 +49,6 @@ namespace _Scripts
 
             // 缓存主摄像头
             _mainCamera = Camera.main;
-            Debug.Log("Main Camera: " + (_mainCamera ? _mainCamera.name : "未找到主摄像头"));
 
             // 初始化 ECS 代理实体
             InitializeSpaceshipProxyEntity();
