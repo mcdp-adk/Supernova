@@ -35,6 +35,12 @@ namespace _Scripts.Systems
             var colliderBuffer = SystemAPI.GetSingletonBuffer<SpaceshipColliderBuffer>();
             var spaceshipMass = SystemAPI.GetSingleton<SpaceshipMass>().Value;
             var spaceshipVelocity = SystemAPI.GetSingleton<SpaceshipVelocity>().Value;
+
+            var displacement = math.length(spaceshipVelocity * GlobalConfig.FastUpdateRateInMS / 1000f);
+            while (displacement > 0)
+            {
+                displacement -= 0.1f;
+            }
         }
     }
 }
