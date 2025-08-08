@@ -19,9 +19,7 @@ namespace _Scripts
         [SerializeField] private float inertialDamping = 200f;
 
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
-
-        [Header("鼠标设置")] [SerializeField] private bool lockCursorOnStart = true;
-
+        
         // 输入状态
         private float _thrustInput;
         private float _strafeInput;
@@ -51,9 +49,6 @@ namespace _Scripts
 
             // 缓存主摄像头
             _mainCamera = Camera.main;
-
-            if (lockCursorOnStart)
-                Cursor.lockState = CursorLockMode.Locked;
 
             // 初始化 ECS 代理实体
             InitializeSpaceshipProxyEntity();
