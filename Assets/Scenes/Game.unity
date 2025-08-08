@@ -172,6 +172,22 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
+      propertyPath: strafeSpeed
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
+      propertyPath: acceleration
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
+      propertyPath: elevationSpeed
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
+      propertyPath: inertialDamping
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
       propertyPath: lockCursorOnStart
       value: 1
       objectReference: {fileID: 0}

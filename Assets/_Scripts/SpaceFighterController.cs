@@ -12,17 +12,14 @@ namespace _Scripts
     [RequireComponent(typeof(Rigidbody))]
     public class SpaceFighterController : MonoBehaviour, InputSystem_Actions.IPlayerActions
     {
-        [Header("移动设置")] [SerializeField] private float acceleration = 20f;
-        [SerializeField] private float maxForwardSpeed = 50f;
+        [Header("移动设置")] [SerializeField] private float maxForwardSpeed = 50f;
         [SerializeField] private float maxBackwardSpeed = 25f;
-        [SerializeField] private float strafeSpeed = 15f;
-        [SerializeField] private float elevationSpeed = 15f; // 上升下降速度
-        [SerializeField] private float inertialDamping = 2f;
-
+        [SerializeField] private float thrustAcceleration = 2000f;
+        [SerializeField] private float strafeAcceleration = 1500f;
+        [SerializeField] private float elevationAcceleration = 1500f;
+        [SerializeField] private float inertialDamping = 200f;
 
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
-
-        [Header("摄像头设置")] [SerializeField] private CinemachineCamera followCamera;
 
         [Header("鼠标设置")] [SerializeField] private bool lockCursorOnStart = true;
 
@@ -87,8 +84,6 @@ namespace _Scripts
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             _spaceshipProxyEntity = _entityManager.CreateEntity();
-
-            // 设置实体名称（用于调试）
             _entityManager.SetName(_spaceshipProxyEntity, "Spaceship_Proxy");
 
             // 添加组件
@@ -159,7 +154,7 @@ namespace _Scripts
             if (cameraForward == Vector3.zero) return;
             var targetRotation = Quaternion.LookRotation(cameraForward);
 
-            // 使用转向速度平滑旋���到目标朝向
+            // 使用转向速度平滑旋转到目标朝向
             var rotationSpeed = turnRate * Time.fixedDeltaTime;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed);
         }
@@ -177,18 +172,18 @@ namespace _Scripts
                 // 检查是否已达到速度限制
                 if ((_thrustInput > 0 && forwardVelocity < maxForwardSpeed) ||
                     (_thrustInput < 0 && forwardVelocity > -maxBackwardSpeed))
-                    force += _thrustInput * acceleration * transform.forward;
+                    force += _thrustInput * thrustAcceleration * transform.forward;
             }
 
             // 基于摄像头的左右环绕移动
             if (Mathf.Abs(_strafeInput) > 0.01f && _mainCamera)
-                force += _strafeInput * strafeSpeed * _mainCamera.transform.right;
+                force += _strafeInput * strafeAcceleration * _mainCamera.transform.right;
 
             // 上下移动
             if (Mathf.Abs(_elevationInput) > 0.01f)
-                force += _elevationInput * elevationSpeed * transform.up;
+                force += _elevationInput * elevationAcceleration * transform.up;
 
-            // ��果没有输入，施加���性阻尼
+            // 如果没有输入，施加线性阻尼
             if (Mathf.Abs(_thrustInput) < 0.01f && Mathf.Abs(_strafeInput) < 0.01f &&
                 Mathf.Abs(_elevationInput) < 0.01f)
                 force = -_rigidbody.linearVelocity * inertialDamping;

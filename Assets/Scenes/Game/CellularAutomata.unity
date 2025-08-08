@@ -139,6 +139,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Supernova Core
       objectReference: {fileID: 0}
+    - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4738577378021417238, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
