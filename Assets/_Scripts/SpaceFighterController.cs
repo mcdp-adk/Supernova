@@ -1,7 +1,6 @@
 using _Scripts.Components;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Cinemachine;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -94,6 +93,7 @@ namespace _Scripts
 
             // 用于数据读取
             _entityManager.AddComponent<SpaceshipForceFeedback>(_spaceshipProxyEntity);
+            _entityManager.SetComponentData(_spaceshipProxyEntity, new SpaceshipForceFeedback { Value = float3.zero });
         }
 
         private void ApplyForceFeedback()
@@ -143,7 +143,7 @@ namespace _Scripts
 
         #endregion
 
-        #region 移动控制
+        #region Movement
 
         private void HandleRotation()
         {
@@ -245,6 +245,46 @@ namespace _Scripts
 
         public void OnTool(InputAction.CallbackContext context)
         {
+        }
+
+        #endregion
+
+        #region Gizmos
+
+        private void OnDrawGizmos()
+        {
+            // 确保 EntityManager 已初始化
+            if (_entityManager == default)
+            {
+                var world = World.DefaultGameObjectInjectionWorld;
+                if (world != null)
+                    _entityManager = world.EntityManager;
+                else
+                    return;
+            }
+
+            // 设置 Gizmos 颜色
+            Gizmos.color = Color.cyan;
+
+            // 查询所有包含 SpaceshipTempCellTag 组件的实体
+            using var query = _entityManager.CreateEntityQuery(typeof(SpaceshipTempCellTag), typeof(LocalTransform));
+            var entities = query.ToEntityArray(Allocator.Temp);
+            var transforms = query.ToComponentDataArray<LocalTransform>(Allocator.Temp);
+
+            for (var i = 0; i < entities.Length; i++)
+            {
+                var localTransform = transforms[i];
+                var position = localTransform.Position;
+                    
+                // 计算底面中心位置（将位置向下偏移0.5个单位，使方块的底面中心为锚点）
+                var bottomCenterPosition = position - new float3(0, 0.5f, 0);
+                    
+                // 绘制大小为1的方块
+                Gizmos.DrawWireCube(bottomCenterPosition, Vector3.one);
+            }
+
+            entities.Dispose();
+            transforms.Dispose();
         }
 
         #endregion
