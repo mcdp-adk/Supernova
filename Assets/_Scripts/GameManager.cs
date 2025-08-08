@@ -13,10 +13,10 @@ namespace _Scripts
         [SerializeField] private GameObject startUI;
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
-        
-        private bool _isGameStarted = false;
 
-        private static GameManager Instance { get; set; }
+        public static GameManager Instance { get; private set; }
+
+        public bool IsGameStarted { get; private set; } = false;
 
         private void Awake()
         {
@@ -33,6 +33,8 @@ namespace _Scripts
 
         public void OnGameStart()
         {
+            IsGameStarted = true;
+
             startUI.SetActive(false);
             inGameUI.SetActive(true);
             settingUI.SetActive(false);
@@ -40,8 +42,7 @@ namespace _Scripts
             Cursor.visible = false;
 
             SetWorldUpdateEnabled(true);
-            SpawnPlayer();
-        }
+            SpawnPlayer(); }
 
         public void OnGameExit()
         {
@@ -73,23 +74,7 @@ namespace _Scripts
             SetWorldUpdateEnabled(true);
         }
 
-        #endregion
-
-        #region 辅助方法
-
-        private void SpawnPlayer()
-        {
-            if (playerPrefab != null && spawnPoint != null)
-            {
-                Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-            }
-            else
-            {
-                Debug.LogError("Player prefab or spawn point not assigned in GameManager");
-            }
-        }
-
-        private static void SetWorldUpdateEnabled(bool shouldEnable)
+        public static void SetWorldUpdateEnabled(bool shouldEnable)
         {
             var world = World.DefaultGameObjectInjectionWorld;
             var caSlowSystemGroup = world.GetExistingSystemManaged<CaSlowSystemGroup>();
@@ -107,6 +92,22 @@ namespace _Scripts
 
             Debug.Log("[GameManager] Cellular Automata 系统组已 " + (shouldEnable ? "启用" : "禁用") +
                       "，游戏时间已 " + (shouldEnable ? "继续" : "暂停"));
+        }
+
+        #endregion
+
+        #region 辅助方法
+
+        private void SpawnPlayer()
+        {
+            if (playerPrefab != null && spawnPoint != null)
+            {
+                Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+            }
+            else
+            {
+                Debug.LogError("Player prefab or spawn point not assigned in GameManager");
+            }
         }
 
         #endregion

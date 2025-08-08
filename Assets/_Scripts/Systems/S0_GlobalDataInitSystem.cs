@@ -18,7 +18,7 @@ namespace _Scripts.Systems
         {
             CellMap = new NativeHashMap<int3, Entity>(GlobalConfig.CellMapInitialCapacity, Allocator.Persistent);
             CellPoolQueue = new NativeQueue<Entity>(Allocator.Persistent);
-            
+
             // 确保存在所需的实体
             RequireForUpdate<CellConfigBuffer>();
             RequireForUpdate<CellPrototypeTag>();
@@ -35,14 +35,15 @@ namespace _Scripts.Systems
             // 直接获取原型并创建实体池
             var prototype = SystemAPI.GetSingletonEntity<CellPrototypeTag>();
             var ecb = new EntityCommandBuffer(WorldUpdateAllocator);
-            
+
             for (var i = 0; i < GlobalConfig.MaxCellPoolSize; i++)
                 CellUtility.InstantiateFromPrototype(prototype, ecb);
-                
+
             ecb.Playback(EntityManager);
-            
             Debug.Log("[GlobalDataInitSystem] 数据初始化完成");
+
             Enabled = false; // 完成后自禁用
+            GameManager.SetWorldUpdateEnabled(true);
         }
 
         protected override void OnDestroy()
