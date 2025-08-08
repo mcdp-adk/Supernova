@@ -40,17 +40,8 @@ namespace _Scripts.Systems
                 CellUtility.InstantiateFromPrototype(prototype, ecb);
                 
             ecb.Playback(EntityManager);
-
-            // 启用其他系统
-            var caSlowSystemGroup = World.GetExistingSystemManaged<CaSlowSystemGroup>();
-            var caFastSystemGroup = World.GetExistingSystemManaged<CaFastSystemGroup>();
-            if (caSlowSystemGroup != null && caFastSystemGroup != null)
-            {
-                caSlowSystemGroup.Enabled = true;
-                caFastSystemGroup.Enabled = true;
-            }
             
-            Debug.Log("[GlobalDataInitSystem] 初始化完成，Cellular Automata 系统更新已启用。");
+            Debug.Log("[GlobalDataInitSystem] 数据初始化完成。");
             Enabled = false; // 完成后自禁用
         }
 
