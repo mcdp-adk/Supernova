@@ -275,12 +275,15 @@ namespace _Scripts
             {
                 var localTransform = transforms[i];
                 var position = localTransform.Position;
-                    
-                // 计算底面中心位置（将位置向下偏移0.5个单位，使方块的底面中心为锚点）
-                var bottomCenterPosition = position - new float3(0, 0.5f, 0);
-                    
-                // 绘制大小为1的方块
-                Gizmos.DrawWireCube(bottomCenterPosition, Vector3.one);
+                
+                // 计算网格坐标（与 CellMap 中的键一致）
+                var gridPos = (int3)math.floor(position);
+                
+                // 网格单元的实际占用区域
+                var cellCenter = new float3(gridPos) + new float3(0.5f);
+                
+                // 绘制网格单元的实际占用区域
+                Gizmos.DrawWireCube(cellCenter, Vector3.one);
             }
 
             entities.Dispose();

@@ -185,15 +185,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 853097bb4eaa4a7785ed32a1c7c9692f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 20
   maxForwardSpeed: 50
   maxBackwardSpeed: 25
-  strafeSpeed: 15
-  elevationSpeed: 15
-  inertialDamping: 2
-  turnRate: 45
-  followCamera: {fileID: 0}
-  lockCursorOnStart: 0
+  thrustAcceleration: 2000
+  strafeAcceleration: 1500
+  elevationAcceleration: 1500
+  inertialDamping: 200
+  turnRate: 60
+  lockCursorOnStart: 1
 --- !u!1 &406109165727066179
 GameObject:
   m_ObjectHideFlags: 0

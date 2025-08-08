@@ -171,26 +171,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
-      propertyPath: strafeSpeed
-      value: 1500
-      objectReference: {fileID: 0}
-    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
-      propertyPath: acceleration
-      value: 2000
-      objectReference: {fileID: 0}
-    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
-      propertyPath: elevationSpeed
-      value: 1500
-      objectReference: {fileID: 0}
-    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
-      propertyPath: inertialDamping
-      value: 200
-      objectReference: {fileID: 0}
-    - target: {fileID: 4790697393362651797, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
-      propertyPath: lockCursorOnStart
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -699,10 +679,10 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 617899774}
   - {fileID: 282361869}
   - {fileID: 1578299170}
   - {fileID: 4325129168399904895}
   - {fileID: 1244577790}
-  - {fileID: 1141132172}
   - {fileID: 2073968019}
-  - {fileID: 617899774}
+  - {fileID: 1141132172}

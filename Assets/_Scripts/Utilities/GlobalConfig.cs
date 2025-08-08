@@ -50,6 +50,9 @@ namespace _Scripts.Utilities
         /// </summary>
         public const float ImpulseLossFactor = 0.8f;
 
+        public const float SpaceshipImpulseUpscaleFactor = 100f;
+        public const float CellImpulseUpscaleFactor = 10f;
+
         /// <summary>
         /// 热传导系数
         /// </summary>

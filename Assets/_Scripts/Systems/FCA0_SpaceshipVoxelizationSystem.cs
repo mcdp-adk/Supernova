@@ -110,12 +110,14 @@ namespace _Scripts.Systems
         [BurstCompile]
         private bool IsIntersecting(int3 cellPos, SpaceshipColliderBuffer collider)
         {
-            var cellCenter = new float3(cellPos) + new float3(0.5f, 0.5f, 0.5f);
+            var cellMin = new float3(cellPos);
+            var cellMax = new float3(cellPos) + new float3(1f);
+            var cellActualCenter = (cellMin + cellMax) * 0.5f; // 真正的几何中心
 
             // 将网格单元中心转换到碰撞体本地空间
-            var localCenter = math.mul(math.inverse(collider.Rotation), cellCenter - collider.Center);
+            var localCenter = math.mul(math.inverse(collider.Rotation), cellActualCenter - collider.Center);
             var halfColliderSize = collider.Size * 0.5f;
-            var halfCellSize = new float3(0.5f);
+            var halfCellSize = new float3(0.5f); // 网格单元半尺寸
 
             // 在本地空间检查 AABB 相交
             return math.all(math.abs(localCenter) <= halfColliderSize + halfCellSize);
