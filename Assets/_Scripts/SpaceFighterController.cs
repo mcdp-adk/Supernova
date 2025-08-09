@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.Serialization;
 
 namespace _Scripts
 {
@@ -31,6 +32,9 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
         [SerializeField] private float maxLaserRange = 50f;
+        private bool _hasTargetCell;
+        private int3 _laserTargetCell;
+        private Vector3 _laserEndPoint;
 
         // 输入状态
         private float _thrustInput;
@@ -49,11 +53,6 @@ namespace _Scripts
         private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
-
-        // 射线检测相关
-        private bool _hasTargetCell;
-        private int3 _laserTargetCell;
-        private Vector3 _laserEndPoint;
 
         private void Awake()
         {
@@ -285,13 +284,15 @@ namespace _Scripts
             // 33% 位置 + 随机偏移
             var offset1 = perpendicular * UnityEngine.Random.Range(-0.5f, 0.5f) +
                           Vector3.up * UnityEngine.Random.Range(-0.5f, 0.5f);
-            laserVFXTransform02.position = weaponTransform.position + laserDirection * (laserVector.magnitude * 0.33f) + offset1;
+            laserVFXTransform02.position =
+                weaponTransform.position + laserDirection * (laserVector.magnitude * 0.33f) + offset1;
             laserVFXTransform02.rotation = weaponTransform.rotation;
 
             // 66% 位置 + 随机偏移
             var offset2 = perpendicular * UnityEngine.Random.Range(-0.5f, 0.5f) +
                           Vector3.up * UnityEngine.Random.Range(-0.5f, 0.5f);
-            laserVFXTransform03.position = weaponTransform.position + laserDirection * (laserVector.magnitude * 0.66f) + offset2;
+            laserVFXTransform03.position =
+                weaponTransform.position + laserDirection * (laserVector.magnitude * 0.66f) + offset2;
             laserVFXTransform03.rotation = weaponTransform.rotation;
 
             // 终点
@@ -410,4 +411,3 @@ namespace _Scripts
         #endregion
     }
 }
-
