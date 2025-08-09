@@ -1,4 +1,5 @@
 using _Scripts.Components;
+using _Scripts.Systems;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Collections;
@@ -29,6 +30,7 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform02;
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
+        [SerializeField] private float maxLaserRange = 50f;
 
         // 输入状态
         private float _thrustInput;
@@ -44,8 +46,14 @@ namespace _Scripts
 
         // ECS 相关
         private NativeHashMap<int3, Entity> _cellMap;
+        private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
+
+        // 射线检测相关
+        private bool _hasTargetCell;
+        private int3 _laserTargetCell;
+        private Vector3 _laserEndPoint;
 
         private void Awake()
         {
@@ -64,8 +72,12 @@ namespace _Scripts
             _boxColliders = GetComponentsInChildren<BoxCollider>();
 
             // ECS 相关初始化
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _world = World.DefaultGameObjectInjectionWorld;
+            _entityManager = _world.EntityManager;
             InitializeSpaceshipProxyEntity();
+
+            // 获取 CellMap 引用
+            _cellMap = _world.GetExistingSystemManaged<GlobalDataInitSystem>().CellMap;
         }
 
         private void OnEnable()
@@ -80,6 +92,7 @@ namespace _Scripts
 
         private void Update()
         {
+            PerformLaser();
             UpdateLaserVFX();
         }
 
@@ -204,30 +217,73 @@ namespace _Scripts
 
         #endregion
 
+        #region Laser
+
+        private void PerformLaser()
+        {
+            if (!_isLaserActive)
+            {
+                _hasTargetCell = false;
+                return;
+            }
+
+            // 从屏幕中心发射射线
+            var ray = _mainCamera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+
+            // 执行步进式射线检测
+            var hitResult = CellDetectionByLaser(weaponTransform.position, ray.direction);
+
+            _hasTargetCell = hitResult.hitFound;
+            _laserTargetCell = hitResult.cellCoordinate;
+            _laserEndPoint = hitResult.endPoint;
+        }
+
+        private (bool hitFound, int3 cellCoordinate, Vector3 endPoint) CellDetectionByLaser(Vector3 weaponPosition,
+            Vector3 direction)
+        {
+            const float stepSize = 0.1f; // 步进大小
+            var step = Mathf.CeilToInt(maxLaserRange / stepSize); // 根据最大范围计算最大步数
+
+            // 计算武器位置在射线上的投影点作为起点
+            var ray = _mainCamera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+            var currentPos = ray.origin + Vector3.Project(weaponPosition - ray.origin, ray.direction);
+
+            while (step > 0)
+            {
+                currentPos += direction * stepSize;
+                var gridCoordinate = WorldToGridCoordinate(currentPos); // 计算当前位置的网格坐标
+
+                // 检查这个网格位置是否有 Cell
+                if (_cellMap.ContainsKey(gridCoordinate))
+                    return (true, gridCoordinate,
+                        new float3(gridCoordinate.x, gridCoordinate.y + 0.5f, gridCoordinate.z));
+
+                step--;
+            }
+
+            return (false, int3.zero, currentPos);
+        }
+
+        #endregion
+
         #region VFX
 
         private void UpdateLaserVFX()
         {
-            if (laserVFX == null || weaponTransform == null) return;
-
-            // 激活或禁用 Laser VFX
             laserVFX.SetActive(_isLaserActive);
+            if (!_isLaserActive) return;
 
-            // 更新 Laser VFX 的位置和旋转
-            if (_isLaserActive)
-            {
-                laserVFXTransform01.position = weaponTransform.position;
-                laserVFXTransform01.rotation = weaponTransform.rotation;
+            laserVFXTransform01.position = weaponTransform.position;
+            laserVFXTransform01.rotation = weaponTransform.rotation;
 
-                laserVFXTransform02.position = weaponTransform.position + new Vector3(5f, 5f, 5f);
-                laserVFXTransform02.rotation = weaponTransform.rotation;
+            laserVFXTransform02.position = weaponTransform.position;
+            laserVFXTransform02.rotation = weaponTransform.rotation;
 
-                laserVFXTransform03.position = weaponTransform.position + new Vector3(-5f, 5f, 10f);
-                laserVFXTransform03.rotation = weaponTransform.rotation;
+            laserVFXTransform03.position = weaponTransform.position;
+            laserVFXTransform03.rotation = weaponTransform.rotation;
 
-                laserVFXTransform04.position = weaponTransform.position + new Vector3(0, 0, 15f);
-                laserVFXTransform04.rotation = weaponTransform.rotation;
-            }
+            laserVFXTransform04.position = _laserEndPoint;
+            laserVFXTransform04.rotation = weaponTransform.rotation;
         }
 
         #endregion
@@ -315,7 +371,7 @@ namespace _Scripts
                 var gridPos = (int3)math.floor(position);
 
                 // 网格单元的实际占用区域
-                var cellCenter = new float3(gridPos) + new float3(0.5f);
+                var cellCenter = new float3(gridPos) + new float3(0, 0.5f, 0);
 
                 // 绘制网格单元的实际占用区域
                 Gizmos.DrawWireCube(cellCenter, Vector3.one);
@@ -323,6 +379,39 @@ namespace _Scripts
 
             entities.Dispose();
             transforms.Dispose();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            // 绘制当前目标 cell 的边缘
+            if (_hasTargetCell)
+            {
+                Gizmos.color = Color.red;
+                var cellCenter = new Vector3(_laserTargetCell.x,
+                    _laserTargetCell.y + 0.5f,
+                    _laserTargetCell.z);
+                Gizmos.DrawWireCube(cellCenter, Vector3.one);
+
+                // 绘制从武器到目标的射线
+                Gizmos.color = Color.yellow;
+                if (weaponTransform != null)
+                {
+                    Gizmos.DrawLine(weaponTransform.position, cellCenter);
+                }
+            }
+        }
+
+        #endregion
+
+        #region 辅助方法
+
+        private static int3 WorldToGridCoordinate(Vector3 worldPosition)
+        {
+            return new int3(
+                Mathf.RoundToInt(worldPosition.x),
+                Mathf.RoundToInt(worldPosition.y),
+                Mathf.RoundToInt(worldPosition.z)
+            );
         }
 
         #endregion
