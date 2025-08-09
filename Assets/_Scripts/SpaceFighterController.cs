@@ -253,8 +253,9 @@ namespace _Scripts
                 currentPos += direction * stepSize;
                 var gridCoordinate = WorldToGridCoordinate(currentPos); // 计算当前位置的网格坐标
 
-                // 检查这个网格位置是否有 Cell
-                if (_cellMap.ContainsKey(gridCoordinate))
+                // 检查这个网格位置是否有 Cell，且具有 CellTag 组件
+                if (_cellMap.TryGetValue(gridCoordinate, out var cellEntity) &&
+                    _entityManager.HasComponent<CellTag>(cellEntity))
                     return (true, gridCoordinate,
                         new float3(gridCoordinate.x, gridCoordinate.y + 0.5f, gridCoordinate.z));
 
@@ -273,15 +274,27 @@ namespace _Scripts
             laserVFX.SetActive(_isLaserActive);
             if (!_isLaserActive) return;
 
+            var laserVector = _laserEndPoint - weaponTransform.position;
+            var laserDirection = laserVector.normalized;
+            var perpendicular = Vector3.Cross(laserDirection, Vector3.up).normalized;
+
+            // 起点
             laserVFXTransform01.position = weaponTransform.position;
             laserVFXTransform01.rotation = weaponTransform.rotation;
 
-            laserVFXTransform02.position = weaponTransform.position;
+            // 33% 位置 + 随机偏移
+            var offset1 = perpendicular * UnityEngine.Random.Range(-0.5f, 0.5f) +
+                          Vector3.up * UnityEngine.Random.Range(-0.5f, 0.5f);
+            laserVFXTransform02.position = weaponTransform.position + laserDirection * (laserVector.magnitude * 0.33f) + offset1;
             laserVFXTransform02.rotation = weaponTransform.rotation;
 
-            laserVFXTransform03.position = weaponTransform.position;
+            // 66% 位置 + 随机偏移
+            var offset2 = perpendicular * UnityEngine.Random.Range(-0.5f, 0.5f) +
+                          Vector3.up * UnityEngine.Random.Range(-0.5f, 0.5f);
+            laserVFXTransform03.position = weaponTransform.position + laserDirection * (laserVector.magnitude * 0.66f) + offset2;
             laserVFXTransform03.rotation = weaponTransform.rotation;
 
+            // 终点
             laserVFXTransform04.position = _laserEndPoint;
             laserVFXTransform04.rotation = weaponTransform.rotation;
         }
@@ -381,26 +394,6 @@ namespace _Scripts
             transforms.Dispose();
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            // 绘制当前目标 cell 的边缘
-            if (_hasTargetCell)
-            {
-                Gizmos.color = Color.red;
-                var cellCenter = new Vector3(_laserTargetCell.x,
-                    _laserTargetCell.y + 0.5f,
-                    _laserTargetCell.z);
-                Gizmos.DrawWireCube(cellCenter, Vector3.one);
-
-                // 绘制从武器到目标的射线
-                Gizmos.color = Color.yellow;
-                if (weaponTransform != null)
-                {
-                    Gizmos.DrawLine(weaponTransform.position, cellCenter);
-                }
-            }
-        }
-
         #endregion
 
         #region 辅助方法
@@ -417,3 +410,4 @@ namespace _Scripts
         #endregion
     }
 }
+
