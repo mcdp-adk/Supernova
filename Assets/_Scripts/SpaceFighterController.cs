@@ -11,6 +11,8 @@ namespace _Scripts
     [RequireComponent(typeof(Rigidbody))]
     public class SpaceFighterController : MonoBehaviour, InputSystem_Actions.IPlayerActions
     {
+        [Header("飞船挂点")] [SerializeField] private Transform weaponTransform;
+
         [Header("移动设置")] [SerializeField] private float maxForwardSpeed = 50f;
         [SerializeField] private float maxBackwardSpeed = 25f;
         [SerializeField] private float thrustAcceleration = 2000f;
@@ -20,17 +22,28 @@ namespace _Scripts
 
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
 
+        [Header("Laser VFX 设置")] [SerializeField]
+        private GameObject laserVFX;
+
+        [SerializeField] private Transform laserVFXTransform01;
+        [SerializeField] private Transform laserVFXTransform02;
+        [SerializeField] private Transform laserVFXTransform03;
+        [SerializeField] private Transform laserVFXTransform04;
+
         // 输入状态
         private float _thrustInput;
         private float _strafeInput;
         private float _elevationInput;
+        private bool _isLaserActive;
 
         // 组件引用
         private Rigidbody _rigidbody;
         private InputSystem_Actions _actions;
         private Camera _mainCamera;
+        private BoxCollider[] _boxColliders;
 
         // ECS 相关
+        private NativeHashMap<int3, Entity> _cellMap;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
 
@@ -47,10 +60,11 @@ namespace _Scripts
             _rigidbody.linearDamping = 0f;
             _rigidbody.angularDamping = 0f;
 
-            // 缓存主摄像头
             _mainCamera = Camera.main;
+            _boxColliders = GetComponentsInChildren<BoxCollider>();
 
-            // 初始化 ECS 代理实体
+            // ECS 相关初始化
+            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             InitializeSpaceshipProxyEntity();
         }
 
@@ -62,6 +76,11 @@ namespace _Scripts
         private void OnDisable()
         {
             _actions.Player.Disable();
+        }
+
+        private void Update()
+        {
+            UpdateLaserVFX();
         }
 
         private void FixedUpdate()
@@ -76,7 +95,6 @@ namespace _Scripts
 
         private void InitializeSpaceshipProxyEntity()
         {
-            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             _spaceshipProxyEntity = _entityManager.CreateEntity();
             _entityManager.SetName(_spaceshipProxyEntity, "Spaceship_Proxy");
 
@@ -119,8 +137,7 @@ namespace _Scripts
             colliderBuffer.Clear();
 
             // 获取所有 BoxCollider
-            var boxColliders = GetComponentsInChildren<BoxCollider>();
-            foreach (var boxCollider in boxColliders)
+            foreach (var boxCollider in _boxColliders)
             {
                 // 计算考虑缩放的实际大小
                 var localScale = boxCollider.transform.lossyScale;
@@ -187,6 +204,34 @@ namespace _Scripts
 
         #endregion
 
+        #region VFX
+
+        private void UpdateLaserVFX()
+        {
+            if (laserVFX == null || weaponTransform == null) return;
+
+            // 激活或禁用 Laser VFX
+            laserVFX.SetActive(_isLaserActive);
+
+            // 更新 Laser VFX 的位置和旋转
+            if (_isLaserActive)
+            {
+                laserVFXTransform01.position = weaponTransform.position;
+                laserVFXTransform01.rotation = weaponTransform.rotation;
+
+                laserVFXTransform02.position = weaponTransform.position + new Vector3(5f, 5f, 5f);
+                laserVFXTransform02.rotation = weaponTransform.rotation;
+
+                laserVFXTransform03.position = weaponTransform.position + new Vector3(-5f, 5f, 10f);
+                laserVFXTransform03.rotation = weaponTransform.rotation;
+
+                laserVFXTransform04.position = weaponTransform.position + new Vector3(0, 0, 15f);
+                laserVFXTransform04.rotation = weaponTransform.rotation;
+            }
+        }
+
+        #endregion
+
         #region Input System
 
         public void OnMove(InputAction.CallbackContext context)
@@ -203,6 +248,8 @@ namespace _Scripts
 
         public void OnLaser(InputAction.CallbackContext context)
         {
+            if (context.started) _isLaserActive = true;
+            else if (context.canceled) _isLaserActive = false;
         }
 
         public void OnProjectile(InputAction.CallbackContext context)
