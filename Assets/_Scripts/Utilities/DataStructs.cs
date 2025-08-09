@@ -51,6 +51,7 @@ namespace _Scripts.Utilities
         public float MoistureMax;
         public float MoistureConductivity;
         public float EnergyDefault;
+        public float Durability;
         public float DropChanceGold;
         public float DropChanceSilver;
         public float DropChanceCopper;
