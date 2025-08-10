@@ -64,6 +64,11 @@ namespace _Scripts
         }
 
         #region 公共方法
+        
+        public void ChangeFPSCounterActive()
+        {
+            fpsCounterUI.SetActive(!fpsCounterUI.activeSelf);
+        }
 
         public void ChangeToolActive()
         {
