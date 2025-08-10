@@ -80,6 +80,7 @@ namespace _Scripts
         // ECS 相关
         private NativeHashMap<int3, Entity> _cellMap;
         private NativeArray<CellConfig> _cellConfigs;
+        private NativeQueue<Entity> _cellPoolQueue;
         private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
@@ -113,6 +114,7 @@ namespace _Scripts
             var globalDataSystem = _world.GetExistingSystemManaged<GlobalDataInitSystem>();
             _cellMap = globalDataSystem.CellMap;
             _cellConfigs = globalDataSystem.CellConfigs;
+            _cellPoolQueue = globalDataSystem.CellPoolQueue;
         }
 
         private void OnEnable()
@@ -399,6 +401,12 @@ namespace _Scripts
                     CellInventory[i] = stack;
                 }
             }
+        }
+
+        private void RecalculateInventoryProperties()
+        {
+            // 重新计算库存总属性
+            CalculateInventoryResources();
         }
 
         #endregion
@@ -737,6 +745,66 @@ namespace _Scripts
 
         public void OnInteract(InputAction.CallbackContext context)
         {
+            if (!context.performed) return;
+            
+            // 检查是否有足够的方块可以发射
+            if (CurrentCellIndex < 0 || CurrentCellIndex >= CellInventory.Length) return;
+            if (CellInventory[CurrentCellIndex].Count <= 0) return;
+
+            // 获取当前选中的方块类型
+            CellTypeEnum cellTypeToFire = CellTypeEnum.None;
+            foreach (var kvp in GameManager.CellTypeIndexMap)
+            {
+                if (kvp.Value == CurrentCellIndex)
+                {
+                    cellTypeToFire = kvp.Key;
+                    break;
+                }
+            }
+
+            if (cellTypeToFire == CellTypeEnum.None) return;
+
+            // 计算发射位置（武器位置往前一点）
+            var firePosition = weaponTransform.position + _mainCamera.transform.forward * 0.5f;
+            var gridCoordinate = WorldToGridCoordinate(firePosition);
+
+            // 创建实体命令缓冲区
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+
+            // 设置初始冲量为相机前方方向
+            var initialImpulse = _mainCamera.transform.forward * 200f; // 调整力度
+
+            if (_cellPoolQueue.TryDequeue(out var cell))
+            {
+                // 获取 CellConfigTag 实体
+                var query = _entityManager.CreateEntityQuery(typeof(CellConfigTag));
+                var cellConfigEntity = query.GetSingletonEntity();
+                
+                // 使用 CellUtility 添加方块到世界
+                var success = CellUtility.TryAddCellToWorld(
+                    cell,
+                    _entityManager,
+                    ecb,
+                    _cellMap,
+                    cellConfigEntity,
+                    cellTypeToFire,
+                    gridCoordinate,
+                    initialImpulse
+                );
+
+                if (success)
+                {
+                    // 减少背包中的方块数量
+                    var inventoryData = CellInventory[CurrentCellIndex];
+                    inventoryData.Count--;
+                    CellInventory[CurrentCellIndex] = inventoryData;
+                
+                    // 更新库存总属性
+                    RecalculateInventoryProperties();
+                }
+            }
+            
+            ecb.Playback(_entityManager);
         }
 
         public void OnNext(InputAction.CallbackContext context)
