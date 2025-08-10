@@ -64,6 +64,9 @@ namespace _Scripts
         public float CurrentOxygen { get; private set; } = 100f;
         public float MaxOxygen { get; private set; } = 300f;
         public float UltimateOxygen { get; private set; } = 1000f;
+        public float Temperature { get; private set; } = 20f;
+        public float Moisture { get; private set; } = 20f;
+        public float Energy { get; private set; } = 1000f;
 
         #endregion
 

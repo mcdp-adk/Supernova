@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using _Scripts.Utilities;
@@ -31,6 +32,10 @@ namespace _Scripts
         [SerializeField] private Image maxOxygenBar;
         [SerializeField] private float fillSpeed = 0.25f;
 
+        [Header("其他资源设置")] [SerializeField] private Text avgTemperatureText;
+        [SerializeField] private Text avgMoistureText;
+        [SerializeField] private Text avgEnergyText;
+
         private void Update()
         {
             if (!GameManager.Instance || !GameManager.Instance.spaceFighterController) return;
@@ -38,6 +43,15 @@ namespace _Scripts
             UpdateInventoryUI();
             UpdateCubeUI();
             UpdateOxygenBarUI();
+            UpdateOtherResourcesUI();
+        }
+
+        private void UpdateOtherResourcesUI()
+        {
+            var spaceFighter = GameManager.Instance.spaceFighterController;
+            avgTemperatureText.text = ((int)spaceFighter.Temperature).ToString();
+            avgMoistureText.text = ((int)spaceFighter.Moisture).ToString();
+            avgEnergyText.text = ((int)spaceFighter.Energy).ToString();
         }
 
         private void UpdateOxygenBarUI()
