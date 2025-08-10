@@ -42,6 +42,7 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
         [SerializeField] private float maxLaserRange = 50f;
+        [SerializeField] private float laserDamagePerSecond = 5f;
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
@@ -535,6 +536,12 @@ namespace _Scripts
             _hasTargetCell = hitResult.hitFound;
             _laserTargetCell = hitResult.cellCoordinate;
             _laserEndPoint = hitResult.endPoint;
+
+            // 如果有目标方块，进行 Laser 伤害
+            if (_hasTargetCell)
+            {
+                ApplyLaserDamageToCell(_laserTargetCell);
+            }
         }
 
         private (bool hitFound, int3 cellCoordinate, Vector3 endPoint) CellDetectionByLaser(Vector3 weaponPosition,
