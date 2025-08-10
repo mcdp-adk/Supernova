@@ -1,4 +1,8 @@
 using System;
+using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
+
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum
@@ -81,5 +85,13 @@ namespace _Scripts.Utilities
         public float AvgTemperature;
         public float AvgMoisture;
         public float AvgEnergy;
+    }
+
+    [Serializable]
+    public struct InventoryUIData
+    {
+        public CellTypeEnum cellType;
+        public Sprite icon;
+        public Text countText;
     }
 }

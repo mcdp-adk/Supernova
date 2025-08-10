@@ -2470,7 +2470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4bc56a5a5744d5741855643422c2b83b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9cee490ce90277649af6ea52bc89ecd2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5114,13 +5114,14 @@ GameObject:
   - component: {fileID: 834988200}
   - component: {fileID: 834988199}
   - component: {fileID: 834988198}
+  - component: {fileID: 834988202}
   m_Layer: 5
   m_Name: In Game UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &834988198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5207,6 +5208,86 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &834988202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834988197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be624ab7d8cb4c7ca7f981d120674e3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cubeCurrentImage: {fileID: 1881399023}
+  cubeCurrentCountText: {fileID: 1205231592}
+  cubeNext1Image: {fileID: 176934694}
+  cubeNext1CountText: {fileID: 789513032}
+  cubeNext2Image: {fileID: 373686029}
+  cubeNext2CountText: {fileID: 983537080}
+  cubePrevious1Image: {fileID: 1292201796}
+  cubePrevious1CountText: {fileID: 786216487}
+  cubePrevious2Image: {fileID: 1484047269}
+  cubePrevious2CountText: {fileID: 310618071}
+  inventoryUIData:
+  - cellType: -1
+    icon: {fileID: 21300000, guid: 008edfcbfbbd59b4ab164a06e037c380, type: 3}
+    countText: {fileID: 74703063}
+  - cellType: -2
+    icon: {fileID: 21300000, guid: c4256cec226cf83408edc91e62931161, type: 3}
+    countText: {fileID: 2132380291}
+  - cellType: -3
+    icon: {fileID: 21300000, guid: 43669542fa891cb438b64db14e7b8ad0, type: 3}
+    countText: {fileID: 246888254}
+  - cellType: -4
+    icon: {fileID: 21300000, guid: 94af787c8fbd2144780a9e7bed510015, type: 3}
+    countText: {fileID: 1995112397}
+  - cellType: -5
+    icon: {fileID: 21300000, guid: df544f93b0258524c988bb1bd3cef0b0, type: 3}
+    countText: {fileID: 791454147}
+  - cellType: -6
+    icon: {fileID: 21300000, guid: d789e4afa06a16843b0fc4ca633621ef, type: 3}
+    countText: {fileID: 1615841602}
+  - cellType: -7
+    icon: {fileID: 21300000, guid: 3f8d28afbac4e93468ea8bca9738e24d, type: 3}
+    countText: {fileID: 1313372257}
+  - cellType: -8
+    icon: {fileID: 21300000, guid: dbb9fd8053b0e8f46b773da118dc2b85, type: 3}
+    countText: {fileID: 1327840301}
+  - cellType: -9
+    icon: {fileID: 21300000, guid: 98e0cb2af1a263047b172fde18d5fb56, type: 3}
+    countText: {fileID: 1839868895}
+  - cellType: -10
+    icon: {fileID: 21300000, guid: b79d5ec7c4885df4a886fe9706ba6a4a, type: 3}
+    countText: {fileID: 1257413061}
+  - cellType: -11
+    icon: {fileID: 21300000, guid: 4bc56a5a5744d5741855643422c2b83b, type: 3}
+    countText: {fileID: 10144578}
+  - cellType: -12
+    icon: {fileID: 21300000, guid: 75896a3c5d16d824397a2a27c1bf81f9, type: 3}
+    countText: {fileID: 1755108288}
+  - cellType: -13
+    icon: {fileID: 21300000, guid: 89c528b08646d664b9526a6fa7bba7cb, type: 3}
+    countText: {fileID: 1005039661}
+  - cellType: -14
+    icon: {fileID: 21300000, guid: be45d4928f87d6b4cac615812e24694b, type: 3}
+    countText: {fileID: 1788079436}
+  - cellType: -15
+    icon: {fileID: 21300000, guid: ed7bacbcf29803a4b96c025c2ce1aa82, type: 3}
+    countText: {fileID: 339682375}
+  - cellType: -16
+    icon: {fileID: 21300000, guid: aa79c6cab4344874d8a5b1db2ceb5df0, type: 3}
+    countText: {fileID: 739024654}
+  - cellType: -17
+    icon: {fileID: 21300000, guid: 9cee490ce90277649af6ea52bc89ecd2, type: 3}
+    countText: {fileID: 1977969157}
+  - cellType: -18
+    icon: {fileID: 21300000, guid: 74f68374d3e31a84a9e71f44922baf57, type: 3}
+    countText: {fileID: 697630267}
+  - cellType: -19
+    icon: {fileID: 21300000, guid: c42b5fa121797b141a801ca9165df4be, type: 3}
+    countText: {fileID: 189074077}
 --- !u!1 &855535065
 GameObject:
   m_ObjectHideFlags: 0
@@ -8665,6 +8746,8 @@ MonoBehaviour:
   currentOxygenBar: {fileID: 1082493797}
   maxOxygenBar: {fileID: 303435517}
   fillSpeed: 0.25
+  spaceship: {fileID: 0}
+  spaceFighterController: {fileID: 0}
 --- !u!1 &1459626421
 GameObject:
   m_ObjectHideFlags: 0

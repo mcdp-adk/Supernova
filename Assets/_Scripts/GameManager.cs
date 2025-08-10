@@ -53,8 +53,8 @@ namespace _Scripts
         public bool IsGameStarted { get; private set; }
         public bool IsMenuOpened { get; private set; }
 
-        private GameObject _spaceship;
-        private SpaceFighterController _spaceFighterController;
+        public GameObject spaceship;
+        public SpaceFighterController spaceFighterController;
 
         private void Awake()
         {
@@ -170,8 +170,8 @@ namespace _Scripts
         {
             if (playerPrefab != null && spawnPoint != null)
             {
-                _spaceship = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-                _spaceFighterController = _spaceship.GetComponent<SpaceFighterController>();
+                spaceship = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                spaceFighterController = spaceship.GetComponent<SpaceFighterController>();
             }
             else
             {
@@ -181,11 +181,11 @@ namespace _Scripts
 
         private void UpdateUI()
         {
-            if (!_spaceFighterController) return;
+            if (!spaceFighterController) return;
 
-            var oxygenByMax = _spaceFighterController.CurrentOxygen / _spaceFighterController.MaxOxygen;
-            var oxygenByUltimate = _spaceFighterController.CurrentOxygen / _spaceFighterController.UltimateOxygen;
-            var oxygenMaxByUltimate = _spaceFighterController.MaxOxygen / _spaceFighterController.UltimateOxygen;
+            var oxygenByMax = spaceFighterController.CurrentOxygen / spaceFighterController.MaxOxygen;
+            var oxygenByUltimate = spaceFighterController.CurrentOxygen / spaceFighterController.UltimateOxygen;
+            var oxygenMaxByUltimate = spaceFighterController.MaxOxygen / spaceFighterController.UltimateOxygen;
             currentOxygenBar.DOColor(currentOxygenBarGradient.Evaluate(oxygenByMax), fillSpeed);
             currentOxygenBar.DOFillAmount(oxygenByUltimate, fillSpeed);
             maxOxygenBar.DOFillAmount(oxygenMaxByUltimate, fillSpeed);
