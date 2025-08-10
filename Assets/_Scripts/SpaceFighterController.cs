@@ -13,6 +13,8 @@ namespace _Scripts
     [RequireComponent(typeof(Rigidbody))]
     public class SpaceFighterController : MonoBehaviour, InputSystem_Actions.IPlayerActions
     {
+        #region 变量和属性
+
         [Header("飞船挂点")] [SerializeField] private Transform weaponTransform;
 
         [Header("移动设置")] [SerializeField] private float maxForwardSpeed = 50f;
@@ -23,6 +25,14 @@ namespace _Scripts
         [SerializeField] private float inertialDamping = 200f;
 
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
+
+        [Header("输入设置")] [SerializeField] private float selectionInterval = 0.15f;
+        private int _selectionDirection;
+        private float _lastSelectionTime;
+        private float _thrustInput;
+        private float _strafeInput;
+        private float _elevationInput;
+        private bool _isLaserActive;
 
         [Header("Laser VFX 设置")] [SerializeField]
         private GameObject laserVFX;
@@ -35,12 +45,6 @@ namespace _Scripts
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
-
-        // 输入状态
-        private float _thrustInput;
-        private float _strafeInput;
-        private float _elevationInput;
-        private bool _isLaserActive;
 
         // 组件引用
         private Rigidbody _rigidbody;
@@ -60,6 +64,10 @@ namespace _Scripts
         public float CurrentOxygen { get; private set; } = 100f;
         public float MaxOxygen { get; private set; } = 300f;
         public float UltimateOxygen { get; private set; } = 1000f;
+
+        #endregion
+
+        #region Mono 生命周期
 
         private void Awake()
         {
@@ -98,9 +106,11 @@ namespace _Scripts
 
         private void Update()
         {
+            UpdateSelection();
             PerformLaser();
             UpdateLaserVFX();
         }
+
 
         private void FixedUpdate()
         {
@@ -109,6 +119,8 @@ namespace _Scripts
             HandleMovement();
             SyncSpaceshipDataToEcs();
         }
+
+        #endregion
 
         #region ECS
 
@@ -339,12 +351,36 @@ namespace _Scripts
 
         public void OnNext(InputAction.CallbackContext context)
         {
-            if (context.started) CurrentCellIndex = (CurrentCellIndex + 1) % CellInventory.Length;
+            if (context.started)
+            {
+                CurrentCellIndex = (CurrentCellIndex + 1) % CellInventory.Length;
+            }
+            else if (context.performed)
+            {
+                _selectionDirection = 1;
+                _lastSelectionTime = Time.time;
+            }
+            else if (context.canceled)
+            {
+                _selectionDirection = 0;
+            }
         }
 
         public void OnPrevious(InputAction.CallbackContext context)
         {
-            if (context.started) CurrentCellIndex = (CurrentCellIndex - 1 + CellInventory.Length) % CellInventory.Length;
+            if (context.started)
+            {
+                CurrentCellIndex = (CurrentCellIndex - 1 + CellInventory.Length) % CellInventory.Length;
+            }
+            else if (context.performed)
+            {
+                _selectionDirection = -1;
+                _lastSelectionTime = Time.time;
+            }
+            else if (context.canceled)
+            {
+                _selectionDirection = 0;
+            }
         }
 
         public void OnMenu(InputAction.CallbackContext context)
@@ -415,6 +451,15 @@ namespace _Scripts
                 Mathf.RoundToInt(worldPosition.y),
                 Mathf.RoundToInt(worldPosition.z)
             );
+        }
+
+        private void UpdateSelection()
+        {
+            if (_selectionDirection == 0) return;
+            if (!(Time.time - _lastSelectionTime >= selectionInterval)) return;
+
+            CurrentCellIndex = (CurrentCellIndex + _selectionDirection + CellInventory.Length) % CellInventory.Length;
+            _lastSelectionTime = Time.time;
         }
 
         #endregion
