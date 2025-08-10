@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using _Scripts.Utilities;
-using DG.Tweening;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 
 namespace _Scripts
 {
     public class GameManager : MonoBehaviour
     {
+        #region 变量和属性
+
         [Header("游戏设置")] [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject playerPrefab;
 
@@ -17,13 +17,6 @@ namespace _Scripts
         [SerializeField] private GameObject startUI;
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
-
-        [Header("Oxygen Bar 设置")] [SerializeField]
-        private Gradient currentOxygenBarGradient;
-
-        [SerializeField] private Image currentOxygenBar;
-        [SerializeField] private Image maxOxygenBar;
-        [SerializeField] private float fillSpeed = 0.25f;
 
         public static GameManager Instance { get; private set; }
 
@@ -56,6 +49,8 @@ namespace _Scripts
         public GameObject spaceship;
         public SpaceFighterController spaceFighterController;
 
+        #endregion
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -65,11 +60,6 @@ namespace _Scripts
             }
 
             Instance = this;
-        }
-
-        private void Update()
-        {
-            UpdateUI();
         }
 
         #region 公共方法
@@ -177,18 +167,6 @@ namespace _Scripts
             {
                 Debug.LogError("Player prefab or spawn point not assigned in GameManager");
             }
-        }
-
-        private void UpdateUI()
-        {
-            if (!spaceFighterController) return;
-
-            var oxygenByMax = spaceFighterController.CurrentOxygen / spaceFighterController.MaxOxygen;
-            var oxygenByUltimate = spaceFighterController.CurrentOxygen / spaceFighterController.UltimateOxygen;
-            var oxygenMaxByUltimate = spaceFighterController.MaxOxygen / spaceFighterController.UltimateOxygen;
-            currentOxygenBar.DOColor(currentOxygenBarGradient.Evaluate(oxygenByMax), fillSpeed);
-            currentOxygenBar.DOFillAmount(oxygenByUltimate, fillSpeed);
-            maxOxygenBar.DOFillAmount(oxygenMaxByUltimate, fillSpeed);
         }
 
         #endregion

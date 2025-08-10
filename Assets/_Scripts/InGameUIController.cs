@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using _Scripts.Utilities;
+using DG.Tweening;
 
 namespace _Scripts
 {
@@ -23,7 +24,12 @@ namespace _Scripts
         [Header("Cell UI 设置")] [SerializeField]
         private InventoryUIData[] inventoryUIData = new InventoryUIData[19];
 
-        private SpaceFighterController _spaceFighterController;
+        [Header("Oxygen Bar 设置")] [SerializeField]
+        private Gradient currentOxygenBarGradient;
+
+        [SerializeField] private Image currentOxygenBar;
+        [SerializeField] private Image maxOxygenBar;
+        [SerializeField] private float fillSpeed = 0.25f;
 
         private void Update()
         {
@@ -31,6 +37,18 @@ namespace _Scripts
 
             UpdateInventoryUI();
             UpdateCubeUI();
+            UpdateOxygenBarUI();
+        }
+
+        private void UpdateOxygenBarUI()
+        {
+            var spaceFighter = GameManager.Instance.spaceFighterController;
+            var oxygenByMax = spaceFighter.CurrentOxygen / spaceFighter.MaxOxygen;
+            var oxygenByUltimate = spaceFighter.CurrentOxygen / spaceFighter.UltimateOxygen;
+            var oxygenMaxByUltimate = spaceFighter.MaxOxygen / spaceFighter.UltimateOxygen;
+            currentOxygenBar.DOColor(currentOxygenBarGradient.Evaluate(oxygenByMax), fillSpeed);
+            currentOxygenBar.DOFillAmount(oxygenByUltimate, fillSpeed);
+            maxOxygenBar.DOFillAmount(oxygenMaxByUltimate, fillSpeed);
         }
 
         private void UpdateInventoryUI()
@@ -55,7 +73,7 @@ namespace _Scripts
             // CurrentCell
             var currentCellType = GetCellTypeByIndex(currentIndex);
             var currentInventory = spaceFighter.CellInventory[currentIndex];
-            
+
             if (cubeCurrentImage && currentCellType != CellTypeEnum.None)
                 cubeCurrentImage.sprite = GetIconByCellType(currentCellType);
             if (cubeCurrentCountText)
@@ -65,7 +83,7 @@ namespace _Scripts
             var next1Index = (currentIndex + 1) % inventoryLength;
             var next1CellType = GetCellTypeByIndex(next1Index);
             var next1Inventory = spaceFighter.CellInventory[next1Index];
-            
+
             if (cubeNext1Image && next1CellType != CellTypeEnum.None)
                 cubeNext1Image.sprite = GetIconByCellType(next1CellType);
             if (cubeNext1CountText)
@@ -75,7 +93,7 @@ namespace _Scripts
             var next2Index = (currentIndex + 2) % inventoryLength;
             var next2CellType = GetCellTypeByIndex(next2Index);
             var next2Inventory = spaceFighter.CellInventory[next2Index];
-            
+
             if (cubeNext2Image && next2CellType != CellTypeEnum.None)
                 cubeNext2Image.sprite = GetIconByCellType(next2CellType);
             if (cubeNext2CountText)
@@ -85,7 +103,7 @@ namespace _Scripts
             var prev1Index = (currentIndex - 1 + inventoryLength) % inventoryLength;
             var prev1CellType = GetCellTypeByIndex(prev1Index);
             var prev1Inventory = spaceFighter.CellInventory[prev1Index];
-            
+
             if (cubePrevious1Image && prev1CellType != CellTypeEnum.None)
                 cubePrevious1Image.sprite = GetIconByCellType(prev1CellType);
             if (cubePrevious1CountText)
@@ -95,7 +113,7 @@ namespace _Scripts
             var prev2Index = (currentIndex - 2 + inventoryLength) % inventoryLength;
             var prev2CellType = GetCellTypeByIndex(prev2Index);
             var prev2Inventory = spaceFighter.CellInventory[prev2Index];
-            
+
             if (cubePrevious2Image && prev2CellType != CellTypeEnum.None)
                 cubePrevious2Image.sprite = GetIconByCellType(prev2CellType);
             if (cubePrevious2CountText)
@@ -109,7 +127,8 @@ namespace _Scripts
 
         private Sprite GetIconByCellType(CellTypeEnum cellType)
         {
-            return (from uiData in inventoryUIData where uiData.cellType == cellType select uiData.icon).FirstOrDefault();
+            return (from uiData in inventoryUIData where uiData.cellType == cellType select uiData.icon)
+                .FirstOrDefault();
         }
     }
 }
