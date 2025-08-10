@@ -52,6 +52,8 @@ namespace _Scripts
 
         [HideInInspector] public int[] toolCount = new int[12];
 
+        public EarthCalculator earthCalculator;
+
         #endregion
 
         private void Awake()
@@ -112,6 +114,10 @@ namespace _Scripts
 
             SetWorldUpdateEnabled(true);
             SpawnPlayer();
+
+            // 直接在 GameManager 上添加 EarthCalculator 组件
+            if (earthCalculator == null)
+                earthCalculator = gameObject.AddComponent<EarthCalculator>();
         }
 
         public void OnGameExit()
