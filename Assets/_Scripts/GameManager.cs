@@ -50,6 +50,8 @@ namespace _Scripts
         [HideInInspector] public GameObject spaceship;
         [HideInInspector] public SpaceFighterController spaceFighterController;
 
+        [HideInInspector] public int[] toolCount = new int[12];
+
         #endregion
 
         private void Awake()
@@ -64,7 +66,17 @@ namespace _Scripts
         }
 
         #region 公共方法
-        
+
+        public void AddToolCount(int index)
+        {
+            toolCount[index]++;
+        }
+
+        public void ResetToolCount()
+        {
+            toolCount = new int[12];
+        }
+
         public void ChangeFPSCounterActive()
         {
             fpsCounterUI.SetActive(!fpsCounterUI.activeSelf);
@@ -75,7 +87,7 @@ namespace _Scripts
             if (!IsGameStarted) return;
             var shouldToolUIOpen = !toolUI.activeSelf;
             toolUI.SetActive(shouldToolUIOpen);
-            
+
             if (shouldToolUIOpen)
             {
                 Cursor.lockState = CursorLockMode.None;
