@@ -17,6 +17,7 @@ namespace _Scripts
         [SerializeField] private GameObject startUI;
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
+        [SerializeField] private GameObject toolUI;
 
         public static GameManager Instance { get; private set; }
 
@@ -46,8 +47,8 @@ namespace _Scripts
         public bool IsGameStarted { get; private set; }
         public bool IsMenuOpened { get; private set; }
 
-        public GameObject spaceship;
-        public SpaceFighterController spaceFighterController;
+        [HideInInspector] public GameObject spaceship;
+        [HideInInspector] public SpaceFighterController spaceFighterController;
 
         #endregion
 
@@ -63,6 +64,24 @@ namespace _Scripts
         }
 
         #region 公共方法
+
+        public void ChangeToolActive()
+        {
+            if (!IsGameStarted) return;
+            var shouldToolUIOpen = !toolUI.activeSelf;
+            toolUI.SetActive(shouldToolUIOpen);
+            
+            if (shouldToolUIOpen)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
 
         public void OnGameStart()
         {

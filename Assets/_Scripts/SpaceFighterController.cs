@@ -785,6 +785,7 @@ namespace _Scripts
 
         public void OnTool(InputAction.CallbackContext context)
         {
+            if(context.performed) GameManager.Instance.ChangeToolActive();
         }
 
         #endregion
