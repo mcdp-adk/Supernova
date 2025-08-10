@@ -6,7 +6,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine.Serialization;
 
 namespace _Scripts
 {
@@ -53,6 +52,11 @@ namespace _Scripts
         private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
+        
+        // 资源相关
+        public float CurrentOxygen { get; private set; } = 100f;
+        public float MaxOxygen { get; private set; } = 300f;
+        public float UltimateOxygen { get; private set; } = 1000f;
 
         private void Awake()
         {

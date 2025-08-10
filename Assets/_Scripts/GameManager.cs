@@ -1,6 +1,10 @@
+using System;
 using _Scripts.Utilities;
+using DG.Tweening;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.UI;
+using Cursor = UnityEngine.Cursor;
 
 namespace _Scripts
 {
@@ -14,10 +18,19 @@ namespace _Scripts
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
 
-        public static GameManager Instance { get; private set; }
+        [Header("Oxygen Bar 设置")] [SerializeField]
+        private Gradient currentOxygenBarGradient;
 
+        [SerializeField] private Image currentOxygenBar;
+        [SerializeField] private Image maxOxygenBar;
+        [SerializeField] private float fillSpeed = 0.25f;
+
+        public static GameManager Instance { get; private set; }
         public bool IsGameStarted { get; private set; } = false;
         public bool IsMenuOpened { get; private set; } = false;
+
+        private GameObject _spaceship;
+        private SpaceFighterController _spaceFighterController;
 
         private void Awake()
         {
@@ -28,6 +41,11 @@ namespace _Scripts
             }
 
             Instance = this;
+        }
+
+        private void Update()
+        {
+            UpdateUI();
         }
 
         #region 公共方法
@@ -128,12 +146,25 @@ namespace _Scripts
         {
             if (playerPrefab != null && spawnPoint != null)
             {
-                Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                _spaceship = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                _spaceFighterController = _spaceship.GetComponent<SpaceFighterController>();
             }
             else
             {
                 Debug.LogError("Player prefab or spawn point not assigned in GameManager");
             }
+        }
+
+        private void UpdateUI()
+        {
+            if (!_spaceFighterController) return;
+
+            var oxygenByMax = _spaceFighterController.CurrentOxygen / _spaceFighterController.MaxOxygen;
+            var oxygenByUltimate = _spaceFighterController.CurrentOxygen / _spaceFighterController.UltimateOxygen;
+            var oxygenMaxByUltimate = _spaceFighterController.MaxOxygen / _spaceFighterController.UltimateOxygen;
+            currentOxygenBar.DOColor(currentOxygenBarGradient.Evaluate(oxygenByMax), fillSpeed);
+            currentOxygenBar.DOFillAmount(oxygenByUltimate, fillSpeed);
+            maxOxygenBar.DOFillAmount(oxygenMaxByUltimate, fillSpeed);
         }
 
         #endregion
