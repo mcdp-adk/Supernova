@@ -158,6 +158,13 @@ namespace _Scripts.Utilities
             cellMap.Remove(currentCoordinate);
             ecb.SetComponentEnabled<IsAlive>(cell, false);
             ecb.SetComponentEnabled<PendingDequeue>(cell, true);
+            ecb.SetComponent(cell, new CellType { Value = CellTypeEnum.None });
+            ecb.SetComponent(cell, new CellState { Value = CellStateEnum.None });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)CellTypeEnum.None },
+                MeshID = new BatchMeshID { value = (uint)CellTypeEnum.None }
+            });
         }
 
         public static CellConfig GetCellConfig(this NativeArray<CellConfig> cellConfigs, CellTypeEnum cellType)

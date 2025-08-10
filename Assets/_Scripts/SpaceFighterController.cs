@@ -42,7 +42,7 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
         [SerializeField] private float maxLaserRange = 50f;
-        [SerializeField] private float laserDamagePerSecond = 5f;
+        [SerializeField] private float laserDamage = 500f;
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
@@ -299,7 +299,6 @@ namespace _Scripts
 
             // 使用热传导系数让飞船温度向目标温度平滑变化
             var deltaT = (targetTemperature - ShipT) * 0.01f * Time.fixedDeltaTime;
-            Debug.Log($"[SpaceshipController] 目标温度: {targetTemperature}, 当前温度: {ShipT}, 温差: {deltaT}");
             ShipT += deltaT;
 
             // 限制温度范围（避免极端值）
@@ -569,6 +568,109 @@ namespace _Scripts
             }
 
             return (false, int3.zero, currentPos);
+        }
+
+        private void ApplyLaserDamageToCell(int3 targetCellCoordinate)
+        {
+            if (!_cellMap.TryGetValue(targetCellCoordinate, out var cellEntity)) return;
+            if (!_entityManager.Exists(cellEntity)) return;
+            if (!_entityManager.HasComponent<Health>(cellEntity)) return;
+
+            // 获取当前 Health 值
+            var healthComponent = _entityManager.GetComponentData<Health>(cellEntity);
+            var currentHealth = healthComponent.Value;
+
+            // 应用 Laser 伤害
+            var damageAmount = laserDamage * Time.deltaTime;
+            currentHealth -= damageAmount;
+
+            // 更新 Health 组件
+            healthComponent.Value = Mathf.Max(0, currentHealth);
+            _entityManager.SetComponentData(cellEntity, healthComponent);
+
+            // 如果 Health <= 0，开采方块
+            if (currentHealth <= 0)
+            {
+                MineCell(targetCellCoordinate, cellEntity);
+            }
+        }
+
+        private void MineCell(int3 targetCellCoordinate, Entity cellEntity)
+        {
+            // 获取方块类型和当前属性
+            if (!_entityManager.HasComponent<CellType>(cellEntity) ||
+                !_entityManager.HasComponent<Temperature>(cellEntity) ||
+                !_entityManager.HasComponent<Moisture>(cellEntity) ||
+                !_entityManager.HasComponent<Energy>(cellEntity) ||
+                !_entityManager.HasComponent<Mass>(cellEntity)) return;
+
+            var cellTypeComponent = _entityManager.GetComponentData<CellType>(cellEntity);
+            var temperatureComponent = _entityManager.GetComponentData<Temperature>(cellEntity);
+            var moistureComponent = _entityManager.GetComponentData<Moisture>(cellEntity);
+            var energyComponent = _entityManager.GetComponentData<Energy>(cellEntity);
+            var massComponent = _entityManager.GetComponentData<Mass>(cellEntity);
+
+            var cellType = cellTypeComponent.Value;
+
+            // 忽略 None 类型
+            if (cellType == CellTypeEnum.None) return;
+
+            var cellMass = massComponent.Value;
+            var currentTemperature = temperatureComponent.Value;
+            var currentMoisture = moistureComponent.Value;
+            var currentEnergy = energyComponent.Value;
+
+            // 使用 GameManager 的映射获取正确的背包索引
+            if (!GameManager.CellTypeIndexMap.TryGetValue(cellType, out var inventoryIndex))
+                return;
+
+            // 确保索引有效
+            if (inventoryIndex < 0 || inventoryIndex >= CellInventory.Length) return;
+
+            var oldTotalMass = _invMass; // 更新库存加权平均温度和水分
+            _invMass += cellMass; // 更新库存总质量
+            if (oldTotalMass <= 0)
+            {
+                // 第一次添加
+                _invT = currentTemperature;
+                _invM = currentMoisture;
+            }
+            else
+            {
+                // 计算新的加权平均值
+                _invT = (_invT * oldTotalMass + currentTemperature * cellMass) / _invMass;
+                _invM = (_invM * oldTotalMass + currentMoisture * cellMass) / _invMass;
+            }
+
+            // 将方块添加到背包
+            var currentInventoryData = CellInventory[inventoryIndex];
+            currentInventoryData.Count++;
+
+            // 更新 CellInventoryData 的平均温度和湿度
+            var totalCount = currentInventoryData.Count;
+            if (totalCount == 1)
+            {
+                currentInventoryData.AvgTemperature = currentTemperature;
+                currentInventoryData.AvgMoisture = currentMoisture;
+            }
+            else
+            {
+                currentInventoryData.AvgTemperature =
+                    (currentInventoryData.AvgTemperature * (totalCount - 1) + currentTemperature) / totalCount;
+                currentInventoryData.AvgMoisture =
+                    (currentInventoryData.AvgMoisture * (totalCount - 1) + currentMoisture) / totalCount;
+            }
+
+            CellInventory[inventoryIndex] = currentInventoryData;
+
+            // 将能量直接添加到飞船总能量
+            Energy += currentEnergy;
+            Energy = Mathf.Clamp(Energy, 0f, energyMax);
+
+            // 调用 CellUtility.SetCellTypeToNone 移除方块
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            CellUtility.SetCellTypeToNone(cellEntity, ecb, _cellMap, targetCellCoordinate);
+            ecb.Playback(_entityManager);
         }
 
         #endregion
