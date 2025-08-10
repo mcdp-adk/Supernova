@@ -1,5 +1,6 @@
 using _Scripts.Components;
 using _Scripts.Systems;
+using _Scripts.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Collections;
@@ -52,8 +53,9 @@ namespace _Scripts
         private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
-        
+
         // 资源相关
+        public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
         public float CurrentOxygen { get; private set; } = 100f;
         public float MaxOxygen { get; private set; } = 300f;
         public float UltimateOxygen { get; private set; } = 1000f;

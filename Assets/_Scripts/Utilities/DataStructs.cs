@@ -74,4 +74,12 @@ namespace _Scripts.Utilities
         public int explosionAngleClamp;
         public LayerCellGenerationConfig[] cellConfigs;
     }
+
+    public struct CellInventoryData
+    {
+        public int Count;
+        public float AvgTemperature;
+        public float AvgMoisture;
+        public float AvgEnergy;
+    }
 }

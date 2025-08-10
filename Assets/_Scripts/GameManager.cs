@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using _Scripts.Utilities;
 using DG.Tweening;
 using Unity.Entities;
@@ -26,8 +26,32 @@ namespace _Scripts
         [SerializeField] private float fillSpeed = 0.25f;
 
         public static GameManager Instance { get; private set; }
-        public bool IsGameStarted { get; private set; } = false;
-        public bool IsMenuOpened { get; private set; } = false;
+
+        public static readonly Dictionary<CellTypeEnum, int> CellTypeIndexMap = new()
+        {
+            { CellTypeEnum.Grass, 0 },
+            { CellTypeEnum.Soil, 1 },
+            { CellTypeEnum.Ground, 2 },
+            { CellTypeEnum.GroundDry, 3 },
+            { CellTypeEnum.Water, 4 },
+            { CellTypeEnum.Ice, 5 },
+            { CellTypeEnum.Snow, 6 },
+            { CellTypeEnum.WoodWet, 7 },
+            { CellTypeEnum.Wood, 8 },
+            { CellTypeEnum.WoodScorched, 9 },
+            { CellTypeEnum.Lava, 10 },
+            { CellTypeEnum.RockVolcanic, 11 },
+            { CellTypeEnum.Sand, 12 },
+            { CellTypeEnum.Concrete, 13 },
+            { CellTypeEnum.StoneSlate, 14 },
+            { CellTypeEnum.StoneRiver, 15 },
+            { CellTypeEnum.StoneGranite, 16 },
+            { CellTypeEnum.StoneBasalt, 17 },
+            { CellTypeEnum.RockBedrock, 18 }
+        };
+
+        public bool IsGameStarted { get; private set; }
+        public bool IsMenuOpened { get; private set; }
 
         private GameObject _spaceship;
         private SpaceFighterController _spaceFighterController;
