@@ -56,6 +56,7 @@ namespace _Scripts
 
         // 资源相关
         public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
+        public int CurrentCellIndex { get; private set; } = 0;
         public float CurrentOxygen { get; private set; } = 100f;
         public float MaxOxygen { get; private set; } = 300f;
         public float UltimateOxygen { get; private set; } = 1000f;
@@ -338,10 +339,12 @@ namespace _Scripts
 
         public void OnNext(InputAction.CallbackContext context)
         {
+            if (context.started) CurrentCellIndex = (CurrentCellIndex + 1) % CellInventory.Length;
         }
 
         public void OnPrevious(InputAction.CallbackContext context)
         {
+            if (context.started) CurrentCellIndex = (CurrentCellIndex - 1 + CellInventory.Length) % CellInventory.Length;
         }
 
         public void OnMenu(InputAction.CallbackContext context)
