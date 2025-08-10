@@ -84,7 +84,6 @@ namespace _Scripts.Utilities
         public int Count;
         public float AvgTemperature;
         public float AvgMoisture;
-        public float AvgEnergy;
     }
 
     [Serializable]

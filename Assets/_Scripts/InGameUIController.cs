@@ -49,8 +49,8 @@ namespace _Scripts
         private void UpdateOtherResourcesUI()
         {
             var spaceFighter = GameManager.Instance.spaceFighterController;
-            avgTemperatureText.text = ((int)spaceFighter.Temperature).ToString();
-            avgMoistureText.text = ((int)spaceFighter.Moisture).ToString();
+            avgTemperatureText.text = ((int)spaceFighter.ShipT).ToString();
+            avgMoistureText.text = ((int)spaceFighter.ShipM).ToString();
             avgEnergyText.text = ((int)spaceFighter.Energy).ToString();
         }
 

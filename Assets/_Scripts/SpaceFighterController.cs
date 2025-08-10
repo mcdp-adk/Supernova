@@ -46,6 +46,30 @@ namespace _Scripts
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
 
+        [Header("资源相关设置")] [SerializeField] private float optimalTemperature = 37f; // 飞船的“适宜”温度
+
+        // [SerializeField] private float heatTransferCoefficient = 0.01f; // 飞船向最终目标温度变化的速度
+        [SerializeField] private float inventoryConsumptionFactor = 0.01f; // 方块数量因为温差过大而消耗的速度
+        [SerializeField] private float tempTolerance = 10f; // 定义背包方块能容忍多大的温差而不被消耗
+        [SerializeField] private float massPenaltyFactor = 0.05f; // 每单位质量增加的能量消耗系数
+        [SerializeField] private float propulsionEnergyCost = 20f; // 每秒推进消耗的基础能量
+        [SerializeField] private float lifeSupportMoistureCost = 0.02f; // 每秒维生消耗的基础水分
+        [SerializeField] private float moistureCostFactor = 0.05f; // 相比飞船“适宜”温度，每度温差消耗的水分系数
+        [SerializeField] private float energyMax = 99999f; // 飞船能量的最大值
+        public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
+        public int CurrentCellIndex { get; private set; }
+        public float CurrentOxygen { get; private set; } = 100f;
+        public float MaxOxygen { get; private set; } = 300f;
+        public float UltimateOxygen { get; private set; } = 1000f;
+        public float ShipT { get; private set; } = 20f;
+        public float ShipM { get; private set; } = 50f;
+        public float Energy { get; private set; } = 1000f;
+        private float _invT;
+        private float _invM;
+        private float _invMass;
+        private float _envT;
+        private float _envMass;
+
         // 组件引用
         private Rigidbody _rigidbody;
         private InputSystem_Actions _actions;
@@ -54,19 +78,10 @@ namespace _Scripts
 
         // ECS 相关
         private NativeHashMap<int3, Entity> _cellMap;
+        private NativeArray<CellConfig> _cellConfigs;
         private World _world;
         private EntityManager _entityManager;
         private Entity _spaceshipProxyEntity;
-
-        // 资源相关
-        public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
-        public int CurrentCellIndex { get; private set; }
-        public float CurrentOxygen { get; private set; } = 100f;
-        public float MaxOxygen { get; private set; } = 300f;
-        public float UltimateOxygen { get; private set; } = 1000f;
-        public float Temperature { get; private set; } = 20f;
-        public float Moisture { get; private set; } = 20f;
-        public float Energy { get; private set; } = 1000f;
 
         #endregion
 
@@ -93,8 +108,10 @@ namespace _Scripts
             _entityManager = _world.EntityManager;
             InitializeSpaceshipProxyEntity();
 
-            // 获取 CellMap 引用
-            _cellMap = _world.GetExistingSystemManaged<GlobalDataInitSystem>().CellMap;
+            // 获取 CellMap 和 CellConfigs 引用
+            var globalDataSystem = _world.GetExistingSystemManaged<GlobalDataInitSystem>();
+            _cellMap = globalDataSystem.CellMap;
+            _cellConfigs = globalDataSystem.CellConfigs;
         }
 
         private void OnEnable()
@@ -120,7 +137,268 @@ namespace _Scripts
             ApplyForceFeedback();
             HandleRotation();
             HandleMovement();
+            CalculateResources();
             SyncSpaceshipDataToEcs();
+        }
+
+        #endregion
+
+        #region 资源
+
+        private void CalculateResources()
+        {
+            // 始终扫描环境，因为环境会影响飞船
+            ScanEnvironment();
+
+            // 计算库存资源（如果没有库存，这些值会是 0）
+            CalculateInventoryResources();
+
+            // 更新飞船的各项参数
+            UpdateTemperature();
+            UpdateMoisture();
+            UpdateEnergy();
+
+            // 只有当有库存时才更新库存消耗
+            var hasInventory = false;
+            foreach (var item in CellInventory)
+            {
+                if (item.Count > 0)
+                {
+                    hasInventory = true;
+                    break;
+                }
+            }
+
+            if (hasInventory)
+            {
+                UpdateInventoryCount();
+            }
+        }
+
+        private void ScanEnvironment()
+        {
+            // 重置环境数据
+            _envMass = 0;
+            _envT = 0;
+            float totalWeightedTemp = 0;
+
+            // 获取飞船当前位置
+            var shipPosition = transform.position;
+            var scanRadius = 10f;
+
+            // 计算扫描范围的网格坐标
+            var minGrid = new int3(
+                Mathf.FloorToInt(shipPosition.x - scanRadius),
+                Mathf.FloorToInt(shipPosition.y - scanRadius),
+                Mathf.FloorToInt(shipPosition.z - scanRadius)
+            );
+            var maxGrid = new int3(
+                Mathf.CeilToInt(shipPosition.x + scanRadius),
+                Mathf.CeilToInt(shipPosition.y + scanRadius),
+                Mathf.CeilToInt(shipPosition.z + scanRadius)
+            );
+
+            // 遍历范围内的网格坐标
+            for (int x = minGrid.x; x <= maxGrid.x; x++)
+            {
+                for (int y = minGrid.y; y <= maxGrid.y; y++)
+                {
+                    for (int z = minGrid.z; z <= maxGrid.z; z++)
+                    {
+                        var gridPos = new int3(x, y, z);
+                        var worldPos = new Vector3(x, y, z);
+
+                        // 检查距离是否在范围内
+                        if (Vector3.Distance(shipPosition, worldPos) > scanRadius) continue;
+
+                        // 查询该位置是否有 Cell
+                        if (_cellMap.TryGetValue(gridPos, out var cellEntity))
+                        {
+                            // 确保实体存在且有必要的组件
+                            if (_entityManager.Exists(cellEntity) &&
+                                _entityManager.HasComponent<CellTag>(cellEntity) &&
+                                _entityManager.HasComponent<Mass>(cellEntity) &&
+                                _entityManager.HasComponent<Temperature>(cellEntity))
+                            {
+                                // 直接从 Mass 组件获取质量
+                                var cellMass = _entityManager.GetComponentData<Mass>(cellEntity).Value;
+                                var cellTemp = _entityManager.GetComponentData<Temperature>(cellEntity).Value;
+
+                                // 累加质量和加权温度
+                                _envMass += cellMass;
+                                totalWeightedTemp += cellTemp * cellMass;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 计算质量加权平均温度
+            if (_envMass > 0)
+            {
+                _envT = totalWeightedTemp / _envMass;
+            }
+        }
+
+        private void CalculateInventoryResources()
+        {
+            // 重置库存数据
+            _invMass = 0;
+            _invT = 0;
+            _invM = 0;
+            float totalWeightedTemp = 0;
+            float totalWeightedMoisture = 0;
+
+            // 确保 CellConfigs 已初始化
+            if (!_cellConfigs.IsCreated) return;
+
+            // 遍历所有背包堆栈
+            for (var i = 0; i < CellInventory.Length; i++)
+            {
+                var stack = CellInventory[i];
+                if (stack.Count <= 0) continue;
+
+                // 获取对应的 CellType（通过索引映射）
+                var cellType = (CellTypeEnum)(-(i + 1)); // 映射索引到 CellType
+                var cellConfig = _cellConfigs.GetCellConfig(cellType);
+
+                // 计算该堆栈的总质量
+                var stackMass = stack.Count * cellConfig.Mass;
+
+                // 累加总质量
+                _invMass += stackMass;
+
+                // 累加加权温度
+                totalWeightedTemp += stack.AvgTemperature * stackMass;
+
+                // 累加加权水分
+                totalWeightedMoisture += stack.AvgMoisture * stackMass;
+            }
+
+            // 计算质量加权平均值
+            if (_invMass > 0)
+            {
+                _invT = totalWeightedTemp / _invMass;
+                _invM = totalWeightedMoisture / _invMass;
+            }
+        }
+
+        private void UpdateTemperature()
+        {
+            // 如果没有环境质量和库存质量，不进行温度更新
+            var totalMass = _invMass + _envMass;
+            if (totalMass <= 0) return;
+
+            // 计算库存和环境的权重
+            var invWeight = _invMass / totalMass;
+            var envWeight = _envMass / totalMass;
+
+            // 计算目标温度（加权平均）
+            var targetTemperature = _invT * invWeight + _envT * envWeight;
+
+            // 使用热传导系数让飞船温度向目标温度平滑变化
+            var deltaT = (targetTemperature - ShipT) * 0.01f * Time.fixedDeltaTime;
+            Debug.Log($"[SpaceshipController] 目标温度: {targetTemperature}, 当前温度: {ShipT}, 温差: {deltaT}");
+            ShipT += deltaT;
+
+            // 限制温度范围（避免极端值）
+            ShipT = Mathf.Clamp(ShipT, -273.15f, 9999f);
+        }
+
+        private void UpdateMoisture()
+        {
+            // 1. 消耗水分
+            // 基础维生消耗
+            var moistureConsumption = lifeSupportMoistureCost * Time.fixedDeltaTime;
+
+            // 温差消耗（距离适宜温度越远，消耗越多）
+            var tempDifference = Mathf.Abs(ShipT - optimalTemperature);
+            moistureConsumption += tempDifference * moistureCostFactor * Time.fixedDeltaTime;
+
+            ShipM -= moistureConsumption;
+
+            // 2. 补充水分（从库存缓慢补充）
+            if (_invM > ShipM)
+            {
+                // 向库存水分靠拢
+                var moistureSupply = (_invM - ShipM) * 0.1f * Time.fixedDeltaTime;
+                ShipM += moistureSupply;
+            }
+
+            // 3. 约束范围
+            ShipM = Mathf.Clamp(ShipM, 0f, 100f);
+
+            // 4. 惩罚机制：如果水分为 0，缓慢消耗氧气
+            if (ShipM <= 0f)
+            {
+                // 每秒消耗氧气
+                CurrentOxygen -= 5f * Time.fixedDeltaTime;
+                CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
+            }
+        }
+
+        private void UpdateEnergy()
+        {
+            // 1. 消耗能量
+            var energyConsumption = 0f;
+
+            // 推进消耗（检查是否在移动）
+            var isMoving = Mathf.Abs(_thrustInput) > 0.01f ||
+                           Mathf.Abs(_strafeInput) > 0.01f ||
+                           Mathf.Abs(_elevationInput) > 0.01f;
+
+            if (isMoving)
+            {
+                energyConsumption += propulsionEnergyCost * Time.fixedDeltaTime;
+            }
+
+            // 质量惩罚消耗（背包越重，消耗越多）
+            energyConsumption += _invMass * massPenaltyFactor * Time.fixedDeltaTime;
+
+            Energy -= energyConsumption;
+
+            // 2. 约束范围
+            Energy = Mathf.Clamp(Energy, 0f, energyMax);
+
+            // 3. 惩罚机制：如果能量为 0，缓慢消耗氧气
+            if (Energy <= 0f)
+            {
+                // 每秒消耗氧气（比水分消耗稍少）
+                CurrentOxygen -= 3f * Time.fixedDeltaTime;
+                CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
+            }
+        }
+
+        private void UpdateInventoryCount()
+        {
+            // 如果没有库存平均温度，不进行消耗计算
+            if (_invMass <= 0) return;
+
+            // 遍历每个背包堆栈
+            for (var i = 0; i < CellInventory.Length; i++)
+            {
+                var stack = CellInventory[i];
+                if (stack.Count <= 0) continue;
+
+                // 计算该堆栈温度与全局背包平均温度的温差
+                var tempDifference = Mathf.Abs(stack.AvgTemperature - _invT);
+
+                // 如果温差超过容忍度，进行消耗
+                if (tempDifference > tempTolerance)
+                {
+                    // 计算消耗量
+                    var consumptionRate = (tempDifference - tempTolerance) *
+                                          inventoryConsumptionFactor *
+                                          Time.fixedDeltaTime;
+
+                    // 减少堆栈数量（转换为整数）
+                    var consumptionAmount = Mathf.CeilToInt(consumptionRate);
+                    stack.Count = Mathf.Max(0, stack.Count - consumptionAmount);
+
+                    // 更新回数组
+                    CellInventory[i] = stack;
+                }
+            }
         }
 
         #endregion
