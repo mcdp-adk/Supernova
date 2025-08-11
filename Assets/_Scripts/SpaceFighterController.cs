@@ -1,3 +1,4 @@
+using System.Collections;
 using _Scripts.Components;
 using _Scripts.Systems;
 using _Scripts.Utilities;
@@ -70,6 +71,7 @@ namespace _Scripts
         private float _invMass;
         private float _envT;
         private float _envMass;
+        private bool _isDead;
 
         // 组件引用
         private Rigidbody _rigidbody;
@@ -132,6 +134,8 @@ namespace _Scripts
             UpdateSelection();
             PerformLaser();
             UpdateLaserVFX();
+
+            if (CurrentOxygen <= 0 && !_isDead) StartCoroutine(RespawnAfterDelay());
         }
 
 
@@ -741,13 +745,14 @@ namespace _Scripts
 
         public void OnProjectile(InputAction.CallbackContext context)
         {
-            if(context.performed) GameManager.Instance.ShotProjectile(weaponTransform.position, _mainCamera.transform.forward, 5f);
+            if (context.performed)
+                GameManager.Instance.ShotProjectile(weaponTransform.position, _mainCamera.transform.forward, 5f);
         }
 
         public void OnInteract(InputAction.CallbackContext context)
         {
             if (!context.performed) return;
-            
+
             // 检查是否有足够的方块可以发射
             if (CurrentCellIndex < 0 || CurrentCellIndex >= CellInventory.Length) return;
             if (CellInventory[CurrentCellIndex].Count <= 0) return;
@@ -780,7 +785,7 @@ namespace _Scripts
                 // 获取 CellConfigTag 实体
                 var query = _entityManager.CreateEntityQuery(typeof(CellConfigTag));
                 var cellConfigEntity = query.GetSingletonEntity();
-                
+
                 // 使用 CellUtility 添加方块到世界
                 var success = CellUtility.TryAddCellToWorld(
                     cell,
@@ -799,12 +804,12 @@ namespace _Scripts
                     var inventoryData = CellInventory[CurrentCellIndex];
                     inventoryData.Count--;
                     CellInventory[CurrentCellIndex] = inventoryData;
-                
+
                     // 更新库存总属性
                     RecalculateInventoryProperties();
                 }
             }
-            
+
             ecb.Playback(_entityManager);
         }
 
@@ -854,7 +859,7 @@ namespace _Scripts
 
         public void OnTool(InputAction.CallbackContext context)
         {
-            if(context.performed) GameManager.Instance.ChangeToolActive();
+            if (context.performed) GameManager.Instance.ChangeToolActive();
         }
 
         #endregion
@@ -903,6 +908,51 @@ namespace _Scripts
         #endregion
 
         #region 辅助方法
+
+        private IEnumerator RespawnAfterDelay()
+        {
+            // 禁用输入
+            _actions.Player.Disable();
+            _isDead = true;
+            
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            Debug.Log("飞船死亡 - 3 秒后复活...");
+            
+            // 等待 3 秒
+            yield return new WaitForSeconds(3f);
+            
+            // 复活
+            RespawnSpaceship();
+            
+            // 恢复输入
+            _actions.Player.Enable();
+            _isDead = false;
+        }
+
+        private void RespawnSpaceship()
+        {
+            // 重置飞船位置和速度
+            var earthCenter = GameManager.Instance.earthCalculator.EarthCenter;
+            var earthRadius = GameManager.Instance.earthCalculator.EarthRadius;
+            transform.position = new Vector3(earthCenter.x, earthCenter.y + earthRadius + 10f, earthCenter.z);
+
+            // 重置飞船速度
+            _rigidbody.linearVelocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+
+            // 重置资源
+            ShipT = 20f;
+            ShipM = 50f;
+            Energy = 1000f;
+            CurrentOxygen = MaxOxygen;
+
+            // 清空背包
+            for (var i = 0; i < CellInventory.Length; i++)
+                CellInventory[i] = new CellInventoryData { Count = 0, AvgTemperature = 20f, AvgMoisture = 50f };
+
+            // 重置激光状态
+            _isLaserActive = false;
+        }
 
         private static int3 WorldToGridCoordinate(Vector3 worldPosition)
         {

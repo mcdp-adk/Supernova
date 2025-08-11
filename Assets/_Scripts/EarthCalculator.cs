@@ -10,8 +10,7 @@ namespace _Scripts
 {
     public class EarthCalculator : MonoBehaviour
     {
-        [SerializeField] private int3 earthCenter = new(0, 0, 0);
-
+        public int3 EarthCenter { get; private set; } = new(0, 0, 0);
         public int EarthRadius { get; private set; }
 
         // ECS 相关
@@ -42,7 +41,7 @@ namespace _Scripts
         private void UpdateEarthRadius()
         {
             // 检查地球中心是否有方块
-            if (!_cellMap.ContainsKey(earthCenter))
+            if (!_cellMap.ContainsKey(EarthCenter))
             {
                 EarthRadius = 0;
                 return;
@@ -57,17 +56,17 @@ namespace _Scripts
                 var hasBlockInThisRadius = false;
 
                 // 遍历当前半径圈上的所有可能位置
-                for (var x = earthCenter.x - radius; x <= earthCenter.x + radius; x++)
+                for (var x = EarthCenter.x - radius; x <= EarthCenter.x + radius; x++)
                 {
-                    for (var y = earthCenter.y - radius; y <= earthCenter.y + radius; y++)
+                    for (var y = EarthCenter.y - radius; y <= EarthCenter.y + radius; y++)
                     {
-                        for (var z = earthCenter.z - radius; z <= earthCenter.z + radius; z++)
+                        for (var z = EarthCenter.z - radius; z <= EarthCenter.z + radius; z++)
                         {
                             var pos = new int3(x, y, z);
                             // 计算曼哈顿距离，只检查距离等于当前半径的位置
-                            var distance = math.abs(pos.x - earthCenter.x) +
-                                           math.abs(pos.y - earthCenter.y) +
-                                           math.abs(pos.z - earthCenter.z);
+                            var distance = math.abs(pos.x - EarthCenter.x) +
+                                           math.abs(pos.y - EarthCenter.y) +
+                                           math.abs(pos.z - EarthCenter.z);
                             if (distance != radius) continue;
                             // 检查该位置是否有方块
                             if (!_cellMap.TryGetValue(pos, out var entity)) continue;
