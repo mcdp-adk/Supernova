@@ -741,6 +741,7 @@ namespace _Scripts
 
         public void OnProjectile(InputAction.CallbackContext context)
         {
+            if(context.performed) GameManager.Instance.ShotProjectile(weaponTransform.position, _mainCamera.transform.forward, 5f);
         }
 
         public void OnInteract(InputAction.CallbackContext context)

@@ -15788,6 +15788,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnPoint: {fileID: 1388485392}
   playerPrefab: {fileID: 399465779751219600, guid: ef49ba1dfcb21c745832335e63c021c7, type: 3}
+  projectilePrefab: {fileID: 454300308521788616, guid: 054077e25a65e1c4f8d6fdb40407fade, type: 3}
   fpsCounterUI: {fileID: 455069698}
   startUI: {fileID: 193640386}
   inGameUI: {fileID: 834988197}

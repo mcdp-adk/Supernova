@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using _Scripts.Utilities;
 using Unity.Entities;
@@ -12,6 +13,7 @@ namespace _Scripts
 
         [Header("游戏设置")] [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private GameObject projectilePrefab;
 
         [Header("UI 设置")] [SerializeField] private GameObject fpsCounterUI;
         [SerializeField] private GameObject startUI;
@@ -66,6 +68,15 @@ namespace _Scripts
         }
 
         #region 公共方法
+
+        public void ShotProjectile(Vector3 position, Vector3 direction, float speed)
+        {
+            var projectile = Instantiate(projectilePrefab, position, Quaternion.identity);
+            var projectileController = projectile.GetComponent<ProjectileController>();
+            projectileController.Initialize(direction, speed, toolCount);
+            
+            StartCoroutine(DestroyAfterDelay(projectile, 5f));
+        }
 
         public void AddToolCount(int index)
         {
@@ -195,6 +206,12 @@ namespace _Scripts
         #endregion
 
         #region 辅助方法
+        
+        private static IEnumerator DestroyAfterDelay(GameObject obj, float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            if (obj) Destroy(obj);
+        }
 
         private void SpawnPlayer()
         {
