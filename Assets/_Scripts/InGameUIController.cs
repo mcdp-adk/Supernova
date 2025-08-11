@@ -58,8 +58,8 @@ namespace _Scripts
         {
             var spaceFighter = GameManager.Instance.spaceFighterController;
             var oxygenByMax = spaceFighter.CurrentOxygen / spaceFighter.MaxOxygen;
-            var oxygenByUltimate = spaceFighter.CurrentOxygen / spaceFighter.UltimateOxygen;
-            var oxygenMaxByUltimate = spaceFighter.MaxOxygen / spaceFighter.UltimateOxygen;
+            var oxygenByUltimate = spaceFighter.CurrentOxygen / SpaceFighterController.UltimateOxygen;
+            var oxygenMaxByUltimate = spaceFighter.MaxOxygen / SpaceFighterController.UltimateOxygen;
             currentOxygenBar.DOColor(currentOxygenBarGradient.Evaluate(oxygenByMax), fillSpeed);
             currentOxygenBar.DOFillAmount(oxygenByUltimate, fillSpeed);
             maxOxygenBar.DOFillAmount(oxygenMaxByUltimate, fillSpeed);

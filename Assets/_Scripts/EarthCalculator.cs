@@ -12,6 +12,8 @@ namespace _Scripts
     {
         public int3 EarthCenter { get; private set; } = new(0, 0, 0);
         public int EarthRadius { get; private set; }
+        public float PlanetAverageTemperature { get; private set; }
+        public float PlanetAverageMoisture { get; private set; }
 
         // ECS 相关
         private NativeHashMap<int3, Entity> _cellMap;
@@ -36,6 +38,7 @@ namespace _Scripts
             if (!_cellMap.IsCreated) return;
 
             UpdateEarthRadius();
+            CalculatePlanetAverages();
         }
 
         private void UpdateEarthRadius()
@@ -89,6 +92,69 @@ namespace _Scripts
             }
 
             EarthRadius = radius;
+        }
+
+        private void CalculatePlanetAverages()
+        {
+            if (EarthRadius <= 0)
+            {
+                PlanetAverageTemperature = 0f;
+                PlanetAverageMoisture = 0f;
+                return;
+            }
+
+            var totalWeightedTemperature = 0f;
+            var totalWeightedMoisture = 0f;
+            var totalMass = 0f;
+
+            // 遍历星球内的所有方块
+            for (var x = EarthCenter.x - EarthRadius; x <= EarthCenter.x + EarthRadius; x++)
+            {
+                for (var y = EarthCenter.y - EarthRadius; y <= EarthCenter.y + EarthRadius; y++)
+                {
+                    for (var z = EarthCenter.z - EarthRadius; z <= EarthCenter.z + EarthRadius; z++)
+                    {
+                        var pos = new int3(x, y, z);
+
+                        // 检查曼哈顿距离是否在半径内
+                        var distance = math.abs(pos.x - EarthCenter.x) +
+                                       math.abs(pos.y - EarthCenter.y) +
+                                       math.abs(pos.z - EarthCenter.z);
+                        if (distance > EarthRadius) continue;
+
+                        // 检查该位置是否有方块
+                        if (!_cellMap.TryGetValue(pos, out var entity)) continue;
+                        if (!_entityManager.Exists(entity) ||
+                            !_entityManager.HasComponent<CellTag>(entity)) continue;
+
+                        // 获取方块的质量、温度和湿度
+                        if (_entityManager.HasComponent<Mass>(entity) &&
+                            _entityManager.HasComponent<Temperature>(entity) &&
+                            _entityManager.HasComponent<Moisture>(entity))
+                        {
+                            var mass = _entityManager.GetComponentData<Mass>(entity).Value;
+                            var temperature = _entityManager.GetComponentData<Temperature>(entity).Value;
+                            var moisture = _entityManager.GetComponentData<Moisture>(entity).Value;
+
+                            totalMass += mass;
+                            totalWeightedTemperature += temperature * mass;
+                            totalWeightedMoisture += moisture * mass;
+                        }
+                    }
+                }
+            }
+
+            // 计算质量加权平均值
+            if (totalMass > 0)
+            {
+                PlanetAverageTemperature = totalWeightedTemperature / totalMass;
+                PlanetAverageMoisture = totalWeightedMoisture / totalMass;
+            }
+            else
+            {
+                PlanetAverageTemperature = 0f;
+                PlanetAverageMoisture = 0f;
+            }
         }
     }
 }

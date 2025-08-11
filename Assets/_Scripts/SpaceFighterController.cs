@@ -61,8 +61,8 @@ namespace _Scripts
         public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
         public int CurrentCellIndex { get; private set; }
         public float CurrentOxygen { get; private set; } = 100f;
-        public float MaxOxygen { get; set; } = 300f;
-        public float UltimateOxygen { get; private set; } = 1000f;
+        public float MaxOxygen { get; private set; } = 300f;
+        public static float UltimateOxygen => 1000f;
         public float ShipT { get; private set; } = 20f;
         public float ShipM { get; private set; } = 50f;
         public float Energy { get; private set; } = 1000f;
@@ -146,6 +146,7 @@ namespace _Scripts
             HandleRotation();
             HandleMovement();
             CalculateResources();
+            UpdateMaxOxygen();
             SyncSpaceshipDataToEcs();
         }
 
@@ -989,6 +990,33 @@ namespace _Scripts
 
             CurrentCellIndex = (CurrentCellIndex + _selectionDirection + CellInventory.Length) % CellInventory.Length;
             _lastSelectionTime = Time.time;
+        }
+
+        private void UpdateMaxOxygen()
+        {
+            // 获取星球的平均温度和湿度
+            var planetTemp = GameManager.Instance.earthCalculator.PlanetAverageTemperature;
+            var planetMoisture = GameManager.Instance.earthCalculator.PlanetAverageMoisture;
+
+            // 计算温度因子（温度越接近适宜温度，因子越高）
+            var tempDifference = Mathf.Abs(planetTemp - optimalTemperature);
+            var tempFactor = Mathf.Clamp01(1f - (tempDifference / 50f)); // 50度为最大温差
+
+            // 计算湿度因子（湿度越接近100，因子越高）
+            var moistureFactor = Mathf.Clamp01(planetMoisture / 100f);
+
+            // 综合因子（温度和湿度各占50%权重）
+            var combinedFactor = (tempFactor + moistureFactor) / 2f;
+
+            // 根据综合因子计算MaxOxygen，在300到UltimateOxygen之间线性插值
+            var baseMaxOxygen = 300f;
+            MaxOxygen = Mathf.Lerp(baseMaxOxygen, UltimateOxygen, combinedFactor);
+
+            // 确保当前氧气不超过新的最大值
+            if (CurrentOxygen > MaxOxygen)
+            {
+                CurrentOxygen = MaxOxygen;
+            }
         }
 
         #endregion
