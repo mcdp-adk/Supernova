@@ -135,6 +135,10 @@ PrefabInstance:
       propertyPath: layerConfigs.Array.size
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].cellConfigs.Array.data[0].cellType
+      value: -5
+      objectReference: {fileID: 0}
     - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_Name
       value: Supernova Core
@@ -201,8 +205,24 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: shouldInitializeOnLaunch
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].radius
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[1].cellConfigs.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[0].cellConfigs.Array.data[0].cellType
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_Name

@@ -75,7 +75,7 @@ namespace _Scripts
             var projectileController = projectile.GetComponent<ProjectileController>();
             projectileController.Initialize(direction, speed, toolCount);
             
-            StartCoroutine(DestroyAfterDelay(projectile, 5f));
+            StartCoroutine(DestroyAfterDelay(projectile, 30f));
         }
 
         public void AddToolCount(int index)
