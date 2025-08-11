@@ -134,6 +134,7 @@ namespace _Scripts
             UpdateSelection();
             PerformLaser();
             UpdateLaserVFX();
+            RecoverOxygen();
 
             if (CurrentOxygen <= 0 && !_isDead) StartCoroutine(RespawnAfterDelay());
         }
@@ -908,6 +909,22 @@ namespace _Scripts
         #endregion
 
         #region 辅助方法
+
+        private void RecoverOxygen()
+        {
+            // 获取地球中心和半径
+            var earthCenter = GameManager.Instance.earthCalculator.EarthCenter;
+            var earthRadius = GameManager.Instance.earthCalculator.EarthRadius;
+            var recoverRadius = earthRadius + 15f;
+            var shipPos = transform.position;
+            var distance = Vector3.Distance(shipPos, new Vector3(earthCenter.x, earthCenter.y, earthCenter.z));
+
+            // 在母星范围内，逐渐恢复氧气
+            if (!(distance <= recoverRadius) || !(CurrentOxygen < MaxOxygen)) return;
+            const float recoverRate = 30f;
+            CurrentOxygen += recoverRate * Time.deltaTime;
+            if (CurrentOxygen > MaxOxygen) CurrentOxygen = MaxOxygen;
+        }
 
         private IEnumerator RespawnAfterDelay()
         {
