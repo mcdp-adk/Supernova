@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine.VFX;
 
 namespace _Scripts
 {
@@ -47,6 +48,10 @@ namespace _Scripts
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
+
+        [Header("尾焰设置")] [SerializeField] private VisualEffect thrustVFX01;
+        [SerializeField] private VisualEffect thrustVFX02;
+        [SerializeField] private VisualEffect thrustVFX03;
 
         [Header("资源相关设置")] [SerializeField] private float optimalTemperature = 37f; // 飞船的“适宜”温度
 
@@ -134,6 +139,7 @@ namespace _Scripts
             UpdateSelection();
             PerformLaser();
             UpdateLaserVFX();
+            UpdateThrustVFX();
             RecoverOxygen();
 
             if (CurrentOxygen <= 0 && !_isDead) StartCoroutine(RespawnAfterDelay());
@@ -721,6 +727,29 @@ namespace _Scripts
             // 终点
             laserVFXTransform04.position = _laserEndPoint;
             laserVFXTransform04.rotation = weaponTransform.rotation;
+        }
+
+        private void UpdateThrustVFX()
+        {
+            if (!thrustVFX01) return;
+
+            // 检查是否在推进
+            var isThrusting = Mathf.Abs(_thrustInput) > 0.01f;
+
+            // 根据推进状态控制VFX播放
+            if (isThrusting)
+            {
+                thrustVFX01.Play();
+                thrustVFX02.Play();
+                thrustVFX03.Play();
+            }
+                
+            else
+            {
+                thrustVFX01.Stop();
+                thrustVFX02.Stop();
+                thrustVFX03.Stop();
+            }
         }
 
         #endregion
