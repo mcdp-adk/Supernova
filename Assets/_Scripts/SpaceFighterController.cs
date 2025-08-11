@@ -61,7 +61,7 @@ namespace _Scripts
         public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
         public int CurrentCellIndex { get; private set; }
         public float CurrentOxygen { get; private set; } = 100f;
-        public float MaxOxygen { get; private set; } = 300f;
+        public float MaxOxygen { get; set; } = 300f;
         public float UltimateOxygen { get; private set; } = 1000f;
         public float ShipT { get; private set; } = 20f;
         public float ShipM { get; private set; } = 50f;
