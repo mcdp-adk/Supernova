@@ -28,17 +28,17 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 最大 Cell 数量
         /// </summary>
-        public const int MaxCellCount = 131072;
+        public const int MaxCellCount = 80000;
 
         /// <summary>
         /// Cell Map 初始容量
         /// </summary>
-        public const int CellMapInitialCapacity = 65536;
+        public const int CellMapInitialCapacity = 80000;
 
         /// <summary>
         /// Cell 池大小
         /// </summary>
-        public const int MaxCellPoolSize = 65536;
+        public const int MaxCellPoolSize = 80000;
 
         /// <summary>
         /// Cell 默认缩放比例

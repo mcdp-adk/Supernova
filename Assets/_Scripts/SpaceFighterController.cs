@@ -61,7 +61,7 @@ namespace _Scripts
         public CellInventoryData[] CellInventory { get; private set; } = new CellInventoryData[19];
         public int CurrentCellIndex { get; private set; }
         public float CurrentOxygen { get; private set; } = 100f;
-        public float MaxOxygen { get; private set; } = 300f;
+        public float MaxOxygen { get; private set; } = 200f;
         public static float UltimateOxygen => 1000f;
         public float ShipT { get; private set; } = 20f;
         public float ShipM { get; private set; } = 50f;
@@ -1008,8 +1008,8 @@ namespace _Scripts
             // 综合因子（温度和湿度各占50%权重）
             var combinedFactor = (tempFactor + moistureFactor) / 2f;
 
-            // 根据综合因子计算MaxOxygen，在300到UltimateOxygen之间线性插值
-            var baseMaxOxygen = 300f;
+            // 根据综合因子计算MaxOxygen
+            var baseMaxOxygen = 200f;
             MaxOxygen = Mathf.Lerp(baseMaxOxygen, UltimateOxygen, combinedFactor);
 
             // 确保当前氧气不超过新的最大值
