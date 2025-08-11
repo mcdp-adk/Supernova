@@ -3,93 +3,118 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Supernova is a Unity 6000.0.49f1 project that combines a cellular automata simulation with space fighter combat. The project uses Unity's DOTS (Data-Oriented Technology Stack) including Entities, Physics, and URP for high-performance simulation of cell-based interactions.
 
-## Architecture
+**Supernova** is a Unity 6000.0.49f1 project using DOTS/ECS architecture for a cellular automata simulation game. The project simulates 80,000+ cells with realistic physics, heat transfer, moisture diffusion, combustion, and explosion effects.
 
-### Core Systems
-- **ECS Architecture**: Uses Unity Entities for high-performance simulation
-- **Cellular Automata**: Grid-based simulation with heat transfer, moisture diffusion, combustion, and explosion mechanics
-- **Space Fighter Integration**: Hybrid ECS/GameObject system with physics-based movement
-- **Dual Update Rates**: Separate fast (20ms) and slow (1000ms) system groups for performance optimization
+## Unity Version & Dependencies
 
-### Key Components
+- **Unity Version**: 6000.0.49f1
+- **Key Packages**:
+  - `com.unity.entities` (1.3.14) - ECS framework
+  - `com.unity.physics` (1.3.14) - Physics simulation
+  - `com.unity.render-pipelines.universal` (17.0.4) - URP rendering
+  - `com.unity.visualeffectgraph` (17.0.4) - VFX system
+  - `com.unity.inputsystem` (1.14.1) - Input handling
 
-#### Cell Simulation
-- **Cell Types**: Lava, Water, Snow, Ice, Wood, Soil, Rock, etc. (defined in CellConfigs.csv)
-- **State Management**: Liquid, Solid, Powder states with transitions
-- **Physics**: Heat transfer, moisture diffusion, evaporation, combustion, explosions
-- **Voxelization**: Dynamic voxel-based collision detection for spaceship-cell interactions
+## Architecture Overview
 
-#### Space Fighter
-- **Input System**: New Input System with WASD movement and mouse look
-- **Physics**: Rigidbody-based movement with custom damping
-- **ECS Bridge**: Hybrid component that syncs GameObject data to ECS entities
+### ECS System Architecture
 
-### System Groups
-- **CaSlowSystemGroup**: Handles cell physics (1000ms update rate)
-- **CaFastSystemGroup**: Handles spaceship physics (20ms update rate)
-- **FCA Systems**: Flight Combat Aircraft systems (voxelization, collision, gravity, physics)
-- **SCA Systems**: Supernova Cellular Automata systems (heat, moisture, combustion, explosions)
+The project uses a **three-tier ECS system** organized by update frequency:
+
+```
+VariableRateSimulationSystemGroup
+├── CaSlowSystemGroup (1000ms updates)
+│   └── SCA* Systems (Cellular automata)
+├── CaFastSystemGroup (20ms updates)  
+│   └── FCA* Systems (Physics & collision)
+└── Lifecycle Systems (LS*, S*)
+    ├── Global initialization
+    └── Entity pooling
+```
+
+### System Categories
+
+- **FCA (Fast Cellular Automata)**: High-frequency physics (collision, gravity, movement)
+- **SCA (Slow Cellular Automata)**: Low-frequency simulation (heat, moisture, combustion, explosions)
+- **LS (Lifecycle Systems)**: Entity management and VFX processing
+
+### Core Components
+
+- **Cell Components**: `CellType`, `CellState`, `Temperature`, `Moisture`, `Energy`, `Mass`, `Velocity`
+- **Buffer Components**: `HeatBuffer`, `MoistureBuffer`, `ImpulseBuffer` for state accumulation
+- **Lifecycle**: `IsAlive`, `IsBurning`, `ShouldExplosion`, `PendingDequeue`
 
 ## Development Commands
 
-### Unity Commands
+### Build Commands
 ```bash
-# Open Unity project
-Unity.exe -projectPath .
+# Unity CLI build (if available)
+Unity.exe -quit -batchmode -executeMethod BuildScript.Build
 
-# Build for Windows
-Unity.exe -quit -batchmode -executeMethod BuildScript.PerformBuild
-
-# Run tests
-Unity.exe -quit -batchmode -runTests -testPlatform EditMode
+# Manual build process
+1. Open Unity Editor
+2. File → Build Settings
+3. Select platform and build
 ```
 
-### Code Structure
-```
-Assets/
-├── _Scripts/
-│   ├── Components/          # ECS component definitions
-│   ├── Systems/             # ECS system implementations  
-│   ├── Authorings/          # MonoBehaviour to ECS conversion
-│   ├── Aspects/             # ECS aspect definitions
-│   └── Utilities/           # Shared utilities and config
-├── Settings/
-│   ├── CellConfigs.csv      # Cell type definitions and properties
-│   └── DefaultVolumeProfile.asset
-├── Prefabs/
-│   ├── SpaceFighter.prefab
-│   └── Supernova Core.prefab
-└── Scenes/
-    ├── Game.unity          # Main scene
-    └── SpaceFighterTest.unity
+### Testing Commands
+```bash
+# Unity Test Framework
+Window → General → Test Runner
+# or use Unity CLI:
+Unity.exe -runTests -testPlatform EditMode -testResults results.xml
 ```
 
-### Key Files
-- **GlobalConfig.cs**: Contains all simulation constants (update rates, physics parameters)
-- **CellComponents.cs**: Defines all ECS components for cell simulation
-- **CellConfigs.csv**: Defines cell types, properties, and behaviors
-- **SpaceFighterController.cs**: Main player controller script
-- **SystemGroups.cs**: Defines update rate management for ECS systems
+### Common Development Tasks
 
-### Configuration
-- **Update Rates**: Fast systems (20ms), Slow systems (1000ms)
-- **Max Cells**: 100,000 cells supported
-- **Physics Scale**: Custom physics scaling with impulse factors
-- **Temperature/Heat**: Full thermal simulation with ignition/explosion points
-- **Moisture**: Water cycle simulation with evaporation/condensation
+#### Running the Game
+1. Open `Scenes/Game.unity`
+2. Press Play in Unity Editor
+3. Use WASD for spaceship movement, mouse for aiming
+4. Press Tab to open tool menu
 
-### ECS System Flow
-1. **Initialization**: S0_GlobalDataInitSystem loads config and initializes data
-2. **Pool Management**: S1_CellPoolQueueSystem manages cell entity lifecycle
-3. **Physics**: FCA systems handle spaceship voxelization and collision
-4. **Simulation**: SCA systems process cell interactions in order:
-   - Heat transfer → Moisture diffusion → Evaporation → Combustion → Explosion
-5. **Rendering**: Custom VFX systems for cell visualization
+#### Adding New Cell Types
+1. Add to `CellTypeEnum` in `CellComponents.cs`
+2. Update `cellTypeIndexMap` in `GameManager.cs:27`
+3. Add configuration in `Settings/CellConfigs.csv`
+4. Update relevant systems (SCA9_CellTypeUpdateSystem)
 
-### Performance Notes
-- Uses Burst compilation for performance-critical systems
-- Native containers for efficient memory access
-- Variable update rates to balance accuracy vs performance
-- Entity pooling for cell lifecycle management
+#### Modifying System Timing
+- Update rates: `GlobalConfig.cs` (lines 11-16)
+- Physics scaling: `GlobalConfig.PhysicsSpeedScale`
+
+#### Debugging ECS
+- Use Entity Debugger: Window → Analysis → Entity Debugger
+- Check system execution order and component data
+- Monitor entity count and memory usage
+
+### Key Files Structure
+
+```
+Assets/_Scripts/
+├── Components/          # ECS components (CellComponents, ConfigComponents)
+├── Systems/            # ECS systems (FCA*, SCA*, LS*)
+├── Aspects/            # ECS aspects (SupernovaAspect)
+├── Authorings/         # MonoBehaviour → ECS conversion
+├── Utilities/          # GlobalConfig, SystemGroups, DataStructs
+└── GameManager.cs      # Main game controller (non-ECS)
+```
+
+### Performance Monitoring
+- **Entity Count**: 80,000 max cells (GlobalConfig.MaxCellCount)
+- **Update Rates**: Slow (1s), Fast (20ms)
+- **Memory**: Pre-allocated pools for entities and buffers
+- **Parallel Processing**: All systems use Burst + Job System
+
+### Configuration Files
+- `Settings/CellConfigs.csv` - Cell type physical properties
+- `GlobalConfig.cs` - Simulation constants and tuning parameters
+- `ProjectSettings/` - Unity project configuration
+
+## Development Notes
+
+- **Spatial Indexing**: Uses `NativeHashMap<int3, Entity>` for O(1) spatial lookups
+- **State Management**: Double buffering prevents race conditions
+- **Entity Pooling**: Pre-allocated entities managed via `NativeQueue<Entity>`
+- **Enableable Components**: Used for efficient filtering and state management
