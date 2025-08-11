@@ -70,7 +70,7 @@ namespace _Scripts
             var spaceFighter = GameManager.Instance.spaceFighterController;
             foreach (var uiData in inventoryUIData)
             {
-                var index = GameManager.CellTypeIndexMap[uiData.cellType];
+                var index = GameManager.cellTypeIndexMap[uiData.cellType];
                 var inventory = spaceFighter.CellInventory[index];
 
                 if (uiData.countText)
@@ -136,7 +136,7 @@ namespace _Scripts
 
         private static CellTypeEnum GetCellTypeByIndex(int index)
         {
-            return (from kvp in GameManager.CellTypeIndexMap where kvp.Value == index select kvp.Key).FirstOrDefault();
+            return (from kvp in GameManager.cellTypeIndexMap where kvp.Value == index select kvp.Key).FirstOrDefault();
         }
 
         private Sprite GetIconByCellType(CellTypeEnum cellType)

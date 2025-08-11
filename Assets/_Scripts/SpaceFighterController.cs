@@ -629,7 +629,7 @@ namespace _Scripts
             var currentEnergy = energyComponent.Value;
 
             // 使用 GameManager 的映射获取正确的背包索引
-            if (!GameManager.CellTypeIndexMap.TryGetValue(cellType, out var inventoryIndex))
+            if (!GameManager.cellTypeIndexMap.TryGetValue(cellType, out var inventoryIndex))
                 return;
 
             // 确保索引有效
@@ -753,7 +753,7 @@ namespace _Scripts
 
             // 获取当前选中的方块类型
             CellTypeEnum cellTypeToFire = CellTypeEnum.None;
-            foreach (var kvp in GameManager.CellTypeIndexMap)
+            foreach (var kvp in GameManager.cellTypeIndexMap)
             {
                 if (kvp.Value == CurrentCellIndex)
                 {

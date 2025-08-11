@@ -4845,7 +4845,7 @@ Transform:
   m_GameObject: {fileID: 524345534}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.248861, y: 3.734842, z: 1.0396639}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15796,6 +15796,7 @@ MonoBehaviour:
   spaceship: {fileID: 0}
   spaceFighterController: {fileID: 0}
   toolCount: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  earthCalculator: {fileID: 0}
 --- !u!1 &1459626421
 GameObject:
   m_ObjectHideFlags: 0
@@ -22526,8 +22527,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2073968016}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.248861, y: -3.734842, z: -1.0396639}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

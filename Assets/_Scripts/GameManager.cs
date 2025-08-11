@@ -21,7 +21,7 @@ namespace _Scripts
 
         public static GameManager Instance { get; private set; }
 
-        public static readonly Dictionary<CellTypeEnum, int> CellTypeIndexMap = new()
+        public static readonly Dictionary<CellTypeEnum, int> cellTypeIndexMap = new()
         {
             { CellTypeEnum.Grass, 0 },
             { CellTypeEnum.Soil, 1 },
@@ -49,10 +49,8 @@ namespace _Scripts
 
         [HideInInspector] public GameObject spaceship;
         [HideInInspector] public SpaceFighterController spaceFighterController;
-
         [HideInInspector] public int[] toolCount = new int[12];
-
-        public EarthCalculator earthCalculator;
+        [HideInInspector] public EarthCalculator earthCalculator;
 
         #endregion
 
