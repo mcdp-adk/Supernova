@@ -91,7 +91,6 @@ Transform:
   - {fileID: 4695434422306148688}
   - {fileID: 9047770669296291665}
   - {fileID: 5007984264483223809}
-  - {fileID: 4517546629247456470}
   - {fileID: 8872568543195903998}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -195,12 +194,22 @@ MonoBehaviour:
   elevationAcceleration: 1500
   inertialDamping: 200
   turnRate: 60
+  selectionInterval: 0.15
   laserVFX: {fileID: 8872568543195903993}
   laserVFXTransform01: {fileID: 2410065045671527073}
   laserVFXTransform02: {fileID: 456132662989729646}
   laserVFXTransform03: {fileID: 1677326926108948952}
   laserVFXTransform04: {fileID: 1816127109951227470}
   maxLaserRange: 50
+  laserDamage: 500
+  optimalTemperature: 37
+  inventoryConsumptionFactor: 0.01
+  tempTolerance: 10
+  massPenaltyFactor: 0.05
+  propulsionEnergyCost: 20
+  lifeSupportMoistureCost: 0.02
+  moistureCostFactor: 0.05
+  energyMax: 99999
 --- !u!1 &1059613559920983044
 GameObject:
   m_ObjectHideFlags: 0
@@ -460,37 +469,6 @@ MonoBehaviour:
         DecelTime: 0
   PlayerIndex: -1
   AutoEnableInputs: 1
---- !u!1 &5342586965645786968
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4517546629247456470}
-  m_Layer: 0
-  m_Name: Tail
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4517546629247456470
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5342586965645786968}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2746204990198338440}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6175254589653385790
 GameObject:
   m_ObjectHideFlags: 0
