@@ -20,6 +20,7 @@ namespace _Scripts
         [SerializeField] private GameObject inGameUI;
         [SerializeField] private GameObject settingUI;
         [SerializeField] private GameObject toolUI;
+        [SerializeField] private GameObject gameOverUI;
 
         public static GameManager Instance { get; private set; }
 
@@ -69,12 +70,17 @@ namespace _Scripts
 
         #region 公共方法
 
+        public void OnGameOver(bool showUI)
+        {
+            gameOverUI.SetActive(showUI);
+        }
+
         public void ShotProjectile(Vector3 position, Vector3 direction, float speed)
         {
             var projectile = Instantiate(projectilePrefab, position, Quaternion.identity);
             var projectileController = projectile.GetComponent<ProjectileController>();
             projectileController.Initialize(direction, speed, toolCount);
-            
+
             StartCoroutine(DestroyAfterDelay(projectile, 30f));
         }
 
@@ -206,7 +212,7 @@ namespace _Scripts
         #endregion
 
         #region 辅助方法
-        
+
         private static IEnumerator DestroyAfterDelay(GameObject obj, float seconds)
         {
             yield return new WaitForSeconds(seconds);

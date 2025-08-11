@@ -914,19 +914,21 @@ namespace _Scripts
             // 禁用输入
             _actions.Player.Disable();
             _isDead = true;
-            
+            GameManager.Instance.OnGameOver(true);
+
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             Debug.Log("飞船死亡 - 3 秒后复活...");
-            
+
             // 等待 3 秒
             yield return new WaitForSeconds(3f);
-            
+
             // 复活
             RespawnSpaceship();
-            
+
             // 恢复输入
             _actions.Player.Enable();
             _isDead = false;
+            GameManager.Instance.OnGameOver(false);
         }
 
         private void RespawnSpaceship()
