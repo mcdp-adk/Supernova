@@ -1,4 +1,7 @@
 using System;
+using UnityEngine;
+using UnityEngine.UI;
+
 namespace _Scripts.Utilities
 {
     public enum CellTypeEnum
@@ -51,6 +54,7 @@ namespace _Scripts.Utilities
         public float MoistureMax;
         public float MoistureConductivity;
         public float EnergyDefault;
+        public float Durability;
         public float DropChanceGold;
         public float DropChanceSilver;
         public float DropChanceCopper;
@@ -72,5 +76,20 @@ namespace _Scripts.Utilities
         public int explosionStrength;
         public int explosionAngleClamp;
         public LayerCellGenerationConfig[] cellConfigs;
+    }
+
+    public struct CellInventoryData
+    {
+        public int Count;
+        public float AvgTemperature;
+        public float AvgMoisture;
+    }
+
+    [Serializable]
+    public struct InventoryUIData
+    {
+        public CellTypeEnum cellType;
+        public Sprite icon;
+        public Text countText;
     }
 }

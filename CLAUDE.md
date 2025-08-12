@@ -2,72 +2,119 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 项目概述
-Supernova 是一个 Unity ECS（实体组件系统）项目，用于模拟具有物理、燃烧和爆炸系统的细胞自动机。该项目使用 Unity DOTS（面向数据的技术栈）实现高性能模拟。
+## Project Overview
 
-## 关键技术
-- **Unity 版本**：6000.0.49f1
-- **ECS**：Unity.Entities 包（1.3.14）
-- **物理**：Unity.Physics 包
-- **渲染**：Universal Render Pipeline（URP）
-- **输入**：Input System 包
-- **特效**：Visual Effect Graph
+**Supernova** is a Unity 6000.0.49f1 project using DOTS/ECS architecture for a cellular automata simulation game. The project simulates 80,000+ cells with realistic physics, heat transfer, moisture diffusion, combustion, and explosion effects.
 
-## 系统架构
+## Unity Version & Dependencies
 
-### 核心系统结构
-- **CaSlowSystemGroup**：每 1000ms 更新一次，用于重型计算（热传递、燃烧、爆炸）
-- **CaFastSystemGroup**：每 20ms 更新一次，用于响应式物理和交互
-- **VariableRateSimulationSystemGroup**：可变频率系统的基础组
+- **Unity Version**: 6000.0.49f1
+- **Key Packages**:
+  - `com.unity.entities` (1.3.14) - ECS framework
+  - `com.unity.physics` (1.3.14) - Physics simulation
+  - `com.unity.render-pipelines.universal` (17.0.4) - URP rendering
+  - `com.unity.visualeffectgraph` (17.0.4) - VFX system
+  - `com.unity.inputsystem` (1.14.1) - Input handling
 
-### 关键组件
-- **CellComponents.cs**：核心 ECS 组件（CellType、Temperature、Energy 等）
-- **ConfigComponents.cs**：配置数据组件
-- **SupernovaComponents.cs**：Supernova 特定组件
+## Architecture Overview
 
-### 主要系统（按执行顺序）
-1. **S0_GlobalDataInitSystem**：初始化全局模拟数据和单元格配置
-2. **S1_CellPoolQueueSystem**：管理单元格池以实现高效生成
-3. **SCA1_SupernovaInstantiationSystem**：创建超新星爆炸
-4. **SCA2_RandomInstantiationSystem**：随机单元格生成
-5. **SCA3_HeatTransferSystem**：单元格间的热力学
-6. **SCA4_MoistureDiffusionSystem**：水/水分移动
-7. **SCA5_EvaporationSystem**：基于温度的水蒸发
-8. **SCA6_CombustionSystem**：带能量释放的火灾/燃烧模拟
-9. **SCA7_ExplosionSystem**：带冲击波的爆炸反应
-10. **FCA9_PhysicSystem**：移动和碰撞的物理模拟
+### ECS System Architecture
 
-### 数据流
-1. **CellConfig**：从 CSV 加载的配置数据（Assets/Settings/CellConfigs.csv）
-2. **GlobalConfig**：代码中的静态配置常量
-3. **单元格地图**：NativeHashMap<int3, Entity> 用于空间查找
-4. **缓冲区**：ImpulseBuffer、HeatBuffer、MoistureBuffer 用于单元格间通信
+The project uses a **three-tier ECS system** organized by update frequency:
 
-## 构建命令
-- **Unity 构建**：使用 Unity 编辑器 → 文件 → 构建并运行
-- **测试场景**：Assets/Scenes/Test/CellularAutomata.unity
-- **主场景**：Assets/Scenes/Test.unity
+```
+VariableRateSimulationSystemGroup
+├── CaSlowSystemGroup (1000ms updates)
+│   └── SCA* Systems (Cellular automata)
+├── CaFastSystemGroup (20ms updates)  
+│   └── FCA* Systems (Physics & collision)
+└── Lifecycle Systems (LS*, S*)
+    ├── Global initialization
+    └── Entity pooling
+```
 
-## 开发设置
-1. **在 Unity 中打开**：使用 Unity 6000.0.49f1 或更新版本
-2. **包安装**：所有包通过 manifest.json 管理
-3. **配置**：编辑 CellConfigs.csv 以修改单元格属性
-4. **常量**：修改 GlobalConfig.cs 中的模拟参数
+### System Categories
 
-## 关键配置文件
-- **CellConfigs.csv**：定义所有单元格类型及其属性
-- **GlobalConfig.cs**：模拟常量和系数
-- **InputSystem_Actions.inputactions**：输入系统配置
-- **Settings/*.asset**：URP 和渲染配置
+- **FCA (Fast Cellular Automata)**: High-frequency physics (collision, gravity, movement)
+- **SCA (Slow Cellular Automata)**: Low-frequency simulation (heat, moisture, combustion, explosions)
+- **LS (Lifecycle Systems)**: Entity management and VFX processing
 
-## 常见开发任务
-- **添加新单元格类型**：添加条目到 CellConfigs.csv 和 CellTypeEnum
-- **修改物理**：编辑 GlobalConfig.cs 中的物理常量
-- **调整燃烧**：修改 GlobalConfig 中的燃烧系数
-- **测试**：使用 Test.unity 场景进行快速迭代
+### Core Components
 
-## 性能考量
-- **最大单元格数**：100,000（在 GlobalConfig.MaxCellCount 中定义）
-- **单元格池大小**：65,536（在 GlobalConfig.MaxCellPoolSize 中定义）
-- **更新频率**：慢系统 1Hz，快系统 50Hz
-- **内存**：使用 NativeArray/NativeHashMap 进行 burst 编译
+- **Cell Components**: `CellType`, `CellState`, `Temperature`, `Moisture`, `Energy`, `Mass`, `Velocity`
+- **Buffer Components**: `HeatBuffer`, `MoistureBuffer`, `ImpulseBuffer` for state accumulation
+- **Lifecycle**: `IsAlive`, `IsBurning`, `ShouldExplosion`, `PendingDequeue`
+
+## Development Commands
+
+### Build Commands
+```bash
+# Unity CLI build (if available)
+Unity.exe -quit -batchmode -executeMethod BuildScript.Build
+
+# Manual build process
+1. Open Unity Editor
+2. File → Build Settings
+3. Select platform and build
+```
+
+### Testing Commands
+```bash
+# Unity Test Framework
+Window → General → Test Runner
+# or use Unity CLI:
+Unity.exe -runTests -testPlatform EditMode -testResults results.xml
+```
+
+### Common Development Tasks
+
+#### Running the Game
+1. Open `Scenes/Game.unity`
+2. Press Play in Unity Editor
+3. Use WASD for spaceship movement, mouse for aiming
+4. Press Tab to open tool menu
+
+#### Adding New Cell Types
+1. Add to `CellTypeEnum` in `CellComponents.cs`
+2. Update `cellTypeIndexMap` in `GameManager.cs:27`
+3. Add configuration in `Settings/CellConfigs.csv`
+4. Update relevant systems (SCA9_CellTypeUpdateSystem)
+
+#### Modifying System Timing
+- Update rates: `GlobalConfig.cs` (lines 11-16)
+- Physics scaling: `GlobalConfig.PhysicsSpeedScale`
+
+#### Debugging ECS
+- Use Entity Debugger: Window → Analysis → Entity Debugger
+- Check system execution order and component data
+- Monitor entity count and memory usage
+
+### Key Files Structure
+
+```
+Assets/_Scripts/
+├── Components/          # ECS components (CellComponents, ConfigComponents)
+├── Systems/            # ECS systems (FCA*, SCA*, LS*)
+├── Aspects/            # ECS aspects (SupernovaAspect)
+├── Authorings/         # MonoBehaviour → ECS conversion
+├── Utilities/          # GlobalConfig, SystemGroups, DataStructs
+└── GameManager.cs      # Main game controller (non-ECS)
+```
+
+### Performance Monitoring
+- **Entity Count**: 80,000 max cells (GlobalConfig.MaxCellCount)
+- **Update Rates**: Slow (1s), Fast (20ms)
+- **Memory**: Pre-allocated pools for entities and buffers
+- **Parallel Processing**: All systems use Burst + Job System
+
+### Configuration Files
+- `Settings/CellConfigs.csv` - Cell type physical properties
+- `GlobalConfig.cs` - Simulation constants and tuning parameters
+- `ProjectSettings/` - Unity project configuration
+
+## Development Notes
+
+- **Spatial Indexing**: Uses `NativeHashMap<int3, Entity>` for O(1) spatial lookups
+- **State Management**: Double buffering prevents race conditions
+- **Entity Pooling**: Pre-allocated entities managed via `NativeQueue<Entity>`
+- **Enableable Components**: Used for efficient filtering and state management

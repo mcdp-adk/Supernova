@@ -33,7 +33,9 @@ namespace _Scripts.Systems
             state.Dependency = new ExplosionJob
             {
                 ECB = ecb1.AsParallelWriter(),
-                CellMap = _cellMap
+                CellMap = _cellMap,
+                ImpulseBufferLookup = SystemAPI.GetBufferLookup<ImpulseBuffer>(true),
+                HeatBufferLookup = SystemAPI.GetBufferLookup<HeatBuffer>(true)
             }.ScheduleParallel(state.Dependency);
             state.Dependency.Complete();
             ecb1.Playback(state.EntityManager);
@@ -54,6 +56,8 @@ namespace _Scripts.Systems
         {
             public EntityCommandBuffer.ParallelWriter ECB;
             [ReadOnly] public NativeHashMap<int3, Entity> CellMap;
+            [ReadOnly] public BufferLookup<ImpulseBuffer> ImpulseBufferLookup;
+            [ReadOnly] public BufferLookup<HeatBuffer> HeatBufferLookup;
 
             private void Execute([EntityIndexInQuery] int index, Entity entity, in LocalTransform transform,
                 ref Energy energy)
@@ -102,12 +106,18 @@ namespace _Scripts.Systems
                     var direction = math.normalize(offset);
                     var impulse = direction * impulseMagnitude;
 
-                    // 添加冲击力到 ImpulseBuffer
-                    ECB.AppendToBuffer(index, targetEntity, new ImpulseBuffer { Value = impulse });
+                    // 只对有 ImpulseBuffer 的 entity 添加冲击力
+                    if (ImpulseBufferLookup.HasBuffer(targetEntity))
+                    {
+                        ECB.AppendToBuffer(index, targetEntity, new ImpulseBuffer { Value = impulse });
+                    }
 
-                    // 添加热量到 HeatBuffer（距离衰减）
-                    var heatToTarget = heatReleased * distanceFactor * 0.1f; // 减少传递的热量
-                    ECB.AppendToBuffer(index, targetEntity, new HeatBuffer { Value = heatToTarget });
+                    // 只对有 HeatBuffer 的 entity 添加热量
+                    if (HeatBufferLookup.HasBuffer(targetEntity))
+                    {
+                        var heatToTarget = heatReleased * distanceFactor * 0.1f;
+                        ECB.AppendToBuffer(index, targetEntity, new HeatBuffer { Value = heatToTarget });
+                    }
                 }
             }
         }
