@@ -13,7 +13,7 @@ namespace _Scripts.Systems
     {
         private NativeHashMap<int3, Entity> _cellMap;
         private NativeQueue<Entity> _cellPoolQueue;
-        
+
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
@@ -44,7 +44,8 @@ namespace _Scripts.Systems
                 ECB = ecb,
                 CellMap = _cellMap,
                 CellPoolQueue = _cellPoolQueue,
-                ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>()
+                ConfigEntity = SystemAPI.GetSingletonEntity<CellConfigTag>(),
+                IsGameStarted = GameManager.Instance != null && GameManager.Instance.IsGameStarted
             };
 
             // 等待 Job 完成后回放 Entity 修改
@@ -52,7 +53,7 @@ namespace _Scripts.Systems
             state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
         }
-        
+
         [BurstCompile]
         [WithAll(typeof(ShouldInitializeCell))]
         private partial struct InstantiateCellJob : IJobEntity
@@ -62,10 +63,15 @@ namespace _Scripts.Systems
             public NativeHashMap<int3, Entity> CellMap;
             public NativeQueue<Entity> CellPoolQueue;
             public Entity ConfigEntity;
+            public bool IsGameStarted;
 
-            private void Execute(SupernovaAspect supernova,
-                EnabledRefRW<ShouldInitializeCell> shouldInitializeCell)
+            private void Execute(SupernovaAspect supernova, ref ShouldInitializeCell shouldInitialize,
+                EnabledRefRW<ShouldInitializeCell> shouldInitializeEnabled)
             {
+                // 对于 shouldInitializeOnLaunch 为 true 的 Supernova，任何时候都可以初始化
+                // 对于 shouldInitializeOnLaunch 为 false 的 Supernova，只有 IsGameStarted 为 true 后才能初始化
+                if (shouldInitialize.ShouldInitializeOnLaunch == false && IsGameStarted == false) return;
+
                 var center = supernova.Coordinate;
                 var random = new Random(math.hash(center));
                 var maxRadius = supernova.MaxRadius;
@@ -76,7 +82,7 @@ namespace _Scripts.Systems
                 {
                     var offset = new int3(x, y, z);
                     var distance = math.length(offset);
-                    
+
                     var (layerIndex, layerConfig) = supernova.GetLayerForDistance(distance);
                     if (layerIndex < 0) continue;
 
@@ -99,7 +105,7 @@ namespace _Scripts.Systems
                     else return;
                 }
 
-                shouldInitializeCell.ValueRW = false;
+                shouldInitializeEnabled.ValueRW = false;
             }
         }
     }

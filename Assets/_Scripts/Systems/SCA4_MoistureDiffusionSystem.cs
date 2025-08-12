@@ -14,7 +14,7 @@ namespace _Scripts.Systems
     {
         private NativeHashMap<int3, Entity> _cellMap;
         private NativeArray<CellConfig> _cellConfigs;
-        
+
         public void OnUpdate(ref SystemState state)
         {
             if (!_cellMap.IsCreated)
@@ -67,6 +67,9 @@ namespace _Scripts.Systems
 
             private void Execute([EntityIndexInQuery] int index, Entity selfEntity, in LocalTransform transform)
             {
+                // 检查实体是否存在且组件有效
+                if (!TypeLookup.HasComponent(selfEntity) || !MoistureLookup.HasComponent(selfEntity)) return;
+
                 var selfCoordinate = (int3)transform.Position;
                 var selfType = TypeLookup[selfEntity];
                 var selfMoisture = MoistureLookup[selfEntity];
@@ -78,11 +81,17 @@ namespace _Scripts.Systems
                 {
                     var neighborCoordinate = selfCoordinate + offset;
                     if (!CellMap.TryGetValue(neighborCoordinate, out var neighborEntity)) continue;
+
+                    // 检查邻居实体是否存在且组件有效
+                    if (!TypeLookup.HasComponent(neighborEntity) ||
+                        !MoistureLookup.HasComponent(neighborEntity)) continue;
+
                     var neighborType = TypeLookup[neighborEntity];
                     var neighborMoisture = MoistureLookup[neighborEntity];
 
                     // 计算水分扩散
-                    var neighborMoistureConductivity = CellConfigs.GetCellConfig(neighborType.Value).MoistureConductivity;
+                    var neighborMoistureConductivity =
+                        CellConfigs.GetCellConfig(neighborType.Value).MoistureConductivity;
                     var avgConductivity = (selfMoistureConductivity + neighborMoistureConductivity) * 0.5f;
                     var moistureDiff = selfMoisture.Value - neighborMoisture.Value;
                     var moistureTransfer = moistureDiff * avgConductivity * GlobalConfig.MoistureDiffusionCoefficient;

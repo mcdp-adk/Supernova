@@ -8,6 +8,7 @@ namespace _Scripts.Authorings
     public class SupernovaAuthoring : MonoBehaviour
     {
         [Header("超新星设置")] [SerializeField] private int mass = 100;
+        [SerializeField] private bool shouldInitializeOnLaunch = true;
 
         [Header("Cell 分层生成设置")] [SerializeField]
         private LayerGenerationConfig[] layerConfigs;
@@ -27,7 +28,7 @@ namespace _Scripts.Authorings
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
                 AddComponent<SupernovaTag>(entity);
-                AddComponent<ShouldInitializeCell>(entity);
+                AddComponent(entity, new ShouldInitializeCell { ShouldInitializeOnLaunch = authoring.shouldInitializeOnLaunch });
                 AddComponent(entity, new Mass { Value = authoring.mass });
 
                 var layerBuffer = AddBuffer<LayerGenerationConfigBuffer>(entity);

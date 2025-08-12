@@ -11,10 +11,11 @@ namespace _Scripts.Components
 
     public struct ShouldInitializeCell : IComponentData, IEnableableComponent
     {
+        public bool ShouldInitializeOnLaunch;
     }
 
     // ========== Buffer ==========
-    
+
     public struct LayerGenerationConfigBuffer : IBufferElementData
     {
         public int Radius;
@@ -22,7 +23,7 @@ namespace _Scripts.Components
         public int ExplosionStrength;
         public int ExplosionAngleClamp;
     }
-    
+
     public struct LayerCellGenerationConfigBuffer : IBufferElementData
     {
         public CellTypeEnum CellType;

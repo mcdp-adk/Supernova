@@ -49,6 +49,7 @@ namespace _Scripts.Utilities
             manager.AddComponent<Temperature>(prototype);
             manager.AddComponent<Moisture>(prototype);
             manager.AddComponent<Energy>(prototype);
+            manager.AddComponent<Health>(prototype);
 
             // Buffer Components
             manager.AddBuffer<ImpulseBuffer>(prototype);
@@ -112,6 +113,7 @@ namespace _Scripts.Utilities
             ecb.SetComponent(cell, new Temperature { Value = config.TemperatureDefault });
             ecb.SetComponent(cell, new Moisture { Value = config.MoistureDefault });
             ecb.SetComponent(cell, new Energy { Value = config.EnergyDefault });
+            ecb.SetComponent(cell, new Health { Value = config.Durability });
             ecb.SetComponent(cell, new MaterialMeshInfo
             {
                 MaterialID = new BatchMaterialID { value = (uint)cellType },
@@ -156,6 +158,13 @@ namespace _Scripts.Utilities
             cellMap.Remove(currentCoordinate);
             ecb.SetComponentEnabled<IsAlive>(cell, false);
             ecb.SetComponentEnabled<PendingDequeue>(cell, true);
+            ecb.SetComponent(cell, new CellType { Value = CellTypeEnum.None });
+            ecb.SetComponent(cell, new CellState { Value = CellStateEnum.None });
+            ecb.SetComponent(cell, new MaterialMeshInfo
+            {
+                MaterialID = new BatchMaterialID { value = (uint)CellTypeEnum.None },
+                MeshID = new BatchMeshID { value = (uint)CellTypeEnum.None }
+            });
         }
 
         public static CellConfig GetCellConfig(this NativeArray<CellConfig> cellConfigs, CellTypeEnum cellType)

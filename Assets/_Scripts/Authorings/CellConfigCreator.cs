@@ -64,10 +64,11 @@ namespace _Scripts.Authorings
                     MoistureMax = float.TryParse(values[14], out var moistMax) ? moistMax : 1f,
                     MoistureConductivity = float.TryParse(values[15], out var moistCond) ? moistCond : 0.5f,
                     EnergyDefault = float.TryParse(values[16], out var energy) ? energy : 0f,
-                    DropChanceGold = float.TryParse(values[17], out var gold) ? gold : 0f,
-                    DropChanceSilver = float.TryParse(values[18], out var silver) ? silver : 0f,
-                    DropChanceCopper = float.TryParse(values[19], out var copper) ? copper : 0f,
-                    DropChanceIron = float.TryParse(values[20], out var iron) ? iron : 0f
+                    Durability = float.TryParse(values[17], out var durability) ? durability : 0f,
+                    DropChanceGold = float.TryParse(values[18], out var gold) ? gold : 0f,
+                    DropChanceSilver = float.TryParse(values[19], out var silver) ? silver : 0f,
+                    DropChanceCopper = float.TryParse(values[20], out var copper) ? copper : 0f,
+                    DropChanceIron = float.TryParse(values[21], out var iron) ? iron : 0f
                 };
 
                 configs.Add(config);
