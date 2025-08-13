@@ -327,15 +327,17 @@ namespace _Scripts
 
             // 温差消耗（距离适宜温度越远，消耗越多）
             var tempDifference = Mathf.Abs(ShipT - optimalTemperature);
-            moistureConsumption += tempDifference * moistureCostFactor * Time.fixedDeltaTime;
+            var tempMoistureConsumption = tempDifference * moistureCostFactor * Time.fixedDeltaTime;
+            moistureConsumption += tempMoistureConsumption;
 
             ShipM -= moistureConsumption;
 
             // 2. 补充水分（从库存缓慢补充）
-            if (_invM > ShipM)
+            var invMoisture = _invM * 100f;
+            if (invMoisture > ShipM)
             {
                 // 向库存水分靠拢
-                var moistureSupply = (_invM - ShipM) * 10f * Time.fixedDeltaTime;
+                var moistureSupply = (invMoisture - ShipM) * 0.1f * Time.fixedDeltaTime;
                 ShipM += moistureSupply;
             }
 
@@ -343,12 +345,11 @@ namespace _Scripts
             ShipM = Mathf.Clamp(ShipM, 0f, 100f);
 
             // 4. 惩罚机制：如果水分为 0，缓慢消耗氧气
-            if (ShipM <= 0f)
-            {
-                // 每秒消耗氧气
-                CurrentOxygen -= 2f * Time.fixedDeltaTime;
-                CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
-            }
+            if (!(ShipM <= 0f)) return;
+            // 每秒消耗氧气
+            var oxygenConsumption = 5f * Time.fixedDeltaTime;
+            CurrentOxygen -= oxygenConsumption;
+            CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
         }
 
         private void UpdateEnergy()
@@ -1053,3 +1054,4 @@ namespace _Scripts
         #endregion
     }
 }
+
