@@ -302,7 +302,7 @@ namespace _Scripts
         {
             // 1. 自然失温（向环境温度缓慢降低）
             const float ambientTemperature = -270f; // 太空环境温度
-            const float naturalCoolingRate = 0.1f; // 每秒自然降温速率
+            const float naturalCoolingRate = 0.01f; // 每秒自然降温速率
             
             var temperatureDifference = ShipT - ambientTemperature;
             if (temperatureDifference > 0)
@@ -324,7 +324,7 @@ namespace _Scripts
                 var targetTemperature = _invT * invWeight + _envT * envWeight;
 
                 // 使用热传导系数让飞船温度向目标温度平滑变化
-                var deltaT = (targetTemperature - ShipT) * 0.5f * Time.fixedDeltaTime;
+                var deltaT = (targetTemperature - ShipT) * 0.8f * Time.fixedDeltaTime;
                 ShipT += deltaT;
             }
 
