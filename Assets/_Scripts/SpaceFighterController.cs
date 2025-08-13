@@ -743,7 +743,7 @@ namespace _Scripts
                 thrustVFX02.Play();
                 thrustVFX03.Play();
             }
-                
+
             else
             {
                 thrustVFX01.Stop();
@@ -1023,22 +1023,24 @@ namespace _Scripts
 
         private void UpdateMaxOxygen()
         {
-            // 获取星球的平均温度和湿度
+            // 获取星球的平均温度和总水分量
             var planetTemp = GameManager.Instance.earthCalculator.PlanetAverageTemperature;
-            var planetMoisture = GameManager.Instance.earthCalculator.PlanetAverageMoisture;
+            var planetTotalMoisture = GameManager.Instance.earthCalculator.PlanetTotalMoisture;
 
             // 计算温度因子（温度越接近适宜温度，因子越高）
             var tempDifference = Mathf.Abs(planetTemp - optimalTemperature);
-            var tempFactor = Mathf.Clamp01(1f - (tempDifference / 50f)); // 50度为最大温差
+            var tempFactor = Mathf.Clamp01(1f - tempDifference / 100f); // 50度为最大温差
 
-            // 计算湿度因子（湿度越接近100，因子越高）
-            var moistureFactor = Mathf.Clamp01(planetMoisture / 100f);
+            // 计算总水分因子（总水分越多，因子越高）
+            // 假设10000为理想总水分量，可根据实际情况调整
+            const float idealTotalMoisture = 5000f;
+            var moistureFactor = Mathf.Clamp01(planetTotalMoisture / idealTotalMoisture);
 
-            // 综合因子（温度和湿度各占50%权重）
-            var combinedFactor = (tempFactor + moistureFactor) / 2f;
+            // 综合因子（温度和总水分各占50%权重）
+            var combinedFactor = tempFactor * 0.25f + moistureFactor * 0.75f;
 
             // 根据综合因子计算MaxOxygen
-            var baseMaxOxygen = 200f;
+            const float baseMaxOxygen = 200f;
             MaxOxygen = Mathf.Lerp(baseMaxOxygen, UltimateOxygen, combinedFactor);
 
             // 确保当前氧气不超过新的最大值
