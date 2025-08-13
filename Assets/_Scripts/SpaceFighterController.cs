@@ -335,7 +335,7 @@ namespace _Scripts
             if (_invM > ShipM)
             {
                 // 向库存水分靠拢
-                var moistureSupply = (_invM - ShipM) * 0.1f * Time.fixedDeltaTime;
+                var moistureSupply = (_invM - ShipM) * 2f * Time.fixedDeltaTime;
                 ShipM += moistureSupply;
             }
 
@@ -357,9 +357,9 @@ namespace _Scripts
             var energyConsumption = 0f;
 
             // 推进消耗（检查是否在移动）
-            var isMoving = Mathf.Abs(_thrustInput) > 0.01f ||
-                           Mathf.Abs(_strafeInput) > 0.01f ||
-                           Mathf.Abs(_elevationInput) > 0.01f;
+            var isMoving = Mathf.Abs(_thrustInput) > 0.1f ||
+                           Mathf.Abs(_strafeInput) > 0.1f ||
+                           Mathf.Abs(_elevationInput) > 0.1f;
 
             if (isMoving)
             {
@@ -684,7 +684,7 @@ namespace _Scripts
             CellInventory[inventoryIndex] = currentInventoryData;
 
             // 将能量直接添加到飞船总能量
-            Energy += currentEnergy;
+            Energy += currentEnergy * 0.1f;
             Energy = Mathf.Clamp(Energy, 0f, energyMax);
 
             // 调用 CellUtility.SetCellTypeToNone 移除方块

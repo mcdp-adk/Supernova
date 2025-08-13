@@ -21,6 +21,7 @@ namespace _Scripts
         [SerializeField] private GameObject settingUI;
         [SerializeField] private GameObject toolUI;
         [SerializeField] private GameObject gameOverUI;
+        [SerializeField] private GameObject inGameLabelUI;
 
         public static GameManager Instance { get; private set; }
 
@@ -123,6 +124,7 @@ namespace _Scripts
 
             startUI.SetActive(false);
             inGameUI.SetActive(true);
+            inGameLabelUI.SetActive(true);
             settingUI.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -148,6 +150,7 @@ namespace _Scripts
             if (IsGameStarted)
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(false);
                 settingUI.SetActive(true);
                 Cursor.lockState = CursorLockMode.None;
@@ -158,6 +161,7 @@ namespace _Scripts
             else
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(false);
                 settingUI.SetActive(true);
                 Cursor.lockState = CursorLockMode.None;
@@ -172,6 +176,7 @@ namespace _Scripts
             if (IsGameStarted)
             {
                 inGameUI.SetActive(true);
+                inGameLabelUI.SetActive(true);
                 startUI.SetActive(false);
                 settingUI.SetActive(false);
                 Cursor.lockState = CursorLockMode.Locked;
@@ -182,6 +187,7 @@ namespace _Scripts
             else
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(true);
                 settingUI.SetActive(false);
                 Cursor.lockState = CursorLockMode.None;
