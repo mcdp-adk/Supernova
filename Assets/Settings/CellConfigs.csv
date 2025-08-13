@@ -1,5 +1,5 @@
 ﻿名字,CellType,CellState,Mass_Default(kg),Fluidity(0-1),Viscosity(0-1),Temperature_Default(°C),Temperature_Min(°C),Temperature_Max(°C),HeatConductivity(0-1),IgnitionPoint(°C),ExplosionPoint(°C),Moisture_Default(0-1),Moisture_Min(0-1),Moisture_Max(0-1),MoistureConductivity(0-1),Energy_Default(J),Durability,DropChance_Gold(0-1),DropChance_Silver(0-1),DropChance_Copper(0-1),DropChance_Iron(0-1)
-岩浆,Lava,Liquid,15,0.9,0.3,1200,800,99999,0.8,800,99999,0,0,0.01,0.05,20000,50,0,0,0,0
+岩浆,Lava,Liquid,15,0.9,0.3,1200,800,99999,0.8,99999,99999,0,0,0.01,0.05,10000,50,0,0,0,0
 火山岩,RockVolcanic,Solid,28,0,1,799,500,800,0.75,99999,99999,0.005,0.001,0.01,0.05,300,200,0,0,0,0
 雪,Snow,Powder,1,0.6,0.4,-5,-99999,0,0.05,99999,99999,1,0.99,1,0.8,50,5,0,0,0,0
 水,Water,Liquid,10,0.9,0.1,20,0,100,0.6,99999,500,1,0.99,1,0.9,50,20,0,0,0,0

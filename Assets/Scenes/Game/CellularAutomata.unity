@@ -165,15 +165,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionStrength
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].explosionStrength
-      value: 0
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionStrength
-      value: 10
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionAngleClamp
@@ -431,15 +431,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionStrength
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].explosionStrength
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionStrength
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionAngleClamp
@@ -624,15 +624,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionStrength
-      value: 2
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].explosionStrength
-      value: 5
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionStrength
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionAngleClamp
@@ -801,15 +801,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionStrength
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[1].explosionStrength
-      value: 10
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].explosionStrength
-      value: 10
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[0].explosionAngleClamp
@@ -954,7 +954,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: layerConfigs.Array.data[2].density
-      value: 3
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 923025128950298984, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
+      propertyPath: layerConfigs.Array.data[2].explosionStrength
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 4448315985919214500, guid: 19c9307ddc0f8dd48bac89e6c525c852, type: 3}
       propertyPath: m_Name

@@ -44,7 +44,7 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
         [SerializeField] private float maxLaserRange = 50f;
-        [SerializeField] private float laserDamage = 500f;
+        [SerializeField] private float laserDamage = 100f;
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
@@ -300,22 +300,35 @@ namespace _Scripts
 
         private void UpdateTemperature()
         {
-            // 如果没有环境质量和库存质量，不进行温度更新
+            // 1. 自然失温（向环境温度缓慢降低）
+            const float ambientTemperature = -270f; // 太空环境温度
+            const float naturalCoolingRate = 0.1f; // 每秒自然降温速率
+            
+            var temperatureDifference = ShipT - ambientTemperature;
+            if (temperatureDifference > 0)
+            {
+                // 向环境温度自然降温
+                var naturalCooling = temperatureDifference * naturalCoolingRate * Time.fixedDeltaTime;
+                ShipT -= naturalCooling;
+            }
+
+            // 2. 如果有环境质量和库存质量，进行温度交换
             var totalMass = _invMass + _envMass;
-            if (totalMass <= 0) return;
+            if (totalMass > 0)
+            {
+                // 计算库存和环境的权重
+                var invWeight = _invMass / totalMass;
+                var envWeight = _envMass / totalMass;
 
-            // 计算库存和环境的权重
-            var invWeight = _invMass / totalMass;
-            var envWeight = _envMass / totalMass;
+                // 计算目标温度（加权平均）
+                var targetTemperature = _invT * invWeight + _envT * envWeight;
 
-            // 计算目标温度（加权平均）
-            var targetTemperature = _invT * invWeight + _envT * envWeight;
+                // 使用热传导系数让飞船温度向目标温度平滑变化
+                var deltaT = (targetTemperature - ShipT) * 0.5f * Time.fixedDeltaTime;
+                ShipT += deltaT;
+            }
 
-            // 使用热传导系数让飞船温度向目标温度平滑变化
-            var deltaT = (targetTemperature - ShipT) * 0.01f * Time.fixedDeltaTime;
-            ShipT += deltaT;
-
-            // 限制温度范围（避免极端值）
+            // 3. 限制温度范围（避免极端值）
             ShipT = Mathf.Clamp(ShipT, -273.15f, 9999f);
         }
 
@@ -1034,7 +1047,7 @@ namespace _Scripts
 
             // 计算总水分因子（总水分越多，因子越高）
             // 假设10000为理想总水分量，可根据实际情况调整
-            const float idealTotalMoisture = 5000f;
+            const float idealTotalMoisture = 1000f;
             var moistureFactor = Mathf.Clamp01(planetTotalMoisture / idealTotalMoisture);
 
             // 综合因子（温度和总水分各占50%权重）
