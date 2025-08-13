@@ -29,6 +29,7 @@ namespace _Scripts
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
 
         [Header("输入设置")] [SerializeField] private float selectionInterval = 0.15f;
+        public bool IsUsingGamepad { get; private set; }
         private int _selectionDirection;
         private float _lastSelectionTime;
         private float _thrustInput;
@@ -303,7 +304,7 @@ namespace _Scripts
             // 1. 自然失温（向环境温度缓慢降低）
             const float ambientTemperature = -270f; // 太空环境温度
             const float naturalCoolingRate = 0.01f; // 每秒自然降温速率
-            
+
             var temperatureDifference = ShipT - ambientTemperature;
             if (temperatureDifference > 0)
             {
@@ -777,6 +778,11 @@ namespace _Scripts
             _strafeInput = input.x;
         }
 
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            CheckInputDevice(context);
+        }
+
         public void OnElevation(InputAction.CallbackContext context)
         {
             _elevationInput = context.ReadValue<float>();
@@ -1064,7 +1070,12 @@ namespace _Scripts
             }
         }
 
+        private void CheckInputDevice(InputAction.CallbackContext context)
+        {
+            var device = context.control.device;
+            IsUsingGamepad = device is Gamepad;
+        }
+
         #endregion
     }
 }
-
