@@ -335,7 +335,7 @@ namespace _Scripts
             if (_invM > ShipM)
             {
                 // 向库存水分靠拢
-                var moistureSupply = (_invM - ShipM) * 2f * Time.fixedDeltaTime;
+                var moistureSupply = (_invM - ShipM) * 10f * Time.fixedDeltaTime;
                 ShipM += moistureSupply;
             }
 
@@ -346,7 +346,7 @@ namespace _Scripts
             if (ShipM <= 0f)
             {
                 // 每秒消耗氧气
-                CurrentOxygen -= 5f * Time.fixedDeltaTime;
+                CurrentOxygen -= 2f * Time.fixedDeltaTime;
                 CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
             }
         }
@@ -1029,7 +1029,7 @@ namespace _Scripts
 
             // 计算温度因子（温度越接近适宜温度，因子越高）
             var tempDifference = Mathf.Abs(planetTemp - optimalTemperature);
-            var tempFactor = Mathf.Clamp01(1f - tempDifference / 100f); // 50度为最大温差
+            var tempFactor = Mathf.Clamp01(1f - tempDifference / 100f);
 
             // 计算总水分因子（总水分越多，因子越高）
             // 假设10000为理想总水分量，可根据实际情况调整

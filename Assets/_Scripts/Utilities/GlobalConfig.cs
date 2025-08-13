@@ -56,12 +56,12 @@ namespace _Scripts.Utilities
         /// <summary>
         /// 热传导系数
         /// </summary>
-        public const float HeatTransferCoefficient = 0.1f;
+        public const float HeatTransferCoefficient = 0.05f;
 
         /// <summary>
         /// 水分扩散系数
         /// </summary>
-        public const float MoistureDiffusionCoefficient = 0.15f;
+        public const float MoistureDiffusionCoefficient = 0.01f;
 
         /// <summary>
         /// 蒸发系数（温度每超过沸点 1 度的蒸发速率）
