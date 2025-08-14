@@ -14,6 +14,7 @@ namespace _Scripts
         public int EarthRadius { get; private set; }
         public float PlanetAverageTemperature { get; private set; }
         public float PlanetAverageMoisture { get; private set; }
+        public float PlanetTotalMoisture { get; private set; }
 
         // ECS 相关
         private NativeHashMap<int3, Entity> _cellMap;
@@ -100,6 +101,7 @@ namespace _Scripts
             {
                 PlanetAverageTemperature = 0f;
                 PlanetAverageMoisture = 0f;
+                PlanetTotalMoisture = 0f;
                 return;
             }
 
@@ -149,11 +151,13 @@ namespace _Scripts
             {
                 PlanetAverageTemperature = totalWeightedTemperature / totalMass;
                 PlanetAverageMoisture = totalWeightedMoisture / totalMass;
+                PlanetTotalMoisture = totalWeightedMoisture;
             }
             else
             {
                 PlanetAverageTemperature = 0f;
                 PlanetAverageMoisture = 0f;
+                PlanetTotalMoisture = 0f;
             }
         }
     }

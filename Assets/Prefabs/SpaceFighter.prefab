@@ -204,7 +204,7 @@ MonoBehaviour:
   laserVFXTransform03: {fileID: 1677326926108948952}
   laserVFXTransform04: {fileID: 1816127109951227470}
   maxLaserRange: 50
-  laserDamage: 500
+  laserDamage: 100
   thrustVFX01: {fileID: 4834052552113139651}
   thrustVFX02: {fileID: 6326096909831902125}
   thrustVFX03: {fileID: 3424353125022266042}

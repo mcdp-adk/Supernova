@@ -29,6 +29,7 @@ namespace _Scripts
         [Header("旋转设置")] [SerializeField] private float turnRate = 45f;
 
         [Header("输入设置")] [SerializeField] private float selectionInterval = 0.15f;
+        public bool IsUsingGamepad { get; private set; }
         private int _selectionDirection;
         private float _lastSelectionTime;
         private float _thrustInput;
@@ -44,7 +45,7 @@ namespace _Scripts
         [SerializeField] private Transform laserVFXTransform03;
         [SerializeField] private Transform laserVFXTransform04;
         [SerializeField] private float maxLaserRange = 50f;
-        [SerializeField] private float laserDamage = 500f;
+        [SerializeField] private float laserDamage = 100f;
         private bool _hasTargetCell;
         private int3 _laserTargetCell;
         private Vector3 _laserEndPoint;
@@ -300,22 +301,35 @@ namespace _Scripts
 
         private void UpdateTemperature()
         {
-            // 如果没有环境质量和库存质量，不进行温度更新
+            // 1. 自然失温（向环境温度缓慢降低）
+            const float ambientTemperature = -270f; // 太空环境温度
+            const float naturalCoolingRate = 0.01f; // 每秒自然降温速率
+
+            var temperatureDifference = ShipT - ambientTemperature;
+            if (temperatureDifference > 0)
+            {
+                // 向环境温度自然降温
+                var naturalCooling = temperatureDifference * naturalCoolingRate * Time.fixedDeltaTime;
+                ShipT -= naturalCooling;
+            }
+
+            // 2. 如果有环境质量和库存质量，进行温度交换
             var totalMass = _invMass + _envMass;
-            if (totalMass <= 0) return;
+            if (totalMass > 0)
+            {
+                // 计算库存和环境的权重
+                var invWeight = _invMass / totalMass;
+                var envWeight = _envMass / totalMass;
 
-            // 计算库存和环境的权重
-            var invWeight = _invMass / totalMass;
-            var envWeight = _envMass / totalMass;
+                // 计算目标温度（加权平均）
+                var targetTemperature = _invT * invWeight + _envT * envWeight;
 
-            // 计算目标温度（加权平均）
-            var targetTemperature = _invT * invWeight + _envT * envWeight;
+                // 使用热传导系数让飞船温度向目标温度平滑变化
+                var deltaT = (targetTemperature - ShipT) * 0.8f * Time.fixedDeltaTime;
+                ShipT += deltaT;
+            }
 
-            // 使用热传导系数让飞船温度向目标温度平滑变化
-            var deltaT = (targetTemperature - ShipT) * 0.01f * Time.fixedDeltaTime;
-            ShipT += deltaT;
-
-            // 限制温度范围（避免极端值）
+            // 3. 限制温度范围（避免极端值）
             ShipT = Mathf.Clamp(ShipT, -273.15f, 9999f);
         }
 
@@ -327,15 +341,17 @@ namespace _Scripts
 
             // 温差消耗（距离适宜温度越远，消耗越多）
             var tempDifference = Mathf.Abs(ShipT - optimalTemperature);
-            moistureConsumption += tempDifference * moistureCostFactor * Time.fixedDeltaTime;
+            var tempMoistureConsumption = tempDifference * moistureCostFactor * Time.fixedDeltaTime;
+            moistureConsumption += tempMoistureConsumption;
 
             ShipM -= moistureConsumption;
 
             // 2. 补充水分（从库存缓慢补充）
-            if (_invM > ShipM)
+            var invMoisture = _invM * 100f;
+            if (invMoisture > ShipM)
             {
                 // 向库存水分靠拢
-                var moistureSupply = (_invM - ShipM) * 0.1f * Time.fixedDeltaTime;
+                var moistureSupply = (invMoisture - ShipM) * 0.1f * Time.fixedDeltaTime;
                 ShipM += moistureSupply;
             }
 
@@ -343,12 +359,11 @@ namespace _Scripts
             ShipM = Mathf.Clamp(ShipM, 0f, 100f);
 
             // 4. 惩罚机制：如果水分为 0，缓慢消耗氧气
-            if (ShipM <= 0f)
-            {
-                // 每秒消耗氧气
-                CurrentOxygen -= 5f * Time.fixedDeltaTime;
-                CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
-            }
+            if (!(ShipM <= 0f)) return;
+            // 每秒消耗氧气
+            var oxygenConsumption = 5f * Time.fixedDeltaTime;
+            CurrentOxygen -= oxygenConsumption;
+            CurrentOxygen = Mathf.Max(CurrentOxygen, 0f);
         }
 
         private void UpdateEnergy()
@@ -357,9 +372,9 @@ namespace _Scripts
             var energyConsumption = 0f;
 
             // 推进消耗（检查是否在移动）
-            var isMoving = Mathf.Abs(_thrustInput) > 0.01f ||
-                           Mathf.Abs(_strafeInput) > 0.01f ||
-                           Mathf.Abs(_elevationInput) > 0.01f;
+            var isMoving = Mathf.Abs(_thrustInput) > 0.1f ||
+                           Mathf.Abs(_strafeInput) > 0.1f ||
+                           Mathf.Abs(_elevationInput) > 0.1f;
 
             if (isMoving)
             {
@@ -684,7 +699,7 @@ namespace _Scripts
             CellInventory[inventoryIndex] = currentInventoryData;
 
             // 将能量直接添加到飞船总能量
-            Energy += currentEnergy;
+            Energy += currentEnergy * 0.1f;
             Energy = Mathf.Clamp(Energy, 0f, energyMax);
 
             // 调用 CellUtility.SetCellTypeToNone 移除方块
@@ -743,7 +758,7 @@ namespace _Scripts
                 thrustVFX02.Play();
                 thrustVFX03.Play();
             }
-                
+
             else
             {
                 thrustVFX01.Stop();
@@ -761,6 +776,11 @@ namespace _Scripts
             var input = context.ReadValue<Vector2>();
             _thrustInput = input.y;
             _strafeInput = input.x;
+        }
+
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            CheckInputDevice(context);
         }
 
         public void OnElevation(InputAction.CallbackContext context)
@@ -1023,22 +1043,24 @@ namespace _Scripts
 
         private void UpdateMaxOxygen()
         {
-            // 获取星球的平均温度和湿度
+            // 获取星球的平均温度和总水分量
             var planetTemp = GameManager.Instance.earthCalculator.PlanetAverageTemperature;
-            var planetMoisture = GameManager.Instance.earthCalculator.PlanetAverageMoisture;
+            var planetTotalMoisture = GameManager.Instance.earthCalculator.PlanetTotalMoisture;
 
             // 计算温度因子（温度越接近适宜温度，因子越高）
             var tempDifference = Mathf.Abs(planetTemp - optimalTemperature);
-            var tempFactor = Mathf.Clamp01(1f - (tempDifference / 50f)); // 50度为最大温差
+            var tempFactor = Mathf.Clamp01(1f - tempDifference / 100f);
 
-            // 计算湿度因子（湿度越接近100，因子越高）
-            var moistureFactor = Mathf.Clamp01(planetMoisture / 100f);
+            // 计算总水分因子（总水分越多，因子越高）
+            // 假设10000为理想总水分量，可根据实际情况调整
+            const float idealTotalMoisture = 1000f;
+            var moistureFactor = Mathf.Clamp01(planetTotalMoisture / idealTotalMoisture);
 
-            // 综合因子（温度和湿度各占50%权重）
-            var combinedFactor = (tempFactor + moistureFactor) / 2f;
+            // 综合因子（温度和总水分各占50%权重）
+            var combinedFactor = tempFactor * 0.25f + moistureFactor * 0.75f;
 
             // 根据综合因子计算MaxOxygen
-            var baseMaxOxygen = 200f;
+            const float baseMaxOxygen = 200f;
             MaxOxygen = Mathf.Lerp(baseMaxOxygen, UltimateOxygen, combinedFactor);
 
             // 确保当前氧气不超过新的最大值
@@ -1046,6 +1068,12 @@ namespace _Scripts
             {
                 CurrentOxygen = MaxOxygen;
             }
+        }
+
+        private void CheckInputDevice(InputAction.CallbackContext context)
+        {
+            var device = context.control.device;
+            IsUsingGamepad = device is Gamepad;
         }
 
         #endregion

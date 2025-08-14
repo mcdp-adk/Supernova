@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using _Scripts.Utilities;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Cursor = UnityEngine.Cursor;
 
 namespace _Scripts
@@ -21,6 +23,9 @@ namespace _Scripts
         [SerializeField] private GameObject settingUI;
         [SerializeField] private GameObject toolUI;
         [SerializeField] private GameObject gameOverUI;
+        [SerializeField] private GameObject inGameLabelUI;
+        [SerializeField] private GameObject gamepadGuideUI;
+        [SerializeField] private GameObject keyboardGuideUI;
 
         public static GameManager Instance { get; private set; }
 
@@ -66,6 +71,11 @@ namespace _Scripts
             }
 
             Instance = this;
+        }
+
+        private void Update()
+        {
+            CheckDeviceUsing();
         }
 
         #region 公共方法
@@ -123,6 +133,7 @@ namespace _Scripts
 
             startUI.SetActive(false);
             inGameUI.SetActive(true);
+            inGameLabelUI.SetActive(true);
             settingUI.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -148,6 +159,7 @@ namespace _Scripts
             if (IsGameStarted)
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(false);
                 settingUI.SetActive(true);
                 Cursor.lockState = CursorLockMode.None;
@@ -158,6 +170,7 @@ namespace _Scripts
             else
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(false);
                 settingUI.SetActive(true);
                 Cursor.lockState = CursorLockMode.None;
@@ -172,6 +185,7 @@ namespace _Scripts
             if (IsGameStarted)
             {
                 inGameUI.SetActive(true);
+                inGameLabelUI.SetActive(true);
                 startUI.SetActive(false);
                 settingUI.SetActive(false);
                 Cursor.lockState = CursorLockMode.Locked;
@@ -182,6 +196,7 @@ namespace _Scripts
             else
             {
                 inGameUI.SetActive(false);
+                inGameLabelUI.SetActive(false);
                 startUI.SetActive(true);
                 settingUI.SetActive(false);
                 Cursor.lockState = CursorLockMode.None;
@@ -212,6 +227,22 @@ namespace _Scripts
         #endregion
 
         #region 辅助方法
+
+        private void CheckDeviceUsing()
+        {
+            if (!spaceFighterController) return;
+
+            if (spaceFighterController.IsUsingGamepad)
+            {
+                gamepadGuideUI.SetActive(true);
+                keyboardGuideUI.SetActive(false);
+            }
+            else
+            {
+                gamepadGuideUI.SetActive(false);
+                keyboardGuideUI.SetActive(true);
+            }
+        }
 
         private static IEnumerator DestroyAfterDelay(GameObject obj, float seconds)
         {

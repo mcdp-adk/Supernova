@@ -71,8 +71,8 @@ namespace _Scripts.Systems
                 // 计算释放的热量
                 var heatReleased = totalEnergy * GlobalConfig.ExplosionHeatCoefficient;
 
-                // 计算爆炸影响范围（与能量正相关）
-                var explosionRange = (int)math.ceil(math.sqrt(totalEnergy));
+                // 限制爆炸影响范围，避免性能问题
+                var explosionRange = math.min((int)math.ceil(math.sqrt(totalEnergy)), 10); // 最大范围限制为 10
 
                 // 设置自身能量为 0
                 energy.Value = 0f;
@@ -80,7 +80,7 @@ namespace _Scripts.Systems
                 // 添加热量到 HeatBuffer
                 ECB.AppendToBuffer(index, entity, new HeatBuffer { Value = heatReleased });
 
-                // 处理爆炸范围内的所有 Cell
+                // 使用球形范围而非立方体范围，减少不必要的计算
                 for (var dx = -explosionRange; dx <= explosionRange; dx++)
                 for (var dy = -explosionRange; dy <= explosionRange; dy++)
                 for (var dz = -explosionRange; dz <= explosionRange; dz++)
@@ -88,7 +88,7 @@ namespace _Scripts.Systems
                     var offset = new int3(dx, dy, dz);
                     var distance = math.length(offset);
 
-                    // 跳过超出范围和自身的 Cell
+                    // 早期跳出：先检查距离，避免不必要的计算
                     if (distance > explosionRange) continue;
                     if (dx == 0 && dy == 0 && dz == 0) continue;
 

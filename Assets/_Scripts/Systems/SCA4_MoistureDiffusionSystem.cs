@@ -92,6 +92,10 @@ namespace _Scripts.Systems
                     // 计算水分扩散
                     var neighborMoistureConductivity =
                         CellConfigs.GetCellConfig(neighborType.Value).MoistureConductivity;
+                    
+                    // 如果双方中任一方的MoistureConductivity为0，则不传递
+                    if (selfMoistureConductivity == 0f || neighborMoistureConductivity == 0f) continue;
+                    
                     var avgConductivity = (selfMoistureConductivity + neighborMoistureConductivity) * 0.5f;
                     var moistureDiff = selfMoisture.Value - neighborMoisture.Value;
                     var moistureTransfer = moistureDiff * avgConductivity * GlobalConfig.MoistureDiffusionCoefficient;

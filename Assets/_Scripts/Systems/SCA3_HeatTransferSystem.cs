@@ -93,6 +93,10 @@ namespace _Scripts.Systems
 
                     // 计算热量传递
                     var neighborHeatConductivity = CellConfigs.GetCellConfig(neighborType.Value).HeatConductivity;
+                    
+                    // 如果双方中任一方的HeatConductivity为0，则不导热
+                    if (selfHeatConductivity == 0f || neighborHeatConductivity == 0f) continue;
+                    
                     var avgConductivity = (selfHeatConductivity + neighborHeatConductivity) * 0.5f;
                     var tempDiff = selfTemperature.Value - neighborTemperature.Value;
                     var heatTransfer = tempDiff * avgConductivity * GlobalConfig.HeatTransferCoefficient;

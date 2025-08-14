@@ -14,12 +14,15 @@ namespace _Scripts.Systems
     public partial class CellVFXDataSystem : SystemBase
     {
         private static readonly int CellCountProperty = Shader.PropertyToID("CellCount");
+        private static readonly int BurningCellCountProperty = Shader.PropertyToID("BurningCellCount");
         private static readonly int PositionBufferProperty = Shader.PropertyToID("PositionBuffer");
         private static readonly int VelocityBufferProperty = Shader.PropertyToID("VelocityBuffer");
+        private static readonly int BurningCellsBufferProperty = Shader.PropertyToID("BurningCellsBuffer");
 
         private VisualEffect _cellVFX;
         private GraphicsBuffer _positionBuffer;
         private GraphicsBuffer _velocityBuffer;
+        private GraphicsBuffer _burningCellsBuffer;
 
         protected override void OnCreate()
         {
@@ -29,6 +32,8 @@ namespace _Scripts.Systems
                 GlobalConfig.MaxCellCount, sizeof(float) * 3);
             _velocityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured,
                 GlobalConfig.MaxCellCount, sizeof(float) * 3);
+            _burningCellsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured,
+                GlobalConfig.MaxCellCount, sizeof(float) * 3);
         }
 
         protected override void OnDestroy()
@@ -37,6 +42,7 @@ namespace _Scripts.Systems
 
             _positionBuffer?.Dispose();
             _velocityBuffer?.Dispose();
+            _burningCellsBuffer?.Dispose();
         }
 
         protected override void OnStartRunning()
@@ -53,22 +59,28 @@ namespace _Scripts.Systems
 
             using var positionList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
             using var velocityList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
+            using var burningCellsList = new NativeList<float3>(GlobalConfig.MaxCellCount, Allocator.TempJob);
 
             var bufferCollectionJob = new BufferCollectionJob
             {
                 PositionList = positionList.AsParallelWriter(),
-                VelocityList = velocityList.AsParallelWriter()
+                VelocityList = velocityList.AsParallelWriter(),
+                BurningCellsList = burningCellsList.AsParallelWriter()
             };
             bufferCollectionJob.ScheduleParallel(Dependency).Complete();
 
             var cellCount = positionList.Length;
+            var burningCellCount = burningCellsList.Length;
             _cellVFX.SetInt(CellCountProperty, cellCount);
+            _cellVFX.SetInt(BurningCellCountProperty, burningCellCount);
 
             if (cellCount == 0) return;
             _positionBuffer.SetData(positionList.AsArray());
             _velocityBuffer.SetData(velocityList.AsArray());
+            _burningCellsBuffer.SetData(burningCellsList.AsArray());
             _cellVFX.SetGraphicsBuffer(PositionBufferProperty, _positionBuffer);
             _cellVFX.SetGraphicsBuffer(VelocityBufferProperty, _velocityBuffer);
+            _cellVFX.SetGraphicsBuffer(BurningCellsBufferProperty, _burningCellsBuffer);
         }
 
         [BurstCompile]
@@ -77,11 +89,13 @@ namespace _Scripts.Systems
         {
             public NativeList<float3>.ParallelWriter PositionList;
             public NativeList<float3>.ParallelWriter VelocityList;
+            public NativeList<float3>.ParallelWriter BurningCellsList;
 
-            private void Execute(in LocalTransform transform, in Velocity velocity)
+            private void Execute(in LocalTransform transform, in Velocity velocity, EnabledRefRO<IsBurning> isBurning)
             {
                 PositionList.AddNoResize(transform.Position);
                 VelocityList.AddNoResize(-velocity.Value);
+                if (isBurning.ValueRO) BurningCellsList.AddNoResize(transform.Position + new float3(0, 0.5f, 0));
             }
         }
     }
